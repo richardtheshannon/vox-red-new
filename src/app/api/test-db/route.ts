@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { queryCount, healthCheck } from '@/lib/db'
 
-// Retry helper function
-async function retryHealthCheck(maxRetries = 3): Promise<boolean> {
+// Retry helper function with exponential backoff
+async function retryHealthCheck(maxRetries = 5): Promise<boolean> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     console.log(`Health check attempt ${attempt}/${maxRetries}`)
     const isHealthy = await healthCheck()
@@ -10,8 +10,9 @@ async function retryHealthCheck(maxRetries = 3): Promise<boolean> {
       return true
     }
     if (attempt < maxRetries) {
-      console.log(`Attempt ${attempt} failed, waiting 2 seconds before retry...`)
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 10000) // Exponential backoff, max 10s
+      console.log(`Attempt ${attempt} failed, waiting ${waitTime}ms before retry...`)
+      await new Promise(resolve => setTimeout(resolve, waitTime))
     }
   }
   return false
@@ -22,9 +23,9 @@ export async function GET() {
     console.log('=== Database Health Check API Called ===')
 
     // Test database connection with retry
-    const isHealthy = await retryHealthCheck(3)
+    const isHealthy = await retryHealthCheck(5)
     if (!isHealthy) {
-      throw new Error('Database health check failed after 3 attempts')
+      throw new Error('Database health check failed after 5 attempts')
     }
 
     // Get table counts

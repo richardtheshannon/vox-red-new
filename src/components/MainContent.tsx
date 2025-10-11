@@ -89,12 +89,12 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           onSlideChange={handleSlideChange}
         >
           <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
+            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <h1 className="text-4xl font-bold mb-4 text-black">Audio Library</h1>
               <EssentialAudioPlayer
                 audioUrl="/media/meditation-sample.mp3"
                 preload={true}
-                className="mx-auto max-w-md"
+                className="w-full max-w-md mb-4"
               />
               <p className="text-black">
                 Browse meditation tracks, yoga sessions, and spiritual courses.
@@ -103,12 +103,12 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
+            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <h1 className="text-4xl font-bold mb-4 text-black">Playlists</h1>
               <EssentialAudioPlayer
                 audioUrl="/media/playlist-sample.mp3"
                 preload={true}
-                className="mx-auto max-w-md"
+                className="w-full max-w-md mb-4"
               />
               <p className="text-black">
                 Create and manage your personal playlists. Organize your favorite content by mood, activity, or spiritual practice.
@@ -117,12 +117,12 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
+            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <h1 className="text-4xl font-bold mb-4 text-black">Service Commitments</h1>
               <EssentialAudioPlayer
                 audioUrl="/media/service-sample.mp3"
                 preload={true}
-                className="mx-auto max-w-md"
+                className="w-full max-w-md mb-4"
               />
               <p className="text-black">
                 Daily service prompts and spiritual practices to deepen your journey and commitment to growth.

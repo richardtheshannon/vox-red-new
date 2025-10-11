@@ -3,11 +3,12 @@ import { Pool, PoolClient } from 'pg'
 // Database connection configuration
 const dbConfig = {
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/mp3_manager',
-  max: 20, // Maximum number of connections in the pool
+  max: 10, // Reduced for Railway limits
   idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 10000, // Timeout after 10 seconds (increased for Railway)
-  statement_timeout: 30000, // Statement timeout 30 seconds
-  query_timeout: 30000, // Query timeout 30 seconds
+  connectionTimeoutMillis: 20000, // Increased timeout for Railway (20 seconds)
+  statement_timeout: 45000, // Increased statement timeout for Railway (45 seconds)
+  query_timeout: 45000, // Increased query timeout for Railway (45 seconds)
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false, // SSL for Railway
 }
 
 // Create connection pool

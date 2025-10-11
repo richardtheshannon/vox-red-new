@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "tsx scripts/railway-init.ts && next build",
     "start": "next start",
     "lint": "eslint",
     "db:init": "tsx scripts/init-db.ts",
-    "db:seed": "tsx scripts/seed-db.ts"
+    "db:seed": "tsx scripts/seed-db.ts",
+    "railway:init": "tsx scripts/railway-init.ts"
   },
   "dependencies": {
     "next": "15.5.4",
