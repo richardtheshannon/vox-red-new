@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(if exist node_modules rmdir /s /q node_modules)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
