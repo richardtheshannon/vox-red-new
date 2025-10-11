@@ -1,67 +1,177 @@
+VOX-RED-NEW
 
-:3000/:1  GET http://localhost:3000/ 500 (Internal Server Error)
-index.js:640 Uncaught ModuleParseError: Module parse failed: Duplicate export 'default' (539:24)
-File was processed with these loaders:
- * ./node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js
- * ./node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js
- * ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js
-You may need an additional loader to handle the result of these loaders.
-| _c = MainContent;
-| // Export the methods for external use
-> export { MainContent as default };
-| var _c;
-| $RefreshReg$(_c, "MainContent");
-    at <unknown> (File was processed with these loaders:)
-    at handleParseError (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\webpack\bundle5.js:29:410378)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\webpack\bundle5.js:29:411994)
-    at processResult (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\webpack\bundle5.js:29:407859)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\webpack\bundle5.js:29:408881)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:8727)
-    at iterateNormalLoaders (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5565)
-    at iterateNormalLoaders (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5650)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5879)
-    at r.callback (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4039)
-    at Object.ReactRefreshLoader (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\@next\react-refresh-utils\dist\loader.js:14:10)
-    at LOADER_EXECUTION (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4134)
-    at runSyncOrAsync (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4145)
-    at iterateNormalLoaders (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5782)
-    at iterateNormalLoaders (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5650)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5879)
-    at r.callback (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4039)
-    at Object.transformSource (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\build\webpack\loaders\next-flight-client-module-loader.js:45:17)
-    at LOADER_EXECUTION (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4134)
-    at runSyncOrAsync (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4145)
-    at iterateNormalLoaders (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5782)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:5142)
-    at r.callback (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\compiled\loader-runner\LoaderRunner.js:1:4039)
-    at <unknown> (file://C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js:224:23)
-getServerError @ node-stack-frames.js:41
-eval @ index.js:640
-setTimeout
-hydrate @ index.js:618
-await in hydrate
-pageBootstrap @ page-bootstrap.js:28
-eval @ next-dev.js:24
-Promise.then
-eval @ next-dev.js:22
-(pages-dir-browser)/./node_modules/next/dist/client/next-dev.js @ main.js?ts=1760200373796:314
-options.factory @ webpack.js:1
-__webpack_require__ @ webpack.js:1
-__webpack_exec__ @ main.js?ts=1760200373796:1546
-(anonymous) @ main.js?ts=1760200373796:1547
-webpackJsonpCallback @ webpack.js:1
-(anonymous) @ main.js?ts=1760200373796:9
-websocket.js:46 [HMR] connected
-hook.js:608 ./src/components/MainContent.tsx
-Module parse failed: Duplicate export 'default' (537:24)
-| }
-| // Export the methods for external use
-> export { MainContent as default };
-|
-overrideMethod @ hook.js:608
-nextJsHandleConsoleError @ pages-dev-overlay-setup.js:77
-handleErrors @ hot-reloader-pages.js:164
-processMessage @ hot-reloader-pages.js:228
-eval @ hot-reloader-pages.js:72
-handleMessage @ websocket.js:69
-index.js:1631 {file: {…}}
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+Share
+
+
+
+
+
+
+
+
+Activity
+
+
+vox-red-new
+Deployments
+Variables
+Metrics
+Settings
+vox-red-new-production.up.railway.app
+us-west2
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vox-red-new
+/
+fc004166
+Failed
+
+Oct 11, 2025, 10:09 AM
+vox-red-new-production.up.railway.app
+Get Help
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Search build logs
+
+You reached the start of the range
+Oct 11, 2025, 10:09 AM
+ 
+[Region: us-west1]
+==============
+Using Nixpacks
+==============
+
+context: frfr-eYrx
+╔════════ Nixpacks v1.38.0 ═══════╗
+║ setup      │ nodejs_18, npm-9_x ║
+║─────────────────────────────────║
+║ install    │ npm ci             ║
+║─────────────────────────────────║
+║ build      │ npm run build      ║
+║─────────────────────────────────║
+║ start      │ npm run start      ║
+╚═════════════════════════════════╝
+
+internal
+load build definition from Dockerfile
+0ms
+
+internal
+load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+323ms
+
+internal
+load .dockerignore
+0ms
+
+internal
+load build context
+0ms
+
+stage-0
+RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d cached
+0ms
+
+stage-0
+COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
+0ms
+
+stage-0
+WORKDIR /app/ cached
+0ms
+
+stage-0
+COPY . /app/.
+32ms
+
+stage-0
+RUN npm ci
+9s
+found 0 vulnerabilities
+
+stage-0
+COPY . /app/.
+104ms
+
+stage-0
+RUN npm run build
+18s
+ƒ (Dynamic) server-rendered on demand
+
+stage-0
+RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+81ms
+
+stage-0
+COPY . /app
+21ms
+
+auth
+sharing credentials for production-us-west2.railway-registry.com
+0ms
+=== Successfully Built! ===
+Run:
+docker run -it production-us-west2.railway-registry.com/a011e499-729f-4d1f-ad0c-d0fbfcd643b2:fc004166-242d-426b-b70f-6bdf3fda1a3f
+Build time: 69.62 seconds
+ 
+====================
+Starting Healthcheck
+====================
+Path: /api/test-db
+Retry window: 5m0s
+ 
+Attempt #1 failed with service unavailable. Continuing to retry for 4m59s
+Attempt #2 failed with service unavailable. Continuing to retry for 4m58s
+Attempt #3 failed with service unavailable. Continuing to retry for 4m56s
+Attempt #4 failed with service unavailable. Continuing to retry for 4m52s
+Attempt #5 failed with service unavailable. Continuing to retry for 4m44s
+Attempt #6 failed with service unavailable. Continuing to retry for 4m28s
+Attempt #7 failed with service unavailable. Continuing to retry for 3m58s
+Attempt #8 failed with service unavailable. Continuing to retry for 3m28s
+Attempt #9 failed with service unavailable. Continuing to retry for 2m58s
+Attempt #10 failed with service unavailable. Continuing to retry for 2m28s
+Attempt #11 failed with service unavailable. Continuing to retry for 1m58s
+Attempt #12 failed with service unavailable. Continuing to retry for 1m28s
+Attempt #13 failed with service unavailable. Continuing to retry for 57s
+Attempt #14 failed with service unavailable. Continuing to retry for 27s
+ 
+1/1 replicas never became healthy!
+
+Healthcheck failed!
+
+You reached the end of the range
+Oct 11, 2025, 10:15 AM
+
+
+vox-red-new | Railway

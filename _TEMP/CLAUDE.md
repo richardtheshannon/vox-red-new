@@ -135,6 +135,37 @@ This file contains configuration and notes for Claude Code.
 - **Seeded Sample Data**: Default admin user, categories, and service commitments
 - **Railway Ready**: Deployment configuration with PostgreSQL schema optimization
 
+### Essential Audio Player Integration (LATEST)
+- **Third-Party Audio Player**: Integrated Essential Audio Player from essential-audio-player.net for MP3 playback functionality
+- **React Component Wrapper**: Created `EssentialAudioPlayer.tsx` with proper TypeScript types and SSR handling
+- **Hydration Fix**: Implemented client-side only rendering to prevent server/client mismatch errors
+- **Custom Red Theme Styling**: Comprehensive CSS customization in `globals.css`
+  - **Red Color Scheme**: Play button (#dc2626) and progress bar with hover effects and transitions
+  - **Left Alignment**: Removed center alignment for left-justified layout matching design requirements
+  - **Professional Layout**: Play button → Progress bar → Time display horizontal arrangement
+  - **Responsive Design**: Maximum width constraint (400px) with flexible gap spacing
+- **Slide Integration**: Audio players positioned between H1 titles and paragraph content on all 3 slides
+  - **Audio Library**: `/media/meditation-sample.mp3`
+  - **Playlists**: `/media/playlist-sample.mp3`
+  - **Service Commitments**: `/media/service-sample.mp3`
+- **File Structure**: Essential Audio Player files located in `public/essential-audio-player/` directory
+- **Cross-Platform Support**: Works on both desktop and mobile with consistent styling
+
+### Railway Deployment Preparation (LATEST)
+- **Production Build Optimization**: Fixed all TypeScript and Next.js compatibility issues for Railway deployment
+- **Next.js Configuration**: Removed deprecated `buildActivity` setting from `next.config.ts`
+- **Font Loading Optimization**: Added `display=optional` parameters to Google Fonts for better performance
+- **Script Loading**: Migrated from manual `<script>` tags to Next.js `<Script>` component with `beforeInteractive` strategy
+- **TypeScript Strict Mode**: Eliminated all `any` types with proper type definitions
+  - **EssentialAudioPlayer**: Window globals properly typed with interface definitions
+  - **Database Layer**: `PoolClient` and `Record<string, unknown>` types for query functions
+- **Build Validation**: All components pass TypeScript compilation (`npx tsc --noEmit`) with zero errors
+- **Production Ready**:
+  - **Build Size**: Optimized at 132KB first load JS
+  - **Static Generation**: 7/7 pages successfully generated
+  - **Route Optimization**: Static and dynamic routes properly configured
+  - **Database Health Check**: Functional `/api/test-db` endpoint for Railway monitoring
+
 ## Technical Stack
 - Next.js 15.5.4
 - React 19.1.0
@@ -142,6 +173,7 @@ This file contains configuration and notes for Claude Code.
 - TypeScript
 - Material Symbols Icons
 - Swiper.js 12.0.2 (touch/swipe navigation)
+- Essential Audio Player (MP3 playback)
 - PostgreSQL with `pg` client library
 - Direct SQL queries (no ORM)
 
@@ -181,14 +213,17 @@ This file contains configuration and notes for Claude Code.
 - Uses icon border layout with fixed positioning
 - Responsive design with mobile fallbacks
 - Windows-optimized setup for CSS processing
-- Database-ready with Prisma ORM and full schema implementation
-- Dual environment support: SQLite (local) + PostgreSQL (Railway)
+- Database-ready with direct PostgreSQL integration (no ORM)
+- PostgreSQL for both local development and Railway production
 - All admin components follow same architectural patterns as frontend
-- Railway deployment configured with health monitoring
+- Railway deployment configured with health monitoring and optimized builds
 - Touch-enabled main content with swipeable slides controlled by footer navigation
 - Context-based component communication for Swiper navigation controls
 - Complete 4-direction footer arrow navigation (slide + scroll control)
 - Centralized SwiperProvider context management for cross-component communication
+- Integrated MP3 audio playback on all slides with Essential Audio Player
+- Custom red-themed audio player styling with left alignment
+- Production-ready with TypeScript strict mode and zero build errors
 
 ## File Structure Updates
 
@@ -204,6 +239,13 @@ This file contains configuration and notes for Claude Code.
 - **src/components/MainContent.tsx**: Enhanced with Swiper integration and slide content
 - **src/components/BottomIconBar.tsx**: Footer arrows now control slide navigation and content scrolling
 - **src/app/page.tsx**: Updated to provide centralized SwiperProvider context for all components
+
+### Essential Audio Player Files (NEW)
+- **src/components/EssentialAudioPlayer.tsx**: React wrapper component with TypeScript types and SSR compatibility
+- **public/essential-audio-player/essential_audio.js**: Core Essential Audio Player JavaScript library
+- **public/essential-audio-player/essential_audio.css**: Default CSS styles (overridden by custom styles)
+- **public/media/**: Directory containing MP3 audio files (meditation-sample.mp3, playlist-sample.mp3, service-sample.mp3)
+- **src/app/globals.css**: Extended with comprehensive Essential Audio Player custom styling (red theme, left alignment)
 
 ### Removed Files
 - **prisma/**: Complete Prisma directory removed (schema.prisma, migrations, seed.ts)

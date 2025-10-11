@@ -5,7 +5,9 @@ const dbConfig = {
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/mp3_manager',
   max: 20, // Maximum number of connections in the pool
   idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 2000, // Timeout after 2 seconds of trying to connect
+  connectionTimeoutMillis: 10000, // Timeout after 10 seconds (increased for Railway)
+  statement_timeout: 30000, // Statement timeout 30 seconds
+  query_timeout: 30000, // Query timeout 30 seconds
 }
 
 // Create connection pool
@@ -58,13 +60,20 @@ export async function transaction<T>(callback: (client: PoolClient) => Promise<T
   }
 }
 
-// Health check function
+// Health check function with detailed logging
 export async function healthCheck(): Promise<boolean> {
   try {
-    await query('SELECT 1')
+    console.log('Starting database health check...')
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL)
+
+    const result = await query('SELECT 1 as health')
+    console.log('Health check query result:', result)
     return true
   } catch (error) {
-    console.error('Database health check failed:', error)
+    console.error('Database health check failed:')
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown error')
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set (hidden)' : 'Not set')
     return false
   }
 }

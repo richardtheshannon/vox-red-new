@@ -28,5 +28,5 @@ Have specific slides for:
 - Requests, oor upload your own?
 
 # Font Pairings
-- Title font: Ubuntu
-- Paragraph font: Open Sans
+Title font: Ubuntu
+Paragraph font: Open Sans
