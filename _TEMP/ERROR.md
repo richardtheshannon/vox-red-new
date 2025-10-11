@@ -52,12 +52,14 @@ History
 
 
 
+
+
 vox-red-new
 /
-253a6f46
+216912c2
 Failed
 
-Oct 11, 2025, 10:22 AM
+Oct 11, 2025, 11:41 AM
 vox-red-new-production.up.railway.app
 Get Help
 Details
@@ -67,7 +69,7 @@ HTTP Logs
 Search build logs
 
 You reached the start of the range
-Oct 11, 2025, 10:22 AM
+Oct 11, 2025, 11:41 AM
  
 [Region: us-west1]
 ==============
@@ -91,18 +93,18 @@ load build definition from Dockerfile
 
 internal
 load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-256ms
+202ms
 
 internal
 load .dockerignore
-0ms
+1ms
 
 internal
 load build context
 0ms
 
 stage-0
-COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
+WORKDIR /app/ cached
 0ms
 
 stage-0
@@ -110,66 +112,62 @@ RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix &
 0ms
 
 stage-0
+COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
+0ms
+
+stage-0
 COPY . /app/.
-180ms
+23ms
 
 stage-0
 RUN npm ci
-7s
+8s
 found 0 vulnerabilities
 
 stage-0
 COPY . /app/.
-107ms
+101ms
 
 stage-0
 RUN npm run build
-15s
-ƒ (Dynamic) server-rendered on demand
-
-stage-0
-RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
-135ms
-
-stage-0
-COPY . /app
-28ms
-
-auth
-sharing credentials for production-us-west2.railway-registry.com
-0ms
-=== Successfully Built! ===
-Run:
-docker run -it production-us-west2.railway-registry.com/a011e499-729f-4d1f-ad0c-d0fbfcd643b2:253a6f46-35dd-4b4c-ad36-5838da02f1ed
-Build time: 60.58 seconds
- 
-====================
-Starting Healthcheck
-====================
-Path: /api/test-db
-Retry window: 5m0s
- 
-Attempt #1 failed with service unavailable. Continuing to retry for 4m59s
-Attempt #2 failed with service unavailable. Continuing to retry for 4m58s
-Attempt #3 failed with service unavailable. Continuing to retry for 4m56s
-Attempt #4 failed with service unavailable. Continuing to retry for 4m52s
-Attempt #5 failed with service unavailable. Continuing to retry for 4m44s
-Attempt #6 failed with service unavailable. Continuing to retry for 4m28s
-Attempt #7 failed with service unavailable. Continuing to retry for 3m57s
-Attempt #8 failed with service unavailable. Continuing to retry for 3m27s
-Attempt #9 failed with service unavailable. Continuing to retry for 2m57s
-Attempt #10 failed with service unavailable. Continuing to retry for 2m27s
-Attempt #11 failed with service unavailable. Continuing to retry for 1m57s
-Attempt #12 failed with service unavailable. Continuing to retry for 1m27s
-Attempt #13 failed with service unavailable. Continuing to retry for 57s
-Attempt #14 failed with service unavailable. Continuing to retry for 27s
- 
-1/1 replicas never became healthy!
-
-Healthcheck failed!
-
+597ms
+npm warn config production Use `--omit=dev` instead.
+> nextjs-app@0.1.0 build
+> tsx scripts/railway-init.ts && next build
+🚂 Starting Railway database initialization...
+🔄 Initializing PostgreSQL database...
+❌ Database initialization failed: Error: getaddrinfo ENOTFOUND postgres.railway.internal
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at initializeDatabase (/app/scripts/init-db.ts:176:20)
+    at railwayInit (/app/scripts/railway-init.ts:14:5) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'postgres.railway.internal'
+}
+❌ Railway database initialization failed: Error: getaddrinfo ENOTFOUND postgres.railway.internal
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at initializeDatabase (/app/scripts/init-db.ts:176:20)
+    at railwayInit (/app/scripts/railway-init.ts:14:5) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'postgres.railway.internal'
+}
+Dockerfile:24
+-------------------
+22 |     # build phase
+23 |     COPY . /app/.
+24 | >>> RUN --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-node_modules/cache,target=/app/node_modules/.cache npm run build
+25 |
+26 |
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
+Error: Docker build failed
 You reached the end of the range
-Oct 11, 2025, 10:28 AM
+Oct 11, 2025, 11:41 AM
 
 
 vox-red-new | Railway

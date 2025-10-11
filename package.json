@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "tsx scripts/railway-init.ts && next build",
-    "start": "next start",
+    "build": "next build",
+    "start": "tsx scripts/railway-init.ts && next start",
     "lint": "eslint",
     "db:init": "tsx scripts/init-db.ts",
     "db:seed": "tsx scripts/seed-db.ts",
