@@ -8,7 +8,7 @@ Update CLAUDE.md in the _TEMP directory, with any relevant application update ov
 
 ### Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze your latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
 Lets push to github for railway deployment.
-git add .&& git commit -m "MP3 Manager 3" && git push origin master
+git add .&& git commit -m "general quick commit" && git push origin master
 
 Deployment failed. Please read ERROR.md in the _TEMP directory. 
 
