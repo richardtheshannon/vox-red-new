@@ -97,7 +97,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
 
                   <p>Contemporary spiritual teachers like Eckhart Tolle, Adyashanti, and Rupert Spira have made these ancient teachings accessible to modern seekers, emphasizing the simplicity of awakening to our true nature in the present moment. Their teachings point to the fact that what we seek is not something to be attained in the future, but recognized as our current reality.</p>
 
-                  <p>The practice of yoga, literally meaning "union," offers a complete system for physical, mental, and spiritual development. Through asanas (postures), pranayama (breath work), and meditation, practitioners prepare the body and mind for deeper states of consciousness and ultimately, samadhi or union with the divine.</p>
+                  <p>The practice of yoga, literally meaning &ldquo;union,&rdquo; offers a complete system for physical, mental, and spiritual development. Through asanas (postures), pranayama (breath work), and meditation, practitioners prepare the body and mind for deeper states of consciousness and ultimately, samadhi or union with the divine.</p>
 
                   <p>Sacred texts such as the Bhagavad Gita, the Tao Te Ching, the Bible, the Quran, and the Buddhist sutras contain timeless wisdom that speaks to the deepest questions of human existence. Regular study and contemplation of these texts, combined with personal practice, provides guidance for navigating the challenges of spiritual growth.</p>
 
@@ -193,7 +193,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
 
                 <p>Contemporary spiritual teachers like Eckhart Tolle, Adyashanti, and Rupert Spira have made these ancient teachings accessible to modern seekers, emphasizing the simplicity of awakening to our true nature in the present moment. Their teachings point to the fact that what we seek is not something to be attained in the future, but recognized as our current reality.</p>
 
-                <p>The practice of yoga, literally meaning "union," offers a complete system for physical, mental, and spiritual development. Through asanas (postures), pranayama (breath work), and meditation, practitioners prepare the body and mind for deeper states of consciousness and ultimately, samadhi or union with the divine.</p>
+                <p>The practice of yoga, literally meaning &ldquo;union,&rdquo; offers a complete system for physical, mental, and spiritual development. Through asanas (postures), pranayama (breath work), and meditation, practitioners prepare the body and mind for deeper states of consciousness and ultimately, samadhi or union with the divine.</p>
 
                 <p>Sacred texts such as the Bhagavad Gita, the Tao Te Ching, the Bible, the Quran, and the Buddhist sutras contain timeless wisdom that speaks to the deepest questions of human existence. Regular study and contemplation of these texts, combined with personal practice, provides guidance for navigating the challenges of spiritual growth.</p>
 

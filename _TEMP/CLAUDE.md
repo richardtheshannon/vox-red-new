@@ -247,6 +247,13 @@ This file contains configuration and notes for Claude Code.
   - **Design Principle**: All slides maintain vertical centering (`justify-center`) regardless of content volume
   - **Scroll Behavior**: Vertical centering preserved even when content overflows and requires scrolling
 
+### Railway Deployment ESLint Fix (LATEST)
+- **ESLint Error Resolution**: Fixed Railway deployment failure caused by unescaped quotes in spiritual teachings content
+  - **Error Details**: Lines 100 and 196 in MainContent.tsx had unescaped quotes around the word "union"
+  - **Fix Applied**: Replaced straight quotes with HTML entities (`&ldquo;` and `&rdquo;`) in both desktop and mobile slide versions
+  - **Build Validation**: ESLint now passes with only warnings (no blocking errors)
+  - **Deployment Ready**: All TypeScript compilation clean, Railway deployment should now succeed
+
 ### Swiper Runtime Error Fix (LATEST)
 - **Critical Runtime Error Resolution**: Fixed `Cannot read properties of undefined (reading 'undefined')` TypeError in Swiper slide change handler
   - **Root Cause**: `swiper.activeIndex` was undefined during Swiper initialization timing issues between desktop and mobile instances
