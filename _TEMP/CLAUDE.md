@@ -236,6 +236,17 @@ This file contains configuration and notes for Claude Code.
   - **Responsive Sizing**: Added mobile-specific CSS with minimum 280px width and proper flex layout
   - **Touch Optimization**: Improved mobile controls visibility and interaction areas
 
+### Content Slide Testing & Alignment Fix (LATEST)
+- **Overflow Test Slide Addition**: Added fourth slide "Spiritual Teachings" with extensive paragraph content for testing scroll functionality
+  - **Content Volume**: 12 comprehensive paragraphs covering spiritual traditions (Buddhism, Hinduism, Christianity, Islam, Zen, etc.)
+  - **Scroll Testing**: Content intentionally exceeds slide height to test vertical scrolling with footer up/down arrows
+  - **Audio Player Integration**: Maintains consistency with existing slides including Essential Audio Player
+- **Vertical Alignment Standardization**: Fixed alignment inconsistency across all slides
+  - **Desktop Fix**: Changed overflow slide from `justify-start` to `justify-center` to match other slides
+  - **Mobile Fix**: Changed overflow slide from `justify-start items-start` to `justify-center items-start` for consistency
+  - **Design Principle**: All slides maintain vertical centering (`justify-center`) regardless of content volume
+  - **Scroll Behavior**: Vertical centering preserved even when content overflows and requires scrolling
+
 ### Swiper Runtime Error Fix (LATEST)
 - **Critical Runtime Error Resolution**: Fixed `Cannot read properties of undefined (reading 'undefined')` TypeError in Swiper slide change handler
   - **Root Cause**: `swiper.activeIndex` was undefined during Swiper initialization timing issues between desktop and mobile instances
@@ -262,6 +273,33 @@ This file contains configuration and notes for Claude Code.
   - **Error Recovery**: Better error handling and logging for Railway deployment diagnostics
   - **Graceful Degradation**: Startup continues even if database is already initialized
 
+### Light/Dark Theme System (LATEST)
+- **Complete Theme Toggle Implementation**: Added comprehensive light/dark mode system with session persistence
+- **Theme Context**: Created `ThemeContext.tsx` with React context for global theme state management
+  - **Session Storage**: Theme preference persists during browser session but resets on new session
+  - **Dynamic Icon**: Toggle shows moon icon in light mode, sun icon in dark mode
+  - **Cross-Interface Support**: Available in both main app and admin interface
+- **Header Integration**: Theme toggle positioned between settings and menu icons in top navigation
+  - **Main App**: TopIconBar.tsx includes theme toggle with hover effects
+  - **Admin Interface**: AdminTopIconBar.tsx includes identical theme toggle functionality
+- **Comprehensive CSS Variables**: Full theme system with extensive variable coverage
+  - **Core Colors**: `--bg-color`, `--text-color`, `--icon-color` for primary elements
+  - **UI Elements**: `--header-bg`, `--footer-bg`, `--content-bg` for layout components
+  - **Interactive Elements**: `--icon-hover`, `--progress-bg` for user interactions
+  - **Admin Specific**: `--card-bg`, `--border-color`, `--secondary-text` for admin interface
+- **Complete UI Coverage**: All elements properly themed for both light and dark modes
+  - **Background**: Full dark background (#1a1a1a) in dark mode, white in light mode
+  - **Text Elements**: All headings, paragraphs, and content text properly colored
+  - **Icons**: Material Symbols icons change to white in dark mode, black in light mode
+  - **Audio Player**: Progress bars, time displays, and controls themed appropriately
+  - **Admin Interface**: Cards, panels, borders, and status elements fully themed
+- **Smooth Transitions**: 0.3s ease transitions between theme changes for professional UX
+- **Material Icons Font Loading Fix**: Resolved icon display issues on initial page load
+  - **Font Preloading**: Added preload link for Material Symbols font
+  - **Display Strategy**: Changed from `display=optional` to `display=swap` for better loading
+  - **JavaScript Fallback**: Added font loading detection and repaint trigger
+  - **Hardcoded Style Removal**: Removed conflicting `bg-white text-black` body classes
+
 ## File Structure Updates
 
 ### Database Migration Files (NEW)
@@ -283,6 +321,15 @@ This file contains configuration and notes for Claude Code.
 - **public/essential-audio-player/essential_audio.css**: Default CSS styles (overridden by custom styles)
 - **public/media/**: Directory containing MP3 audio files (meditation-sample.mp3, playlist-sample.mp3, service-sample.mp3)
 - **src/app/globals.css**: Extended with comprehensive Essential Audio Player custom styling (red theme, left alignment)
+
+### Theme System Files (NEW)
+- **src/contexts/ThemeContext.tsx**: React context for global theme state management with session storage
+- **src/components/TopIconBar.tsx**: Updated with theme toggle integration between settings and menu icons
+- **src/components/admin/AdminTopIconBar.tsx**: Updated with theme toggle for admin interface consistency
+- **src/app/page.tsx**: Enhanced with ThemeProvider wrapper for main application
+- **src/app/admin/page.tsx**: Enhanced with ThemeProvider wrapper for admin interface
+- **src/app/layout.tsx**: Updated with improved Material Symbols font loading and removed conflicting body classes
+- **src/app/globals.css**: Comprehensive theme system with CSS variables and complete UI coverage overrides
 
 ### Removed Files
 - **prisma/**: Complete Prisma directory removed (schema.prisma, migrations, seed.ts)

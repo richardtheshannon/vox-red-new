@@ -8,6 +8,7 @@ import RightIconBar from '@/components/RightIconBar';
 import BottomIconBar from '@/components/BottomIconBar';
 import MainContent from '@/components/MainContent';
 import { SwiperProvider } from '@/contexts/SwiperContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export default function Home() {
   const swiperRef = useRef<SwiperType | null>(null);
@@ -51,13 +52,15 @@ export default function Home() {
   };
 
   return (
-    <SwiperProvider slidePrev={slidePrev} slideNext={slideNext} scrollUp={scrollUp} scrollDown={scrollDown}>
-      <TopIconBar />
-      <LeftIconBar />
-      <RightIconBar />
-      <BottomIconBar />
-      <MainContentWithRef setSwiperRef={setSwiperRef} handleSlideChange={handleSlideChange} />
-    </SwiperProvider>
+    <ThemeProvider>
+      <SwiperProvider slidePrev={slidePrev} slideNext={slideNext} scrollUp={scrollUp} scrollDown={scrollDown}>
+        <TopIconBar />
+        <LeftIconBar />
+        <RightIconBar />
+        <BottomIconBar />
+        <MainContentWithRef setSwiperRef={setSwiperRef} handleSlideChange={handleSlideChange} />
+      </SwiperProvider>
+    </ThemeProvider>
   );
 }
 
