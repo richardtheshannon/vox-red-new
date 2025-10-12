@@ -202,7 +202,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
+            <div className="h-full overflow-y-auto p-4 flex flex-col justify-start items-start">
               <div className="flex justify-start gap-4 mb-4 w-full">
                 <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
                 <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
