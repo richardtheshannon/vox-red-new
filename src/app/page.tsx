@@ -36,6 +36,10 @@ export default function Home() {
   };
 
   const handleSlideChange = (swiper: SwiperType) => {
+    // Add safety checks to prevent runtime errors
+    if (!swiper || typeof swiper.activeIndex === 'undefined' || !swiper.slides) {
+      return;
+    }
     const activeSlide = swiper.slides[swiper.activeIndex];
     const scrollContainer = activeSlide?.querySelector('.h-full.overflow-y-auto') as HTMLElement;
     setActiveSlideElement(scrollContainer);

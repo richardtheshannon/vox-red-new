@@ -225,6 +225,43 @@ This file contains configuration and notes for Claude Code.
 - Custom red-themed audio player styling with left alignment
 - Production-ready with TypeScript strict mode and zero build errors
 
+### Mobile Layout Optimization (LATEST)
+- **Mobile Alignment Fix**: Corrected mobile view content alignment to be left-aligned while maintaining vertical centering
+  - **Layout Enhancement**: Changed mobile slides from `justify-center` to `justify-center items-start`
+  - **Audio Player Position**: Updated from `mx-auto` to `w-full` for proper left alignment
+  - **Visual Consistency**: Maintained vertical centering with `justify-center` while ensuring left text/content alignment
+- **Mobile Audio Player Improvements**: Enhanced mobile audio player display and functionality
+  - **Full Width Display**: Ensured MP3 player shows completely with full progress bar on mobile devices
+  - **Border Removal**: Eliminated unwanted grey borders at bottom of mobile audio player
+  - **Responsive Sizing**: Added mobile-specific CSS with minimum 280px width and proper flex layout
+  - **Touch Optimization**: Improved mobile controls visibility and interaction areas
+
+### Swiper Runtime Error Fix (LATEST)
+- **Critical Runtime Error Resolution**: Fixed `Cannot read properties of undefined (reading 'undefined')` TypeError in Swiper slide change handler
+  - **Root Cause**: `swiper.activeIndex` was undefined during Swiper initialization timing issues between desktop and mobile instances
+  - **Error Location**: `src/app/page.tsx:39` in `handleSlideChange` function when accessing `swiper.slides[swiper.activeIndex]`
+  - **Surgical Fix**: Added comprehensive safety checks to prevent crashes without affecting functionality
+    - Validates `swiper` object exists
+    - Checks `swiper.activeIndex` is defined (not undefined)
+    - Ensures `swiper.slides` array is available
+  - **Preserved Functionality**: All existing slide navigation and scroll behavior maintained
+  - **Zero Layout Impact**: No visual or behavioral changes to user interface
+  - **Development Stability**: Local development server now runs without TypeError crashes
+
+### Railway Deployment Resolution
+- **Build Phase Fix**: Resolved Railway deployment failures by moving database initialization from build to runtime
+  - **Database Timing**: Moved `tsx scripts/railway-init.ts` from build script to start script
+  - **Connection Availability**: Fixed `ENOTFOUND postgres.railway.internal` errors by ensuring database access only at runtime
+  - **Graceful Handling**: Added error handling for existing database schemas to prevent startup failures
+- **Database Connection Optimization**: Enhanced PostgreSQL connection settings for Railway environment
+  - **SSL Configuration**: Added SSL support with `rejectUnauthorized: false` for Railway PostgreSQL
+  - **Timeout Adjustments**: Increased connection timeouts to 20s and query timeouts to 45s for Railway network latency
+  - **Pool Optimization**: Reduced connection pool from 20 to 10 connections for Railway resource limits
+- **Health Check Resilience**: Improved `/api/test-db` endpoint reliability for Railway health monitoring
+  - **Retry Logic**: Enhanced from 3 to 5 retry attempts with exponential backoff (1s, 2s, 4s, 8s, 10s max)
+  - **Error Recovery**: Better error handling and logging for Railway deployment diagnostics
+  - **Graceful Degradation**: Startup continues even if database is already initialized
+
 ## File Structure Updates
 
 ### Database Migration Files (NEW)
