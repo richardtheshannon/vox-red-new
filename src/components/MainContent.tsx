@@ -30,10 +30,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           >
             <SwiperSlide>
               <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-center gap-4 mb-4">
-                  <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                  <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                  <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <div className="flex justify-start gap-4 mb-4">
+                  <span className="material-symbols-rounded text-2xl">check_circle</span>
+                  <span className="material-symbols-rounded text-2xl">schedule</span>
+                  <span className="material-symbols-rounded text-2xl">check_box</span>
                 </div>
                 <h1 className="text-4xl font-bold mb-4 text-black">Audio Library</h1>
                 <EssentialAudioPlayer
@@ -49,10 +49,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
 
             <SwiperSlide>
               <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-center gap-4 mb-4">
-                  <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                  <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                  <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <div className="flex justify-start gap-4 mb-4">
+                  <span className="material-symbols-rounded text-2xl">check_circle</span>
+                  <span className="material-symbols-rounded text-2xl">schedule</span>
+                  <span className="material-symbols-rounded text-2xl">check_box</span>
                 </div>
                 <h1 className="text-4xl font-bold mb-4 text-black">Playlists</h1>
                 <EssentialAudioPlayer
@@ -68,10 +68,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
 
             <SwiperSlide>
               <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-center gap-4 mb-4">
-                  <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                  <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                  <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <div className="flex justify-start gap-4 mb-4">
+                  <span className="material-symbols-rounded text-2xl">check_circle</span>
+                  <span className="material-symbols-rounded text-2xl">schedule</span>
+                  <span className="material-symbols-rounded text-2xl">check_box</span>
                 </div>
                 <h1 className="text-4xl font-bold mb-4 text-black">Service Commitments</h1>
                 <EssentialAudioPlayer
@@ -87,10 +87,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
 
             <SwiperSlide>
               <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-center gap-4 mb-4">
-                  <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                  <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                  <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <div className="flex justify-start gap-4 mb-4">
+                  <span className="material-symbols-rounded text-2xl">check_circle</span>
+                  <span className="material-symbols-rounded text-2xl">schedule</span>
+                  <span className="material-symbols-rounded text-2xl">check_box</span>
                 </div>
                 <h1 className="text-4xl font-bold mb-4 text-black">Spiritual Teachings</h1>
                 <EssentialAudioPlayer
@@ -147,9 +147,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           <SwiperSlide>
             <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <span className="material-symbols-rounded text-2xl">check_circle</span>
+                <span className="material-symbols-rounded text-2xl">schedule</span>
+                <span className="material-symbols-rounded text-2xl">check_box</span>
               </div>
               <h1 className="text-4xl font-bold mb-4 text-black">Audio Library</h1>
               <EssentialAudioPlayer
@@ -166,9 +166,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           <SwiperSlide>
             <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <span className="material-symbols-rounded text-2xl">check_circle</span>
+                <span className="material-symbols-rounded text-2xl">schedule</span>
+                <span className="material-symbols-rounded text-2xl">check_box</span>
               </div>
               <h1 className="text-4xl font-bold mb-4 text-black">Playlists</h1>
               <EssentialAudioPlayer
@@ -185,9 +185,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           <SwiperSlide>
             <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <span className="material-symbols-rounded text-2xl">check_circle</span>
+                <span className="material-symbols-rounded text-2xl">schedule</span>
+                <span className="material-symbols-rounded text-2xl">check_box</span>
               </div>
               <h1 className="text-4xl font-bold mb-4 text-black">Service Commitments</h1>
               <EssentialAudioPlayer
@@ -204,9 +204,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange }: MainCon
           <SwiperSlide>
             <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
               <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded text-2xl text-black">check_circle_unread</span>
-                <span className="material-symbols-rounded text-2xl text-black">clock_arrow_up</span>
-                <span className="material-symbols-rounded text-2xl text-black">select_check_box</span>
+                <span className="material-symbols-rounded text-2xl">check_circle</span>
+                <span className="material-symbols-rounded text-2xl">schedule</span>
+                <span className="material-symbols-rounded text-2xl">check_box</span>
               </div>
               <h1 className="text-4xl font-bold mb-4 text-black">Spiritual Teachings</h1>
               <EssentialAudioPlayer
