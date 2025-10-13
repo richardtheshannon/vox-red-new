@@ -247,7 +247,16 @@ This file contains configuration and notes for Claude Code.
   - **Design Principle**: All slides maintain vertical centering (`justify-center`) regardless of content volume
   - **Scroll Behavior**: Vertical centering preserved even when content overflows and requires scrolling
 
-### Railway Deployment ESLint Fix (LATEST)
+### Mobile Overflow Slide Fix (LATEST)
+- **Mobile Vertical Alignment Issue Resolution**: Fixed mobile "Spiritual Teachings" slide content visibility problem
+  - **Problem**: Mobile overflow slide was vertically centered, hiding title and top content from view
+  - **Root Cause**: `justify-center` CSS class on mobile slide pushed extensive content below viewport
+  - **Surgical Fix**: Changed mobile overflow slide from `justify-center` to `justify-start` in MainContent.tsx:205
+  - **Impact**: Users can now see title, icons, and first paragraphs immediately on mobile
+  - **Preserved Functionality**: Full scroll access maintained with footer up/down arrows and touch gestures
+  - **Minimal Change**: Only affected problematic overflow slide, other slides maintain original alignment
+
+### Railway Deployment ESLint Fix
 - **ESLint Error Resolution**: Fixed Railway deployment failure caused by unescaped quotes in spiritual teachings content
   - **Error Details**: Lines 100 and 196 in MainContent.tsx had unescaped quotes around the word "union"
   - **Fix Applied**: Replaced straight quotes with HTML entities (`&ldquo;` and `&rdquo;`) in both desktop and mobile slide versions

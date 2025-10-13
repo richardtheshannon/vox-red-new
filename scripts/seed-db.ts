@@ -1,3 +1,8 @@
+import { config } from 'dotenv'
+
+// Load environment variables from .env file FIRST
+config()
+
 import { query } from '../src/lib/db'
 
 const seedData = async () => {

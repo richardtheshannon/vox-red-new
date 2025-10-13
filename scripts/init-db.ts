@@ -1,4 +1,46 @@
-import { pool } from '../src/lib/db'
+import { config } from 'dotenv'
+
+// Load environment variables from .env file FIRST
+config()
+
+// Environment variables loaded
+
+import { Pool } from 'pg'
+import { pool, closeDatabase } from '../src/lib/db'
+
+// Create database if it doesn't exist
+async function createDatabaseIfNotExists() {
+  const adminConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'password',
+    database: 'postgres', // Connect to default postgres database first
+  }
+
+  const adminPool = new Pool(adminConfig)
+
+  try {
+    // Check if database exists
+    const result = await adminPool.query(
+      'SELECT 1 FROM pg_database WHERE datname = $1',
+      [process.env.DB_NAME || 'mp3_manager']
+    )
+
+    if (result.rows.length === 0) {
+      console.log('🔄 Creating database...')
+      await adminPool.query(`CREATE DATABASE ${process.env.DB_NAME || 'mp3_manager'}`)
+      console.log('✅ Database created successfully!')
+    } else {
+      console.log('✅ Database already exists')
+    }
+  } catch (error) {
+    console.error('❌ Error creating database:', error)
+    throw error
+  } finally {
+    await adminPool.end()
+  }
+}
 
 const createTables = `
 -- User Management
@@ -159,18 +201,34 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Apply the trigger to tables with updated_at columns
+-- Apply the trigger to tables with updated_at columns (skip if exists)
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_audio_files_updated_at ON audio_files;
 CREATE TRIGGER update_audio_files_updated_at BEFORE UPDATE ON audio_files FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_playlists_updated_at ON playlists;
 CREATE TRIGGER update_playlists_updated_at BEFORE UPDATE ON playlists FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_categories_updated_at ON categories;
 CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_service_commitments_updated_at ON service_commitments;
 CREATE TRIGGER update_service_commitments_updated_at BEFORE UPDATE ON service_commitments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_bug_reports_updated_at ON bug_reports;
 CREATE TRIGGER update_bug_reports_updated_at BEFORE UPDATE ON bug_reports FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_documentation_updated_at ON documentation;
 CREATE TRIGGER update_documentation_updated_at BEFORE UPDATE ON documentation FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 `;
 
 async function initializeDatabase() {
   try {
+    // First, create the database if it doesn't exist
+    await createDatabaseIfNotExists()
+
     console.log('🔄 Initializing PostgreSQL database...')
 
     const client = await pool.connect()
@@ -187,7 +245,7 @@ async function initializeDatabase() {
     console.error('❌ Database initialization failed:', error)
     throw error
   } finally {
-    await pool.end()
+    await closeDatabase()
   }
 }
 

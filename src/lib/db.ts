@@ -1,30 +1,57 @@
 import { Pool, PoolClient } from 'pg'
 
-// Database connection configuration
-const dbConfig = {
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/mp3_manager',
-  max: 10, // Reduced for Railway limits
-  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-  connectionTimeoutMillis: 20000, // Increased timeout for Railway (20 seconds)
-  statement_timeout: 45000, // Increased statement timeout for Railway (45 seconds)
-  query_timeout: 45000, // Increased query timeout for Railway (45 seconds)
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false, // SSL for Railway
+// Function to get database configuration (evaluated at runtime, not import time)
+function getDbConfig() {
+  const config = process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        max: 10, // Reduced for Railway limits
+        idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
+        connectionTimeoutMillis: 20000, // Increased timeout for Railway (20 seconds)
+        statement_timeout: 45000, // Increased statement timeout for Railway (45 seconds)
+        query_timeout: 45000, // Increased query timeout for Railway (45 seconds)
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false, // SSL for Railway
+      }
+    : {
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432'),
+        database: process.env.DB_NAME || 'mp3_manager',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'password',
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 20000,
+        statement_timeout: 45000,
+        query_timeout: 45000,
+        ssl: false,
+      }
+
+  // Database configuration ready
+
+  return config
 }
 
-// Create connection pool
-const pool = new Pool(dbConfig)
+// Lazy pool creation
+let _pool: Pool | null = null
 
-// Handle pool errors
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err)
-})
+function getPool(): Pool {
+  if (!_pool) {
+    _pool = new Pool(getDbConfig())
 
-// Export the pool for direct use
-export { pool }
+    // Handle pool errors
+    _pool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err)
+    })
+  }
+  return _pool
+}
+
+// Export the pool with lazy initialization
+export const pool = { connect: () => getPool().connect() }
 
 // Helper function to execute queries
 export async function query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]> {
-  const client = await pool.connect()
+  const client = await getPool().connect()
   try {
     const result = await client.query(text, params)
     return result.rows
@@ -47,7 +74,7 @@ export async function queryCount(text: string, params?: unknown[]): Promise<numb
 
 // Transaction helper
 export async function transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
-  const client = await pool.connect()
+  const client = await getPool().connect()
   try {
     await client.query('BEGIN')
     const result = await callback(client)
@@ -81,5 +108,8 @@ export async function healthCheck(): Promise<boolean> {
 
 // Graceful shutdown
 export async function closeDatabase(): Promise<void> {
-  await pool.end()
+  if (_pool) {
+    await _pool.end()
+    _pool = null
+  }
 }
