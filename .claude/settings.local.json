@@ -35,7 +35,8 @@
       "Bash(tsx scripts/verify-slides.ts:*)",
       "Bash(dir:*)",
       "Bash(timeout:*)",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(cmd /c:*)"
     ],
     "deny": [],
     "ask": []
