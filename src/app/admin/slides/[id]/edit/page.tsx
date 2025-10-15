@@ -19,7 +19,16 @@ export default function EditSlideRowPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [rowId, setRowId] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = useState<{
+    id?: string;
+    title: string;
+    description: string;
+    row_type: string;
+    icon_set: string[];
+    theme_color: string;
+    display_order: number;
+    is_published: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const fetchRowData = async () => {
