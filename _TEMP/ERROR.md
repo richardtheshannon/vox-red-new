@@ -1,46 +1,187 @@
-index.js:440 Uncaught Error: Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
-    at _EditorInstanceManager.getInitialEditor (index.js:440:17)
-    at new _EditorInstanceManager (index.js:421:25)
-    at eval (index.js:645:83)
-    at mountStateImpl (react-dom-client.development.js:7397:24)
-    at mountState (react-dom-client.development.js:7418:22)
-    at Object.useState (react-dom-client.development.js:23922:18)
-    at exports.useState (react.development.js:1252:34)
-    at useEditor (index.js:645:76)
-    at SlideEditor (C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\admin\slides\SlideEditor.tsx:51:27)
-    at Object.react_stack_bottom_frame (react-dom-client.development.js:23584:20)
-    at renderWithHooks (react-dom-client.development.js:6793:22)
-    at updateFunctionComponent (react-dom-client.development.js:9247:19)
-    at beginWork (react-dom-client.development.js:10858:18)
-    at runWithFiberInDEV (react-dom-client.development.js:872:30)
-    at performUnitOfWork (react-dom-client.development.js:15727:22)
-    at workLoopSync (react-dom-client.development.js:15547:41)
-    at renderRootSync (react-dom-client.development.js:15527:11)
-    at performWorkOnRoot (react-dom-client.development.js:15034:44)
-    at performWorkOnRootViaSchedulerTask (react-dom-client.development.js:16816:7)
-    at MessagePort.performWorkUntilDeadline (scheduler.development.js:45:48)
-
-Runtime Error
+VOX-RED-NEW
 
 
-Tiptap Error: SSR has been detected, please set `immediatelyRender` explicitly to `false` to avoid hydration mismatches.
+production
+Architecture
+Observability
+Logs
+Settings
 
-src\components\admin\slides\SlideEditor.tsx (51:27) @ SlideEditor
+Share
 
 
-  49 |   const [error, setError] = useState<string | null>(null);
-  50 |
-> 51 |   const editor = useEditor({
-     |                           ^
-  52 |     extensions: [
-  53 |       StarterKit,
-  54 |       Link.configure({
-Call Stack
-22
 
-Show 20 ignore-listed frame(s)
-SlideEditor
-src\components\admin\slides\SlideEditor.tsx (51:27)
-EditSlidePage
-src\app\admin\slides\[id]\slide\[slideId]\page.tsx (184:17)
-1
+
+
+
+
+
+Activity
+
+
+vox-red-new
+Deployments
+Variables
+Metrics
+Settings
+vox-red-new-production.up.railway.app
+us-west2
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vox-red-new
+/
+b3c513bd
+Active
+
+Oct 15, 2025, 10:23 AM
+vox-red-new-production.up.railway.app
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Filter and search logs
+
+You reached the start of the range
+Oct 15, 2025, 10:23 AM
+Starting Container
+npm warn config production Use `--omit=dev` instead.
+> nextjs-app@0.1.0 start
+> tsx scripts/railway-init.ts && next start
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+🚂 Starting Railway database initialization...
+❌ Error creating database: Error: connect ECONNREFUSED ::1:5432
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at createDatabaseIfNotExists (/app/scripts/init-db.ts:25:20)
+    at initializeDatabase (/app/scripts/init-db.ts:230:5)
+    at railwayInit (/app/scripts/railway-init.ts:17:7) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '::1',
+  port: 5432
+}
+❌ Database initialization failed: Error: connect ECONNREFUSED ::1:5432
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at createDatabaseIfNotExists (/app/scripts/init-db.ts:25:20)
+    at initializeDatabase (/app/scripts/init-db.ts:230:5)
+    at railwayInit (/app/scripts/railway-init.ts:17:7) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '::1',
+  port: 5432
+}
+❌ Database initialization failed: Error: connect ECONNREFUSED ::1:5432
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at createDatabaseIfNotExists (/app/scripts/init-db.ts:25:20)
+    at initializeDatabase (/app/scripts/init-db.ts:230:5)
+    at railwayInit (/app/scripts/railway-init.ts:17:7) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '::1',
+  port: 5432
+}
+❌ Railway database initialization failed: Error: connect ECONNREFUSED ::1:5432
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at createDatabaseIfNotExists (/app/scripts/init-db.ts:25:20)
+    at initializeDatabase (/app/scripts/init-db.ts:230:5)
+    at railwayInit (/app/scripts/railway-init.ts:17:7) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '::1',
+  port: 5432
+}
+⚠️ Continuing startup anyway - database may already be initialized
+   ▲ Next.js 15.5.4
+   - Local:        http://localhost:8080
+   - Network:      http://10.250.12.221:8080
+ ✓ Starting...
+ ✓ Ready in 752ms
+=== Database Health Check API Called ===
+Health check attempt 1/5
+Starting database health check...
+DATABASE_URL exists: true
+Health check query result: [ { health: 1 } ]
+Error fetching slide rows: error: relation "slide_rows" does not exist
+    at async h (.next/server/app/api/test-db/route.js:1:6987)
+    at async g (.next/server/app/api/slides/rows/[id]/route.js:1:2741)
+    at async h (.next/server/app/api/slides/rows/route.js:1:8395)
+    at async k (.next/server/app/api/slides/rows/route.js:1:5327)
+    at async g (.next/server/app/api/slides/rows/route.js:1:6330) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '15',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+Error fetching slide rows: error: relation "slide_rows" does not exist
+    at async h (.next/server/app/api/test-db/route.js:1:6987)
+    at async g (.next/server/app/api/slides/rows/[id]/route.js:1:2741)
+    at async h (.next/server/app/api/slides/rows/route.js:1:8395)
+    at async k (.next/server/app/api/slides/rows/route.js:1:5327)
+    at async g (.next/server/app/api/slides/rows/route.js:1:6330) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '15',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+
+
+vox-red-new | Railway

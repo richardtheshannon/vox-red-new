@@ -9,7 +9,9 @@ export default function AdminTopIconBar() {
       <div className="flex items-center">
         <span className="material-symbols-outlined" title="Dashboard">dashboard</span>
         <span className="material-symbols-outlined" title="Bug Report">bug_report</span>
-        <span className="material-symbols-outlined" title="Documentation">description</span>
+        <Link href="/admin/slides">
+          <span className="material-symbols-outlined" title="Documentation">description</span>
+        </Link>
       </div>
       <div className="flex items-center">
         <Link href="/">
