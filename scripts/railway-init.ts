@@ -51,19 +51,23 @@ async function railwayInit() {
       }
     }
 
-    // Seed slide data (safe to run multiple times)
-    try {
-      await seedSlideData()
-      console.log('✅ Slide data seeded')
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('already exists')) {
-        console.log('ℹ️ Slide data already seeded, skipping')
-      } else {
-        console.error('❌ Slide data seeding failed:', error)
-        // Don't throw - slide seeding is optional
-        console.log('⚠️ Continuing without slide seed data')
-      }
-    }
+    // Skip automatic slide data seeding to prevent duplicate/resurrected rows
+    // Use `npm run db:slides:seed` manually if needed
+    console.log('ℹ️  Skipping automatic slide data seeding (run manually with: npm run db:slides:seed)')
+
+    // Seed slide data (safe to run multiple times) - DISABLED FOR AUTO-STARTUP
+    // try {
+    //   await seedSlideData()
+    //   console.log('✅ Slide data seeded')
+    // } catch (error) {
+    //   if (error instanceof Error && error.message.includes('already exists')) {
+    //     console.log('ℹ️ Slide data already seeded, skipping')
+    //   } else {
+    //     console.error('❌ Slide data seeding failed:', error)
+    //     // Don't throw - slide seeding is optional
+    //     console.log('⚠️ Continuing without slide seed data')
+    //   }
+    // }
 
     console.log('🎉 Railway database initialization completed successfully!')
   } catch (error) {

@@ -4,25 +4,35 @@ import { config } from 'dotenv'
 config()
 
 import { closeDatabase } from '../src/lib/db'
-import { createSlideRow } from '../src/lib/queries/slideRows'
-import { createSlide } from '../src/lib/queries/slides'
+import { createSlideRow, getAllSlideRows } from '../src/lib/queries/slideRows'
+import { createSlide, getSlidesForRow } from '../src/lib/queries/slides'
 
 async function seedSlideData() {
   try {
     console.log('🔄 Seeding slide data...')
 
+    // Check for existing slide rows to prevent duplicates
+    const existingRows = await getAllSlideRows(false)
+    const existingTitles = existingRows.map(row => row.title)
+
     // Create "Legacy Content" row from existing hardcoded slides
-    console.log('📦 Creating Legacy Content slide row...')
-    const legacyRow = await createSlideRow({
-      title: 'Legacy Content',
-      description: 'Original hardcoded slides migrated to database',
-      row_type: 'CUSTOM',
-      icon_set: ['check_circle_unread', 'clock_arrow_up', 'select_check_box'],
-      theme_color: '#dc2626',
-      is_published: true,
-      display_order: 0,
-    })
-    console.log('✅ Legacy Content row created:', legacyRow.id)
+    let legacyRow
+    if (existingTitles.includes('Legacy Content')) {
+      console.log('ℹ️  Legacy Content slide row already exists, skipping creation')
+      legacyRow = existingRows.find(row => row.title === 'Legacy Content')!
+    } else {
+      console.log('📦 Creating Legacy Content slide row...')
+      legacyRow = await createSlideRow({
+        title: 'Legacy Content',
+        description: 'Original hardcoded slides migrated to database',
+        row_type: 'CUSTOM',
+        icon_set: ['check_circle_unread', 'clock_arrow_up', 'select_check_box'],
+        theme_color: '#dc2626',
+        is_published: true,
+        display_order: 0,
+      })
+      console.log('✅ Legacy Content row created:', legacyRow.id)
+    }
 
     // Migrate existing slides
     const slides = [
@@ -77,27 +87,39 @@ async function seedSlideData() {
       },
     ]
 
-    console.log('📝 Creating slides...')
-    for (const slideData of slides) {
-      const slide = await createSlide({
-        slide_row_id: legacyRow.id,
-        ...slideData,
-      })
-      console.log(`✅ Created slide: "${slide.title}" (position ${slide.position})`)
+    // Only create slides if Legacy Content row is newly created or has no slides
+    const existingLegacySlides = await getSlidesForRow(legacyRow.id)
+    if (existingLegacySlides.length > 0) {
+      console.log(`ℹ️  Legacy Content already has ${existingLegacySlides.length} slides, skipping slide creation`)
+    } else {
+      console.log('📝 Creating slides...')
+      for (const slideData of slides) {
+        const slide = await createSlide({
+          slide_row_id: legacyRow.id,
+          ...slideData,
+        })
+        console.log(`✅ Created slide: "${slide.title}" (position ${slide.position})`)
+      }
     }
 
     // Create sample "Morning Meditation Routine" row
-    console.log('\n📦 Creating Morning Meditation Routine slide row...')
-    const morningRow = await createSlideRow({
-      title: 'Morning Meditation Routine',
-      description: 'A 7-day guided meditation sequence to start your day with clarity and peace',
-      row_type: 'ROUTINE',
-      icon_set: ['self_improvement', 'wb_twilight', 'spa'],
-      theme_color: '#2563eb',
-      is_published: false, // Keep as draft
-      display_order: 1,
-    })
-    console.log('✅ Morning Meditation Routine row created:', morningRow.id)
+    let morningRow
+    if (existingTitles.includes('Morning Meditation Routine')) {
+      console.log('\nℹ️  Morning Meditation Routine slide row already exists, skipping creation')
+      morningRow = existingRows.find(row => row.title === 'Morning Meditation Routine')!
+    } else {
+      console.log('\n📦 Creating Morning Meditation Routine slide row...')
+      morningRow = await createSlideRow({
+        title: 'Morning Meditation Routine',
+        description: 'A 7-day guided meditation sequence to start your day with clarity and peace',
+        row_type: 'ROUTINE',
+        icon_set: ['self_improvement', 'wb_twilight', 'spa'],
+        theme_color: '#2563eb',
+        is_published: false, // Keep as draft
+        display_order: 1,
+      })
+      console.log('✅ Morning Meditation Routine row created:', morningRow.id)
+    }
 
     const morningSlides = [
       {
@@ -123,14 +145,20 @@ async function seedSlideData() {
       },
     ]
 
-    console.log('📝 Creating morning meditation slides...')
-    for (const slideData of morningSlides) {
-      const slide = await createSlide({
-        slide_row_id: morningRow.id,
-        layout_type: 'STANDARD',
-        ...slideData,
-      })
-      console.log(`✅ Created slide: "${slide.title}" (position ${slide.position})`)
+    // Only create slides if Morning Meditation row is newly created or has no slides
+    const existingMorningSlides = await getSlidesForRow(morningRow.id)
+    if (existingMorningSlides.length > 0) {
+      console.log(`ℹ️  Morning Meditation Routine already has ${existingMorningSlides.length} slides, skipping slide creation`)
+    } else {
+      console.log('📝 Creating morning meditation slides...')
+      for (const slideData of morningSlides) {
+        const slide = await createSlide({
+          slide_row_id: morningRow.id,
+          layout_type: 'STANDARD',
+          ...slideData,
+        })
+        console.log(`✅ Created slide: "${slide.title}" (position ${slide.position})`)
+      }
     }
 
     console.log('\n🎉 Slide data seeding completed!')
