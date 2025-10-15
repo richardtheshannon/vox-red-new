@@ -87,7 +87,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         image_url: imageUrl || undefined,
         video_url: videoUrl || undefined,
         layout_type: layoutType,
-        position: isNewSlide ? position : slide?.position,
+        // For new slides, don't send position - let server auto-calculate
+        // For existing slides, keep the current position
+        ...(isNewSlide ? {} : { position: slide?.position }),
       };
 
       await onSave(slideData);

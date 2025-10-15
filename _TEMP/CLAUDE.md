@@ -176,8 +176,10 @@ npm run db:slides:seed   # Seed slide content
 
 ### Admin
 - `src/app/admin/slides/page.tsx` - Slide row list
-- `src/app/admin/slides/[id]/page.tsx` - Slide manager
-- `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
+- `src/app/admin/slides/new/page.tsx` - Create new slide row
+- `src/app/admin/slides/[id]/edit/page.tsx` - Edit slide row metadata
+- `src/app/admin/slides/[id]/page.tsx` - Slide manager (manage slides within a row)
+- `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor (edit individual slide)
 - `src/components/admin/slides/*.tsx` - All admin slide components
 
 ### Styling
@@ -241,7 +243,7 @@ DATABASE_URL=postgresql://...
 - **Footer Arrows**: Prev/next slide, scroll up/down
 
 ### Admin (/admin)
-- **Dashboard Icon**: Admin dashboard
+- **Dashboard Icon**: Navigate to /admin (Admin dashboard)
 - **Bug Report Icon**: Bug reporting
 - **Description Icon**: Navigate to /admin/slides (Slide management)
 - **Exit Icon**: Navigate back to /
@@ -345,6 +347,33 @@ npm run lint
 
 ## Recent Updates
 
+### October 15, 2025 - Admin Dashboard Navigation & Edit Row Fix
+**Feature**: Fixed missing "Edit Row" page and added dashboard icon navigation
+**Implementation**: Created missing edit page and updated admin header navigation
+
+**Part 1 - Edit Row Page (Bug Fix)**
+- **Issue**: "Edit Row" button led to 404 at `/admin/slides/[id]/edit`
+- **Solution**: Created missing page file at `src/app/admin/slides/[id]/edit/page.tsx`
+- Fetches existing slide row data via `GET /api/slides/rows/[id]`
+- Displays `SlideRowForm` component with `initialData` and `isEdit={true}`
+- Updates row via `PATCH /api/slides/rows/[id]` when submitted
+- Redirects to `/admin/slides` after successful update
+- Handles loading and error states gracefully
+
+**Part 2 - Dashboard Icon Navigation**
+- Updated `AdminTopIconBar.tsx` to wrap dashboard icon with Link to `/admin`
+- Follows same pattern as description and exit icons
+- Provides quick navigation back to admin dashboard from all admin pages
+
+**Files Modified/Created**: 2 files (~192 lines total)
+- `src/app/admin/slides/[id]/edit/page.tsx` - New file (189 lines)
+- `src/components/admin/AdminTopIconBar.tsx` - Modified (3 lines)
+
+**Impact**:
+- Admin users can now edit slide row metadata (title, description, type, icons, etc.)
+- Quick navigation to admin dashboard from all admin pages via dashboard icon
+- Completes the CRUD functionality for slide row management
+
 ### October 15, 2025 - Admin Navigation Enhancement
 **Feature**: Description icon in admin header now links to slide management
 **Implementation**: Minimal navigation update for better UX
@@ -417,7 +446,99 @@ npm run lint
 
 **Impact**: Slides with `image_url` now display full-browser backgrounds as intended
 
+### October 15, 2025 - Railway Deployment Fix (TypeScript Error)
+**Issue**: Railway production deployment failed during build phase
+**Error**: `@typescript-eslint/no-explicit-any` violation in edit page
+**Root Cause**: `initialData` state typed as `any` in `src/app/admin/slides/[id]/edit/page.tsx:22`
+
+**Solution**: Replaced `any` with explicit interface definition
+```typescript
+// Before
+const [initialData, setInitialData] = useState<any>(null);
+
+// After
+const [initialData, setInitialData] = useState<{
+  id?: string;
+  title: string;
+  description: string;
+  row_type: string;
+  icon_set: string[];
+  theme_color: string;
+  display_order: number;
+  is_published: boolean;
+} | null>(null);
+```
+
+**Deployment Context**:
+- Platform: Railway (Nixpacks v1.38.0, Node.js 18, npm 9.x)
+- Build Process: `npm ci` → `npm run build` → `npm run start`
+- Error occurred during Next.js type checking phase
+- Region: us-west1
+
+**Files Modified**: 1 file (9 lines added, 1 line removed)
+- `src/app/admin/slides/[id]/edit/page.tsx:22-31` - Type definition
+
+**Impact**:
+- Deployment now passes TypeScript linting requirements
+- Code quality improved with explicit type safety
+- Prevents potential runtime type errors
+
+**Commit**: `aebfe29` - Pushed to `origin/master`
+
+### October 15, 2025 - Create Slide Fix (Position Constraint Violation)
+**Issue**: Creating new slides failed with 500 error and "Failed to create slide" message
+**Error**: PostgreSQL UNIQUE constraint violation on `(slide_row_id, position)`
+**Root Cause Analysis**:
+- Database has `UNIQUE(slide_row_id, position)` constraint (init-slide-tables.ts:56)
+- SlideEditor always sent position (default: 1) for new slides
+- API's auto-calculation logic (lines 98-103) never ran because position was always provided
+- When a slide already existed at position 1, PostgreSQL threw constraint violation
+- Generic error message didn't expose actual database error to client
+
+**Solution**: Two-part fix for position handling and error messaging
+
+**Part 1 - Remove Position from New Slide Submissions**
+Modified `SlideEditor.tsx` (lines 82-93):
+```typescript
+// Before
+const slideData: Partial<Slide> = {
+  // ... other fields
+  position: isNewSlide ? position : slide?.position,
+};
+
+// After
+const slideData: Partial<Slide> = {
+  // ... other fields
+  // For new slides, don't send position - let server auto-calculate
+  // For existing slides, keep the current position
+  ...(isNewSlide ? {} : { position: slide?.position }),
+};
+```
+
+**Part 2 - Improved Error Handling**
+Enhanced API route error handling (route.ts:124-149):
+- Added specific check for PostgreSQL unique constraint violations
+- Returns 409 Conflict status with clear message for duplicate position errors
+- Preserves generic 500 error for other failures
+- Better logging for debugging
+
+**Files Modified**: 2 files (~25 lines changed)
+- `src/components/admin/slides/SlideEditor.tsx:82-93` - Position logic
+- `src/app/api/slides/rows/[id]/slides/route.ts:124-149` - Error handling
+
+**Technical Details**:
+- Position field still displayed in UI for user reference (non-functional for new slides)
+- Server auto-calculates position as `existingSlides.length + 1`
+- Editing existing slides preserves their current position
+- TypeScript compilation passes without errors
+
+**Impact**:
+- New slide creation now works reliably without position conflicts
+- Clear error messages when unexpected database constraints are violated
+- Admin users no longer see cryptic 500 errors
+- Follows best practice of server-side auto-assignment for sequential fields
+
 ---
 
-**Last Updated**: Admin Navigation Enhancement - October 15, 2025
-**Total Lines**: 563
+**Last Updated**: Create Slide Fix - October 15, 2025
+**Total Lines**: 546

@@ -123,6 +123,21 @@ export async function POST(
     );
   } catch (error) {
     console.error('Error creating slide:', error);
+
+    // Check for PostgreSQL unique constraint violation (duplicate position)
+    if (error instanceof Error && error.message.includes('duplicate key value violates unique constraint')) {
+      if (error.message.includes('slide_row_id') && error.message.includes('position')) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: 'A slide already exists at this position. The position has been auto-assigned to avoid conflicts.',
+            error: 'DUPLICATE_POSITION',
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         status: 'error',
