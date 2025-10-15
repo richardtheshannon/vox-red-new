@@ -7,7 +7,9 @@ export default function AdminTopIconBar() {
   return (
     <header className="icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem'}}>
       <div className="flex items-center">
-        <span className="material-symbols-outlined" title="Dashboard">dashboard</span>
+        <Link href="/admin">
+          <span className="material-symbols-outlined" title="Dashboard">dashboard</span>
+        </Link>
         <span className="material-symbols-outlined" title="Bug Report">bug_report</span>
         <Link href="/admin/slides">
           <span className="material-symbols-outlined" title="Documentation">description</span>

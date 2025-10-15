@@ -20,58 +20,35 @@ export default function Home() {
 
   // Track active row and slide
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
-  const [activeSlideElement, setActiveSlideElement] = useState<HTMLElement | null>(null);
   const [activeSlideImageUrl, setActiveSlideImageUrl] = useState<string | null>(null);
   const [activeSlideVideoUrl, setActiveSlideVideoUrl] = useState<string | null>(null);
   const [videoDisplayMode, setVideoDisplayMode] = useState<'cover' | 'contained'>('cover');
 
   // Navigation functions for footer arrows
+  // Left/Right arrows navigate horizontal slides only
   const slidePrev = () => {
     console.log('slidePrev called');
-
-    // Try to navigate within the current row's horizontal swiper first
     if (activeRowId && horizontalSwipersRef.current[activeRowId]) {
-      const horizontalSwiper = horizontalSwipersRef.current[activeRowId];
-
-      // If we're not at the beginning of the horizontal swiper, go to previous slide
-      if (horizontalSwiper.activeIndex > 0) {
-        horizontalSwiper.slidePrev();
-        return;
-      }
+      horizontalSwipersRef.current[activeRowId].slidePrev();
     }
-
-    // If we're at the beginning of horizontal swiper, navigate to previous row
-    verticalSwiperRef.current?.slidePrev();
   };
 
   const slideNext = () => {
     console.log('slideNext called');
-
-    // Try to navigate within the current row's horizontal swiper first
     if (activeRowId && horizontalSwipersRef.current[activeRowId]) {
-      const horizontalSwiper = horizontalSwipersRef.current[activeRowId];
-
-      // If we're not at the end of the horizontal swiper, go to next slide
-      if (horizontalSwiper.activeIndex < horizontalSwiper.slides.length - 1) {
-        horizontalSwiper.slideNext();
-        return;
-      }
+      horizontalSwipersRef.current[activeRowId].slideNext();
     }
-
-    // If we're at the end of horizontal swiper, navigate to next row
-    verticalSwiperRef.current?.slideNext();
   };
 
+  // Up/Down arrows navigate vertical rows
   const scrollUp = () => {
-    if (activeSlideElement) {
-      activeSlideElement.scrollBy({ top: -200, behavior: 'smooth' });
-    }
+    console.log('scrollUp called - navigating to previous row');
+    verticalSwiperRef.current?.slidePrev();
   };
 
   const scrollDown = () => {
-    if (activeSlideElement) {
-      activeSlideElement.scrollBy({ top: 200, behavior: 'smooth' });
-    }
+    console.log('scrollDown called - navigating to next row');
+    verticalSwiperRef.current?.slideNext();
   };
 
   // Store reference to a horizontal swiper
@@ -90,10 +67,7 @@ export default function Home() {
     if (!swiper || typeof swiper.activeIndex === 'undefined' || !swiper.slides) {
       return;
     }
-
-    const activeSlide = swiper.slides[swiper.activeIndex];
-    const scrollContainer = activeSlide?.querySelector('.h-full.overflow-y-auto') as HTMLElement;
-    setActiveSlideElement(scrollContainer);
+    // Slide change handled - no content scrolling needed
   };
 
   // Set vertical swiper ref from MainContent

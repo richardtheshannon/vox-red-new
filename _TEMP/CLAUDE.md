@@ -241,9 +241,12 @@ DATABASE_URL=postgresql://...
 - **Footer Arrows**: Prev/next slide, scroll up/down
 
 ### Admin (/admin)
+- **Dashboard Icon**: Admin dashboard
+- **Bug Report Icon**: Bug reporting
+- **Description Icon**: Navigate to /admin/slides (Slide management)
 - **Exit Icon**: Navigate back to /
-- **Slide Management Icon**: Navigate to /admin/slides
 - **Theme Toggle**: Same as main app
+- **Admin Panel Icon**: Admin settings
 
 ---
 
@@ -342,6 +345,18 @@ npm run lint
 
 ## Recent Updates
 
+### October 15, 2025 - Admin Navigation Enhancement
+**Feature**: Description icon in admin header now links to slide management
+**Implementation**: Minimal navigation update for better UX
+- Updated `AdminTopIconBar.tsx` to wrap description icon with Next.js Link component
+- Link points to `/admin/slides` for quick access to slide management interface
+- Follows existing pattern used by exit_to_app icon
+
+**Files Modified**: 1 file (3 lines)
+- `src/components/admin/AdminTopIconBar.tsx` - Added Link wrapper to description icon
+
+**Impact**: Improves admin workflow by providing direct navigation from dashboard to slide management
+
 ### October 15, 2025 - YouTube Video Display Mode Toggle
 **Feature**: Interactive toggle between 'cover' and 'contained' video display modes
 **Implementation**: Added conditional videocam icon with click-to-toggle functionality
@@ -404,5 +419,5 @@ npm run lint
 
 ---
 
-**Last Updated**: YouTube Video Display Mode Toggle - October 15, 2025
-**Total Lines**: 545
+**Last Updated**: Admin Navigation Enhancement - October 15, 2025
+**Total Lines**: 563
