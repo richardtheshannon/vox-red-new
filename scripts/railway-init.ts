@@ -5,6 +5,8 @@
 
 import { initializeDatabase } from './init-db'
 import { seedData } from './seed-db'
+import { initializeSlideTables } from './init-slide-tables'
+import { seedSlideData } from './seed-slide-data'
 
 async function railwayInit() {
   try {
@@ -23,6 +25,19 @@ async function railwayInit() {
       }
     }
 
+    // Initialize slide tables (safe to run multiple times)
+    try {
+      await initializeSlideTables()
+      console.log('✅ Slide tables initialized')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide tables already exist, skipping initialization')
+      } else {
+        console.error('❌ Slide table initialization failed:', error)
+        throw error
+      }
+    }
+
     // Seed with initial data (safe to run multiple times)
     try {
       await seedData()
@@ -33,6 +48,20 @@ async function railwayInit() {
       } else {
         console.error('❌ Database seeding failed:', error)
         throw error
+      }
+    }
+
+    // Seed slide data (safe to run multiple times)
+    try {
+      await seedSlideData()
+      console.log('✅ Slide data seeded')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide data already seeded, skipping')
+      } else {
+        console.error('❌ Slide data seeding failed:', error)
+        // Don't throw - slide seeding is optional
+        console.log('⚠️ Continuing without slide seed data')
       }
     }
 
