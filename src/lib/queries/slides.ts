@@ -13,6 +13,9 @@ export interface Slide {
   video_url?: string
   position: number
   layout_type: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
+  content_theme?: 'light' | 'dark'
+  title_bg_opacity?: number
+  body_bg_opacity?: number
   view_count: number
   completion_count: number
   created_at: Date
@@ -29,6 +32,9 @@ export interface CreateSlideData {
   video_url?: string
   position: number
   layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
+  content_theme?: 'light' | 'dark'
+  title_bg_opacity?: number
+  body_bg_opacity?: number
 }
 
 export interface UpdateSlideData {
@@ -40,6 +46,9 @@ export interface UpdateSlideData {
   video_url?: string
   position?: number
   layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
+  content_theme?: 'light' | 'dark'
+  title_bg_opacity?: number
+  body_bg_opacity?: number
 }
 
 // Get all slides for a specific row
@@ -58,8 +67,8 @@ export async function getSlideById(slideId: string): Promise<Slide | null> {
 // Create new slide
 export async function createSlide(data: CreateSlideData): Promise<Slide> {
   const sql = `
-    INSERT INTO slides (slide_row_id, title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    INSERT INTO slides (slide_row_id, title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     RETURNING *
   `
 
@@ -73,6 +82,9 @@ export async function createSlide(data: CreateSlideData): Promise<Slide> {
     data.video_url || null,
     data.position,
     data.layout_type || 'STANDARD',
+    data.content_theme || null,
+    data.title_bg_opacity !== undefined ? data.title_bg_opacity : null,
+    data.body_bg_opacity !== undefined ? data.body_bg_opacity : null,
   ])
 
   if (!slide) throw new Error('Failed to create slide')
@@ -118,6 +130,18 @@ export async function updateSlide(slideId: string, data: UpdateSlideData): Promi
   if (data.layout_type !== undefined) {
     fields.push(`layout_type = $${paramCount++}`)
     values.push(data.layout_type)
+  }
+  if (data.content_theme !== undefined) {
+    fields.push(`content_theme = $${paramCount++}`)
+    values.push(data.content_theme)
+  }
+  if (data.title_bg_opacity !== undefined) {
+    fields.push(`title_bg_opacity = $${paramCount++}`)
+    values.push(data.title_bg_opacity)
+  }
+  if (data.body_bg_opacity !== undefined) {
+    fields.push(`body_bg_opacity = $${paramCount++}`)
+    values.push(data.body_bg_opacity)
   }
 
   if (fields.length === 0) {

@@ -1,7 +1,8 @@
 # Claude Development Reference
 
 **Project**: Icon Border Template - Spiritual Content Platform
-**Platform**: Windows | **Branch**: master | **Status**: Phase 5 Complete
+**Platform**: Windows | **Branch**: master | **Status**: Production Ready
+**Last Updated**: October 15, 2025
 
 ---
 
@@ -16,6 +17,12 @@ npm run db:slides:init   # Initialize slide tables
 npm run db:slides:seed   # Seed slide content
 ```
 
+**URLs**:
+- Frontend: http://localhost:3000/
+- Admin: http://localhost:3000/admin
+- Slides: http://localhost:3000/admin/slides
+- Health: http://localhost:3000/api/test-db
+
 ---
 
 ## Tech Stack
@@ -23,30 +30,28 @@ npm run db:slides:seed   # Seed slide content
 - **Framework**: Next.js 15.5.4, React 19.1.0, TypeScript
 - **Styling**: Tailwind CSS v3, Material Symbols Icons
 - **Database**: PostgreSQL (direct `pg` client, no ORM)
-- **UI Libraries**: Swiper.js 12.0.2, Tiptap (rich text), @dnd-kit (drag-drop)
+- **UI**: Swiper.js 12.0.2, Tiptap (rich text), @dnd-kit (drag-drop)
 - **Audio**: Essential Audio Player (custom red theme)
 
 ---
 
-## Application Architecture
+## Architecture Overview
 
 ### Frontend (/)
-- **Icon Border Layout**: 50px padding, fixed header/footer/sidebars
-- **Dynamic Slides**: Multi-level Swiper navigation (vertical rows + horizontal slides)
-- **Background Images**: Full-browser slide backgrounds via `image_url` field
-- **YouTube Videos**: Full-browser embedded videos via `video_url` field with cover/contained toggle
-- **Video Display Modes**: Toggle between cover (full-screen) and contained (60px padding) views
-- **Theme System**: Light/dark mode with session persistence
-- **4-Direction Navigation**: Footer arrows (prev/next slide, scroll up/down)
-- **Audio Playback**: Essential Audio Player integrated on all slides
+- **50px Icon Border Layout**: Fixed header/footer/sidebars with gradient backgrounds
+- **Multi-Level Navigation**: Vertical Swiper (slide rows) + Horizontal Swiper (slides)
+- **Dynamic Content**: Background images, YouTube videos (cover/contained modes)
+- **Per-Slide Themes**: Light/dark text with semi-transparent backgrounds (0-1 opacity)
+- **Global Theme**: Light/dark mode with session persistence
+- **Audio**: Essential Audio Player integrated on all slides
 
-### Admin Interface (/admin)
-- **Slide Management** (`/admin/slides`): CRUD interface for dynamic content
+### Admin (/admin)
+- **Slide Management**: Full CRUD interface for slide rows and slides
 - **Rich Text Editor**: Tiptap WYSIWYG with live preview
-- **Drag-and-Drop**: @dnd-kit for slide reordering
+- **Drag-and-Drop**: Slide reordering with position auto-calculation
 - **File Upload**: Audio (MP3/WAV/OGG), Images (JPG/PNG/WebP)
-- **YouTube Video Integration**: Add YouTube URLs to slides via `video_url` field
-- **Same Layout**: Identical 50px border structure as frontend
+- **Media Integration**: YouTube videos + background images per slide
+- **Theme Settings**: Per-slide light/dark override + text background opacity
 
 ---
 
@@ -54,201 +59,225 @@ npm run db:slides:seed   # Seed slide content
 
 ### Core Tables (8)
 1. **users**: Role-based access (Admin, Moderator, User)
-2. **audio_files**: MP3 metadata (artist, album, duration, bitrate)
-3. **playlists** + **playlist_items**: User playlist management
-4. **categories**: Meditation, Yoga, Courses, Mantras
-5. **service_commitments**: Daily prompts repository
+2. **audio_files**: MP3 metadata
+3. **playlists** + **playlist_items**: Playlist management
+4. **categories**: Content categories
+5. **service_commitments**: Daily prompts
 6. **bug_reports** + **documentation**: Admin tools
 
-### Slide System Tables (3) - Phase 1
-1. **slide_rows**: Collections of slides (ROUTINE/COURSE/TEACHING/CUSTOM)
+### Slide System (3 tables)
+1. **slide_rows**: Collections of slides
    - `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set`, `theme_color`, `slide_count`
+
 2. **slides**: Individual slide content
-   - `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `audio_url`, `image_url`, `video_url`, `position`, `layout_type`
+   - Core: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type`
+   - Media: `audio_url`, `image_url`, `video_url`
+   - Display: `content_theme` ('light'|'dark'), `title_bg_opacity` (0-1), `body_bg_opacity` (0-1)
+   - Meta: `view_count`, `completion_count`, `created_at`, `updated_at`
+
 3. **slide_icons**: Optional custom icons per slide
 
-**Key Features**:
+**Features**:
 - Auto-updating `slide_count` trigger
-- Cascading deletes (delete row → deletes all slides)
+- Cascading deletes (row deletion removes all slides)
 - Unique position constraint per row
+- Server-side position auto-calculation
 
 ---
 
-## API Endpoints (14 total) - Phase 2
+## API Endpoints (14)
 
 ### Slide Rows
-- `GET /api/slides/rows` - List all rows (`?published=true` for frontend)
-- `POST /api/slides/rows` - Create row
-- `GET /api/slides/rows/[id]` - Get single row
-- `PATCH /api/slides/rows/[id]` - Update row
-- `DELETE /api/slides/rows/[id]` - Delete row
+- `GET /api/slides/rows` (query: `?published=true`)
+- `POST /api/slides/rows`
+- `GET /api/slides/rows/[id]`
+- `PATCH /api/slides/rows/[id]`
+- `DELETE /api/slides/rows/[id]`
 
 ### Slides
-- `GET /api/slides/rows/[id]/slides` - Get slides for row
-- `POST /api/slides/rows/[id]/slides` - Create slide
-- `GET /api/slides/rows/[id]/slides/[slideId]` - Get single slide
-- `PATCH /api/slides/rows/[id]/slides/[slideId]` - Update slide
-- `DELETE /api/slides/rows/[id]/slides/[slideId]` - Delete slide
-- `POST /api/slides/rows/[id]/slides/reorder` - Reorder slides
+- `GET /api/slides/rows/[id]/slides`
+- `POST /api/slides/rows/[id]/slides`
+- `GET /api/slides/rows/[id]/slides/[slideId]`
+- `PATCH /api/slides/rows/[id]/slides/[slideId]`
+- `DELETE /api/slides/rows/[id]/slides/[slideId]`
+- `POST /api/slides/rows/[id]/slides/reorder`
 
 ### Utilities
-- `GET /api/slides/upload` - Get upload config
-- `POST /api/slides/upload` - Upload audio/image files
-- `GET /api/test-db` - Database health check
+- `GET /api/slides/upload`
+- `POST /api/slides/upload`
+- `GET /api/test-db`
+
+**Validation**: All routes validate content_theme ('light'|'dark'), opacity values (0-1), and layout types.
 
 ---
 
-## Key Components
-
-### Frontend
-- **MainContent.tsx**: Dynamic slides with API integration, lazy loading, caching
-- **YouTubeEmbed.tsx**: Full-browser YouTube video player component with cover/contained display modes
-- **RightIconBar.tsx**: Right sidebar with conditional videocam toggle icon
-- **SwiperContext.tsx**: Multi-level navigation (vertical rows + horizontal slides)
-- **ThemeContext.tsx**: Light/dark mode state management
-- **EssentialAudioPlayer.tsx**: MP3 player wrapper (SSR-safe)
-
-### Admin
-- **SlideRowList.tsx**: Card-based list with filtering/sorting
-- **SlideRowForm.tsx**: Create/edit row with validation
-- **SlideManager.tsx**: Drag-and-drop slide reordering
-- **SlideEditor.tsx**: Tiptap rich text editor + live preview
-- **AudioUploader.tsx**: File upload with progress
-- **IconPicker.tsx**: Material Symbols icon selector
-
----
-
-## Development Phases
-
-### ✅ Completed (Phases 1-5)
-1. **Database Foundation**: Slide tables, triggers, query functions
-2. **API Endpoints**: 14 REST endpoints with validation
-3. **Admin UI - List & Forms**: Slide row CRUD interface
-4. **Admin UI - Editor**: Rich text editor, drag-drop, uploads
-5. **Frontend Integration**: Dynamic slides, multi-level navigation, performance optimization
-
-### 🔄 Current Phase (Phase 6)
-**Polish & Deployment** - Estimated 1-2 weeks
-- View tracking (increment `view_count`)
-- Admin analytics dashboard
-- Search functionality
-- Bulk operations
-- Database optimization (indexes)
-- Security audit (SQL injection, XSS)
-- User documentation
-- Railway production deployment
-
----
-
-## Performance Optimizations
-
-### Frontend (Phase 5)
-- **Lazy Loading**: Slides loaded on-demand (90%+ API improvement)
-- **Client Caching**: `slidesCache` prevents redundant API calls
-- **Preloading**: First 2 rows on mount, adjacent rows on navigation
-- **Memoization**: Icon parsing cached with `useMemo`
-- **Server Caching**: `next: { revalidate: 60 }` on fetch calls
-
-### Results
-- Initial API: 473ms → Cached: 39-45ms (90%+ faster)
-- Instant navigation between cached rows
-- Zero layout shift during loading
-
----
-
-## Critical File Locations
+## Critical Files
 
 ### Database
-- `src/lib/db.ts` - PostgreSQL connection utility
-- `src/lib/queries/slideRows.ts` - Slide row queries
-- `src/lib/queries/slides.ts` - Slide queries (includes video_url support)
+- `src/lib/db.ts` - Connection utility (lazy pool initialization)
+- `src/lib/queries/slideRows.ts` - Row queries
+- `src/lib/queries/slides.ts` - Slide queries
 - `scripts/init-db.ts` - Schema initialization
-- `scripts/seed-db.ts` - Sample data seeding
-- `scripts/add-video-url-column.ts` - Migration to add video_url field
+- `scripts/init-slide-tables.ts` - Slide table creation
+- `scripts/railway-init.ts` - Railway startup script (runs all migrations)
+- `scripts/add-slide-theme-settings.ts` - Theme settings migration
 
-### Frontend
-- `src/app/page.tsx` - Main page with Swiper navigation logic + YouTube embed layer + video mode state
-- `src/components/MainContent.tsx` - Dynamic slide rendering (405+ lines)
-- `src/components/YouTubeEmbed.tsx` - YouTube video player with cover/contained modes
-- `src/components/RightIconBar.tsx` - Right sidebar with conditional videocam icon
-- `src/contexts/SwiperContext.tsx` - Navigation context
-- `src/contexts/ThemeContext.tsx` - Theme state
+### Frontend Core
+- `src/app/page.tsx` - Main page (Swiper navigation + background/video state)
+- `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching)
+- `src/components/YouTubeEmbed.tsx` - YouTube player (cover/contained modes)
+- `src/contexts/SwiperContext.tsx` - Multi-level navigation context
+- `src/contexts/ThemeContext.tsx` - Global theme state
+
+### Icon Borders
+- `src/components/TopIconBar.tsx` - Header (z-20)
+- `src/components/BottomIconBar.tsx` - Footer (z-20)
+- `src/components/LeftIconBar.tsx` - Left sidebar (z-10)
+- `src/components/RightIconBar.tsx` - Right sidebar (z-10, videocam toggle)
 
 ### Admin
 - `src/app/admin/slides/page.tsx` - Slide row list
-- `src/app/admin/slides/new/page.tsx` - Create new slide row
-- `src/app/admin/slides/[id]/edit/page.tsx` - Edit slide row metadata
-- `src/app/admin/slides/[id]/page.tsx` - Slide manager (manage slides within a row)
-- `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor (edit individual slide)
-- `src/components/admin/slides/*.tsx` - All admin slide components
+- `src/app/admin/slides/new/page.tsx` - Create row
+- `src/app/admin/slides/[id]/edit/page.tsx` - Edit row metadata
+- `src/app/admin/slides/[id]/page.tsx` - Slide manager (reorder slides)
+- `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
+- `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI
+- `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
 
 ### Styling
-- `src/app/globals.css` - Theme system, Essential Audio Player overrides, YouTube embed styling (cover + contained modes)
-- `tailwind.config.js` - Tailwind v3 configuration
+- `src/app/globals.css` - Theme system, gradients, YouTube styling, Essential Audio overrides
 
 ---
 
-## Database Connection
+## Key Features & Behavior
 
-### Local Development
+### Media Layering (Z-Index)
+- Background image: z-0
+- YouTube video: z-10
+- Sidebars: z-10
+- Content: z-20
+- Header/Footer: z-20
+
+### Performance
+- **Lazy Loading**: Slides loaded on-demand (90%+ improvement)
+- **Client Caching**: `slidesCache` prevents redundant API calls
+- **Preloading**: First 2 rows on mount, adjacent rows on navigation
+- **Memoization**: Icon sets cached with `useMemo`
+
+### Per-Slide Theme Settings (Oct 15, 2025)
+- **content_theme**: Override global theme ('light' = white text, 'dark' = black text)
+- **title_bg_opacity**: Semi-transparent background behind title (0-1)
+- **body_bg_opacity**: Semi-transparent background behind body (0-1)
+- **Logic**: Light theme uses dark backgrounds (rgba(0,0,0,opacity)), dark theme uses light backgrounds (rgba(255,255,255,opacity))
+- **Rendering**: Only applies when opacity > 0, uses inline styles
+
+### Icon Border Gradients
+- Conditional display: Transparent when background image present, gradients when absent
+- `.no-gradient` class applied via `hasBackgroundImage` prop
+- Smooth 500ms transitions between slides
+
+### YouTube Videos
+- Supports: `youtube.com/watch?v=`, `youtu.be/`, raw video IDs
+- **Cover Mode**: Full-screen like `background-size: cover` (default)
+- **Contained Mode**: 60px padding, 16:9 aspect ratio, fits viewport
+- Toggle via videocam icon in right sidebar (only visible when video present)
+
+---
+
+## Environment Variables
+
+### Local (.env)
 ```env
-# .env.local
 DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=mp3_manager
 DB_USER=postgres
 DB_PASSWORD=your_password
-DB_NAME=mp3_manager
-DB_PORT=5432
 ```
 
-### Railway Production
+### Railway (Auto-provided)
 ```env
-# Automatically provided by Railway
 DATABASE_URL=postgresql://...
 ```
 
-**Health Check**: http://localhost:3000/api/test-db
+---
+
+## Deployment (Railway)
+
+### Pre-Deployment Checks
+```bash
+npx tsc --noEmit        # TypeScript validation (0 errors required)
+npm run lint            # ESLint (0 errors, warnings OK)
+npm run build           # Production build test
+```
+
+### Railway Pipeline
+1. Git push triggers deployment
+2. Nixpacks v1.38.0 detects Node.js 18
+3. Build: `npm ci` → `npm run build` → `npm run start`
+4. `railway-init.ts` runs automatically:
+   - Initializes database schema
+   - Initializes slide tables
+   - Runs theme settings migration (IF NOT EXISTS)
+   - Seeds initial data
+5. Database health check at `/api/test-db`
+
+### Migration Safety
+- All migrations use `IF NOT EXISTS` (idempotent)
+- Theme settings migration wrapped in try/catch (non-critical)
+- Seed scripts check for existing data (no duplicates)
+- Railway auto-seeding disabled for slide data
 
 ---
 
-## Common Issues & Fixes
+## Common Issues
 
-### Tiptap SSR Hydration Error
-**Error**: "SSR has been detected, please set `immediatelyRender` explicitly"
+### Tiptap SSR Hydration
 **Fix**: Add `immediatelyRender: false` to `useEditor()` config
 
-### Nested Scrollbars
-**Issue**: Multiple scrollbars on page
-**Fix**: Remove `overflow-y-auto` from containers, use single page-level scroll
+### Background Images Not Showing
+**Fix**: Ensure `.no-gradient` class applied to icon bars when `hasBackgroundImage={true}`
 
 ### Material Icons Not Loading
-**Fix**: Icons load via CSS `@import` in `globals.css`, font-weight: 100
+**Fix**: Icons load via `@import` in `globals.css`, requires font-weight: 100
 
-### Background Images Not Displaying ✅ FIXED (Oct 15, 2025)
-**Issue**: Background images set via admin `image_url` field not showing on frontend
-**Root Cause**: Opaque `background-color: var(--content-bg)` on main containers blocked parent background image
-**Fix**: Changed `globals.css` lines 64-67 to use `transparent` instead of `var(--content-bg)`
-**Files Modified**:
-- `src/app/globals.css` - Made main/swiper containers transparent
-- `src/app/page.tsx` - Added fallback background color for slides without images
+### Position Constraint Violation
+**Fix**: Don't send position for new slides (server auto-calculates)
+
+### Seed Script Duplicates
+**Fix**: Scripts check for existing data, Railway auto-seeding disabled
 
 ---
 
-## Navigation Structure
+## Navigation
 
-### Main App (/)
-- **Home Icon**: Navigate to main page
-- **Settings Icon**: Navigate to /admin
-- **Theme Toggle**: Switch light/dark mode
-- **Videocam Icon** (conditional): Toggle video display mode (only visible when slide has video)
-- **Footer Arrows**: Prev/next slide, scroll up/down
+### Main App Icons (/)
+- **Home**: Navigate to /
+- **Settings**: Navigate to /admin
+- **Theme Toggle**: Light/dark mode
+- **Videocam** (conditional): Toggle video cover/contained
+- **Footer Arrows**: Prev/next slide, up/down row
 
-### Admin (/admin)
-- **Dashboard Icon**: Navigate to /admin (Admin dashboard)
-- **Bug Report Icon**: Bug reporting
-- **Description Icon**: Navigate to /admin/slides (Slide management)
-- **Exit Icon**: Navigate back to /
+### Admin Icons (/admin)
+- **Dashboard**: Navigate to /admin
+- **Description**: Navigate to /admin/slides
+- **Exit**: Navigate to /
 - **Theme Toggle**: Same as main app
-- **Admin Panel Icon**: Admin settings
+
+---
+
+## Important Notes
+
+- **50px Border**: All pages maintain 50px padding for icon layout
+- **Icon Specs**: 24px size, weight 100, `var(--icon-color)`
+- **Audio**: Stored in `/public/media/`
+- **Slide Media**: Stored in `/public/media/slides/[row-id]/`
+- **No ORM**: Direct PostgreSQL queries for performance
+- **SSR**: Some components use `'use client'` directive
+- **Transparent Containers**: Main/Swiper containers use transparent backgrounds
+- **Gradients**: Conditionally hidden when background images present
+- **Position Auto-Assignment**: Server calculates position for new slides
+- **Railway Safe**: All migrations idempotent, wrapped in error handling
 
 ---
 
@@ -259,11 +288,11 @@ DATABASE_URL=postgresql://...
 psql -U postgres -d mp3_manager -c "SELECT * FROM slide_rows;"
 curl http://localhost:3000/api/test-db
 
-# API Endpoints
+# API
 curl http://localhost:3000/api/slides/rows?published=true
 curl http://localhost:3000/api/slides/rows/[id]/slides
 
-# Build Validation
+# Validation
 npm run build
 npx tsc --noEmit
 npm run lint
@@ -271,336 +300,20 @@ npm run lint
 
 ---
 
-## Deployment Checklist
+## Recent Critical Updates
 
-### Pre-deployment
-- ✅ All TypeScript errors resolved
-- ✅ Database schema initialized
-- ✅ Sample data seeded
-- ✅ API endpoints tested
-- ✅ Responsive design verified
-- ✅ Theme system working
-- ✅ Audio player functional
+### Per-Slide Theme Settings (Oct 15, 2025)
+Added `content_theme`, `title_bg_opacity`, `body_bg_opacity` columns to slides table. Admin UI includes dropdown + sliders. Frontend applies theme-aware semi-transparent backgrounds. Migration runs automatically on Railway via `railway-init.ts`.
 
-### Railway Deployment
-1. Push to Git repository
-2. Connect Railway to repo
-3. Set `DATABASE_URL` environment variable (auto-provided)
-4. Deploy with `railway up`
-5. Monitor with `/api/test-db` endpoint
+### Position Constraint Fix (Oct 15, 2025)
+Fixed slide creation errors. Server now auto-calculates position. SlideEditor no longer sends position for new slides.
+
+### Seed Script Duplicate Prevention (Oct 15, 2025)
+Added existence checks to seed scripts. Disabled Railway auto-seeding for slides. Prevents deleted rows from resurrecting.
+
+### Background Image Gradient Fix (Oct 15, 2025)
+Icon borders conditionally transparent when background images present. `.no-gradient` class applied via `hasBackgroundImage` prop.
 
 ---
 
-## Project Status
-
-**Current State**: Production-ready with dynamic slide management
-**Last Major Update**: Phase 5 Frontend Integration (Complete)
-**Next Milestone**: Phase 6 - Polish & Deployment
-
-### Key Achievements
-- ✅ Zero code deployments for content changes
-- ✅ 90%+ performance improvement (caching)
-- ✅ Complete admin interface
-- ✅ Multi-level navigation system
-- ✅ Responsive design (desktop/mobile)
-- ✅ Light/dark theme system
-- ✅ Full-browser background images per slide
-- ✅ Full-browser YouTube video embeds per slide
-- ✅ Interactive video display mode toggle (cover/contained)
-
----
-
-## Important Notes
-
-- **50px Padding**: All pages have 50px border for icon layout
-- **Icon Specifications**: 24px size, weight 100, `var(--icon-color)` for theming
-- **Audio Files**: Stored in `/public/media/` directory
-- **Slide Images**: Stored in `/public/media/slides/[row-id]/`
-- **Background Images**: Set via `image_url` field in slides table, covers entire browser with `background-size: cover`
-- **YouTube Videos**: Set via `video_url` field in slides table, supports multiple URL formats (youtube.com, youtu.be, video ID)
-- **Video Display Modes**: Toggle between 'cover' (full-screen) and 'contained' (60px padding) via videocam icon in right sidebar
-- **Media Layering**: Background image (z-0) → YouTube video (z-10) → Content (z-20) → Icon borders (z-30)
-- **Transparent Containers**: Main/swiper containers use `transparent` backgrounds to allow background images/videos to show through
-- **No ORM**: Direct PostgreSQL queries for performance
-- **SSR Considerations**: Some components need client-side rendering (`'use client'`)
-
----
-
-## Quick Reference URLs
-
-- **Frontend**: http://localhost:3000/
-- **Admin Dashboard**: http://localhost:3000/admin
-- **Slide Management**: http://localhost:3000/admin/slides
-- **Database Health**: http://localhost:3000/api/test-db
-
----
-
-## Documentation Files
-
-- **PHASE_5_COMPLETION_SUMMARY.md**: 650+ line detailed implementation guide
-- **SLIDE_ROW_MANAGEMENT_SPEC.md**: Original 6-phase development plan
-- **ERROR.md**: Current errors/issues to address
-
----
-
----
-
-## Recent Updates
-
-### October 15, 2025 - Admin Dashboard Navigation & Edit Row Fix
-**Feature**: Fixed missing "Edit Row" page and added dashboard icon navigation
-**Implementation**: Created missing edit page and updated admin header navigation
-
-**Part 1 - Edit Row Page (Bug Fix)**
-- **Issue**: "Edit Row" button led to 404 at `/admin/slides/[id]/edit`
-- **Solution**: Created missing page file at `src/app/admin/slides/[id]/edit/page.tsx`
-- Fetches existing slide row data via `GET /api/slides/rows/[id]`
-- Displays `SlideRowForm` component with `initialData` and `isEdit={true}`
-- Updates row via `PATCH /api/slides/rows/[id]` when submitted
-- Redirects to `/admin/slides` after successful update
-- Handles loading and error states gracefully
-
-**Part 2 - Dashboard Icon Navigation**
-- Updated `AdminTopIconBar.tsx` to wrap dashboard icon with Link to `/admin`
-- Follows same pattern as description and exit icons
-- Provides quick navigation back to admin dashboard from all admin pages
-
-**Files Modified/Created**: 2 files (~192 lines total)
-- `src/app/admin/slides/[id]/edit/page.tsx` - New file (189 lines)
-- `src/components/admin/AdminTopIconBar.tsx` - Modified (3 lines)
-
-**Impact**:
-- Admin users can now edit slide row metadata (title, description, type, icons, etc.)
-- Quick navigation to admin dashboard from all admin pages via dashboard icon
-- Completes the CRUD functionality for slide row management
-
-### October 15, 2025 - Admin Navigation Enhancement
-**Feature**: Description icon in admin header now links to slide management
-**Implementation**: Minimal navigation update for better UX
-- Updated `AdminTopIconBar.tsx` to wrap description icon with Next.js Link component
-- Link points to `/admin/slides` for quick access to slide management interface
-- Follows existing pattern used by exit_to_app icon
-
-**Files Modified**: 1 file (3 lines)
-- `src/components/admin/AdminTopIconBar.tsx` - Added Link wrapper to description icon
-
-**Impact**: Improves admin workflow by providing direct navigation from dashboard to slide management
-
-### October 15, 2025 - YouTube Video Display Mode Toggle
-**Feature**: Interactive toggle between 'cover' and 'contained' video display modes
-**Implementation**: Added conditional videocam icon with click-to-toggle functionality
-- Updated `YouTubeEmbed.tsx` to accept `displayMode` prop ('cover' | 'contained')
-- Added contained mode CSS classes to `globals.css`:
-  - `.youtube-contained`: 60px padding for icon borders, flexbox centering
-  - `.youtube-iframe-contained`: Responsive 16:9 aspect ratio, fits within viewport
-- Updated `RightIconBar.tsx` to conditionally show videocam icon:
-  - Only visible when slide has `video_url` present
-  - Clickable with hover cursor
-  - Dynamic tooltip based on current mode
-  - Accepts `hasVideo`, `onVideoToggle`, `videoMode` props
-- State management already existed in `page.tsx` (no new state needed)
-
-**Files Modified**: 3 files (~60 lines total)
-- `src/components/YouTubeEmbed.tsx` - Display mode prop support
-- `src/app/globals.css` - Contained mode styling (lines 451-486)
-- `src/components/RightIconBar.tsx` - Conditional icon rendering
-
-**User Experience**:
-- **No Video**: Videocam icon hidden
-- **Video Present**: Videocam icon appears in right sidebar
-- **Cover Mode** (default): Video fills entire browser like `background-size: cover`
-- **Contained Mode**: Video fits within viewport with 60px padding, maintains 16:9 aspect ratio
-- **Toggle**: Click videocam icon to switch modes instantly
-
-**Impact**: Users can now choose between cinematic full-screen (cover) or contained video viewing while maintaining icon border visibility
-
-### October 15, 2025 - YouTube Video Integration (with Cover Behavior)
-**Feature**: Full-browser YouTube video embeds for slides with background cover behavior
-**Implementation**: Added `video_url` field to slides table with complete frontend/admin support
-- Added `video_url VARCHAR` column to `slides` table via migration script
-- Created `YouTubeEmbed.tsx` component with URL parsing for multiple YouTube formats
-- Updated admin `SlideEditor.tsx` with YouTube URL input field
-- Integrated video layer in `page.tsx` with proper z-index layering
-- Updated `MainContent.tsx` to propagate video URLs on slide changes
-- Added YouTube iframe CSS styling to `globals.css` with responsive cover behavior
-- Videos layer between background images and content (z-index: 10)
-- **Cover Styling**: Videos behave like `background-size: cover`, filling entire viewport while maintaining aspect ratio
-- Responsive media queries ensure proper coverage on all screen sizes (16:9 aspect ratio handling)
-- Center-positioned with `transform: translate(-50%, -50%)` for optimal display
-- Smooth transitions between videos on slide navigation
-- Supports: `youtube.com/watch?v=`, `youtu.be/`, and raw video IDs
-
-**Files Modified**: 9 files modified, 2 files created (~220 lines total)
-**Migration**: `npx tsx scripts/add-video-url-column.ts` (successfully executed)
-**CSS Enhancement**: Updated `.youtube-embed-iframe` with absolute positioning, min-width/height constraints, and responsive aspect ratio media queries
-**Impact**: Slides can now have full-browser YouTube videos that cover the entire background, independent of background images, with proper cropping like CSS `background-size: cover`
-
-### October 15, 2025 - Background Image Fix
-**Issue**: Background images not displaying on frontend despite being set in admin
-**Solution**: Fixed CSS transparency layer issue
-- Changed `globals.css` main containers from opaque `var(--content-bg)` to `transparent`
-- Added fallback background color in `page.tsx` for slides without images
-- Background images now properly cover entire browser window
-- Smooth 500ms transition between slide backgrounds
-- Theme system preserved (text/icon colors still respect light/dark mode)
-
-**Impact**: Slides with `image_url` now display full-browser backgrounds as intended
-
-### October 15, 2025 - Railway Deployment Fix (TypeScript Error)
-**Issue**: Railway production deployment failed during build phase
-**Error**: `@typescript-eslint/no-explicit-any` violation in edit page
-**Root Cause**: `initialData` state typed as `any` in `src/app/admin/slides/[id]/edit/page.tsx:22`
-
-**Solution**: Replaced `any` with explicit interface definition
-```typescript
-// Before
-const [initialData, setInitialData] = useState<any>(null);
-
-// After
-const [initialData, setInitialData] = useState<{
-  id?: string;
-  title: string;
-  description: string;
-  row_type: string;
-  icon_set: string[];
-  theme_color: string;
-  display_order: number;
-  is_published: boolean;
-} | null>(null);
-```
-
-**Deployment Context**:
-- Platform: Railway (Nixpacks v1.38.0, Node.js 18, npm 9.x)
-- Build Process: `npm ci` → `npm run build` → `npm run start`
-- Error occurred during Next.js type checking phase
-- Region: us-west1
-
-**Files Modified**: 1 file (9 lines added, 1 line removed)
-- `src/app/admin/slides/[id]/edit/page.tsx:22-31` - Type definition
-
-**Impact**:
-- Deployment now passes TypeScript linting requirements
-- Code quality improved with explicit type safety
-- Prevents potential runtime type errors
-
-**Commit**: `aebfe29` - Pushed to `origin/master`
-
-### October 15, 2025 - Create Slide Fix (Position Constraint Violation)
-**Issue**: Creating new slides failed with 500 error and "Failed to create slide" message
-**Error**: PostgreSQL UNIQUE constraint violation on `(slide_row_id, position)`
-**Root Cause Analysis**:
-- Database has `UNIQUE(slide_row_id, position)` constraint (init-slide-tables.ts:56)
-- SlideEditor always sent position (default: 1) for new slides
-- API's auto-calculation logic (lines 98-103) never ran because position was always provided
-- When a slide already existed at position 1, PostgreSQL threw constraint violation
-- Generic error message didn't expose actual database error to client
-
-**Solution**: Two-part fix for position handling and error messaging
-
-**Part 1 - Remove Position from New Slide Submissions**
-Modified `SlideEditor.tsx` (lines 82-93):
-```typescript
-// Before
-const slideData: Partial<Slide> = {
-  // ... other fields
-  position: isNewSlide ? position : slide?.position,
-};
-
-// After
-const slideData: Partial<Slide> = {
-  // ... other fields
-  // For new slides, don't send position - let server auto-calculate
-  // For existing slides, keep the current position
-  ...(isNewSlide ? {} : { position: slide?.position }),
-};
-```
-
-**Part 2 - Improved Error Handling**
-Enhanced API route error handling (route.ts:124-149):
-- Added specific check for PostgreSQL unique constraint violations
-- Returns 409 Conflict status with clear message for duplicate position errors
-- Preserves generic 500 error for other failures
-- Better logging for debugging
-
-**Files Modified**: 2 files (~25 lines changed)
-- `src/components/admin/slides/SlideEditor.tsx:82-93` - Position logic
-- `src/app/api/slides/rows/[id]/slides/route.ts:124-149` - Error handling
-
-**Technical Details**:
-- Position field still displayed in UI for user reference (non-functional for new slides)
-- Server auto-calculates position as `existingSlides.length + 1`
-- Editing existing slides preserves their current position
-- TypeScript compilation passes without errors
-
-**Impact**:
-- New slide creation now works reliably without position conflicts
-- Clear error messages when unexpected database constraints are violated
-- Admin users no longer see cryptic 500 errors
-- Follows best practice of server-side auto-assignment for sequential fields
-
-**Commit**: `d910830` - Pushed to `origin/master`
-
-### October 15, 2025 - Pre-Deployment Validation (Railway Ready)
-**Status**: ✅ All validation checks passed - Ready for Railway deployment
-
-**Validation Results:**
-
-**1. Database Integrity Check**
-- Command: `npx tsx scripts/verify-slides.ts`
-- Status: ✅ PASSED
-- Database Connection: Successful
-- Slide Rows: 2 (Legacy Content, Morning Meditation Routine)
-- Total Slides: 8 slides with proper position sequencing
-- Schema Integrity: All tables, triggers, and relationships validated
-- Data Summary:
-  - Legacy Content (CUSTOM): 5 slides, positions 1-5, published
-  - Morning Meditation Routine (ROUTINE): 3 slides, positions 1-3, published
-
-**2. TypeScript Compilation**
-- Command: `npx tsc --noEmit`
-- Status: ✅ PASSED
-- Result: No TypeScript errors
-- All type checking passed successfully
-- Recent fixes (any type, position logic) compile correctly
-
-**3. ESLint Code Quality**
-- Command: `npm run lint`
-- Status: ✅ PASSED (0 errors, 26 warnings)
-- All warnings are non-blocking:
-  - Unused variables (selectedIcons, setSelectedIcons, showPreview, etc.)
-  - React hook exhaustive-deps warnings
-  - Font loading warnings (Next.js recommendations)
-  - Third-party library warnings (Essential Audio Player)
-- No new issues introduced by recent changes
-- Same warnings present in production build logs (non-critical)
-
-**Deployment Readiness:**
-- ✅ Code pushed to `origin/master` (commits: `aebfe29`, `d910830`)
-- ✅ TypeScript errors resolved (any type fix)
-- ✅ Create slide functionality fixed (position constraint)
-- ✅ Database schema validated
-- ✅ All API endpoints functional
-- ✅ No blocking compilation errors
-
-**Railway Deployment Pipeline:**
-1. Git push triggers automatic deployment
-2. Nixpacks v1.38.0 detects Node.js 18 project
-3. Build process: `npm ci` → `npm run build` → `npm run start`
-4. Railway executes `railway-init.ts` script on startup
-5. Production database initialized (if needed)
-
-**Monitoring Points:**
-- Railway build logs for successful compilation
-- Test create slide at: `https://app.lilde.com/admin/slides/{rowId}/slide/new`
-- Verify slide position auto-assignment
-- Check database health: `https://app.lilde.com/api/test-db`
-
-**Known Non-Critical Warnings:**
-- 26 ESLint warnings (unused vars, React hooks) - will not block deployment
-- Font loading warnings - cosmetic, app functional
-- Tiptap duplicate extension warning - library issue, non-blocking
-
----
-
-**Last Updated**: Pre-Deployment Validation - October 15, 2025
-**Total Lines**: 607
+**Lines**: ~480 | **Status**: Production Ready | **Railway**: Deployment Safe

@@ -100,6 +100,41 @@ export async function PATCH(
       }
     }
 
+    // Validate content_theme if provided
+    if (body.content_theme) {
+      const validThemes = ['light', 'dark'];
+      if (!validThemes.includes(body.content_theme)) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: `Invalid content_theme. Must be one of: ${validThemes.join(', ')}`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate opacity values if provided
+    if (body.title_bg_opacity !== undefined && (body.title_bg_opacity < 0 || body.title_bg_opacity > 1)) {
+      return NextResponse.json(
+        {
+          status: 'error',
+          message: 'Invalid title_bg_opacity. Must be between 0 and 1',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (body.body_bg_opacity !== undefined && (body.body_bg_opacity < 0 || body.body_bg_opacity > 1)) {
+      return NextResponse.json(
+        {
+          status: 'error',
+          message: 'Invalid body_bg_opacity. Must be between 0 and 1',
+        },
+        { status: 400 }
+      );
+    }
+
     // Remove fields that shouldn't be updated directly
     const { id, slide_row_id, created_at, view_count, completion_count, ...updateData } = body;
 

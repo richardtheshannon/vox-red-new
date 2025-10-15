@@ -141,6 +141,37 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
 
+    // Determine text color based on slide-specific theme or default to black
+    const getTextColor = () => {
+      if (slide.content_theme === 'light') {
+        return '#ffffff'; // White text for light theme
+      } else if (slide.content_theme === 'dark') {
+        return '#000000'; // Black text for dark theme
+      }
+      return undefined; // Use default (var(--text-color) or existing classes)
+    };
+
+    const textColor = getTextColor();
+
+    // Helper to create semi-transparent background style
+    const createBgStyle = (opacity: number | undefined) => {
+      if (!opacity || opacity === 0) return {};
+
+      // Use slide theme to determine background color, or fallback to black with opacity
+      const bgColor = slide.content_theme === 'light'
+        ? `rgba(0, 0, 0, ${opacity})` // Dark background for light text
+        : `rgba(255, 255, 255, ${opacity})`; // Light background for dark text
+
+      return {
+        backgroundColor: bgColor,
+        padding: '12px 16px',
+        borderRadius: '8px',
+        display: 'inline-block',
+        width: 'fit-content',
+        maxWidth: '100%'
+      };
+    };
+
     return (
       <div className={containerClass}>
         {/* Icons */}
@@ -154,7 +185,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                   fontSize: '24px',
                   fontWeight: '100',
                   fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24",
-                  color: 'var(--icon-color)'
+                  color: textColor || 'var(--icon-color)'
                 }}
               >
                 {icon}
@@ -164,11 +195,31 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         )}
 
         {/* Title */}
-        <h1 className="text-4xl font-bold mb-4 text-black">{slide.title}</h1>
+        <div style={createBgStyle(slide.title_bg_opacity)}>
+          <h1
+            className="text-4xl font-bold mb-4"
+            style={{
+              color: textColor || '#000000',
+              marginBottom: slide.title_bg_opacity ? '0' : undefined
+            }}
+          >
+            {slide.title}
+          </h1>
+        </div>
 
         {/* Subtitle (if exists) */}
         {slide.subtitle && (
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700">{slide.subtitle}</h2>
+          <div style={createBgStyle(slide.title_bg_opacity)} className="mt-4">
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{
+                color: textColor || '#4b5563',
+                marginBottom: slide.title_bg_opacity ? '0' : undefined
+              }}
+            >
+              {slide.subtitle}
+            </h2>
+          </div>
         )}
 
         {/* Audio Player (if audio_url exists) */}
@@ -181,10 +232,13 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         )}
 
         {/* Body Content */}
-        <div
-          className="text-black space-y-4"
-          dangerouslySetInnerHTML={{ __html: slide.body_content }}
-        />
+        <div style={createBgStyle(slide.body_bg_opacity)}>
+          <div
+            className="space-y-4"
+            style={{ color: textColor || '#000000' }}
+            dangerouslySetInnerHTML={{ __html: slide.body_content }}
+          />
+        </div>
       </div>
     );
   };
@@ -212,11 +266,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         onSwiper={(swiper) => {
           // Register this horizontal swiper in context
           setHorizontalSwiper(row.id, swiper);
-          // Set initial image URL and video URL for first slide
-          if (slides.length > 0) {
-            setActiveSlideImageUrl(slides[0].image_url || null);
-            setActiveSlideVideoUrl(slides[0].video_url || null);
-          }
+          // Note: Don't set image/video URL here - let the useEffect handle initial state
+          // This prevents race conditions with multiple swipers initializing
         }}
         onSlideChange={(swiper) => {
           // Update the scroll container when horizontal slide changes

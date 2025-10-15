@@ -7,6 +7,7 @@ import { initializeDatabase } from './init-db'
 import { seedData } from './seed-db'
 import { initializeSlideTables } from './init-slide-tables'
 import { seedSlideData } from './seed-slide-data'
+import { addSlideThemeSettings } from './add-slide-theme-settings'
 
 async function railwayInit() {
   try {
@@ -35,6 +36,20 @@ async function railwayInit() {
       } else {
         console.error('❌ Slide table initialization failed:', error)
         throw error
+      }
+    }
+
+    // Add slide theme settings columns (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addSlideThemeSettings()
+      console.log('✅ Slide theme settings columns added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide theme settings already exist, skipping')
+      } else {
+        console.error('❌ Slide theme settings migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without theme settings columns')
       }
     }
 

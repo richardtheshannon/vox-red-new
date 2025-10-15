@@ -110,14 +110,15 @@ export default function Home() {
           getHorizontalSwiper={getHorizontalSwiper}
           activeRowId={activeRowId}
         >
-          <TopIconBar />
-          <LeftIconBar />
+          <TopIconBar hasBackgroundImage={!!activeSlideImageUrl} />
+          <LeftIconBar hasBackgroundImage={!!activeSlideImageUrl} />
           <RightIconBar
             hasVideo={!!activeSlideVideoUrl}
             onVideoToggle={toggleVideoMode}
             videoMode={videoDisplayMode}
+            hasBackgroundImage={!!activeSlideImageUrl}
           />
-          <BottomIconBar />
+          <BottomIconBar hasBackgroundImage={!!activeSlideImageUrl} />
           <MainContentWithRef
             setSwiperRef={setVerticalSwiperRef}
             handleSlideChange={handleSlideChange}

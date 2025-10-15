@@ -10,7 +10,7 @@ Ask me any questions you have, strictly one question at a time before we get sta
 
 Update CLAUDE.md in the _TEMP directory, with any relevant application update overviews.
 
-Deployment failed. Please read ERROR.md in the _TEMP directory. 
+Deployment failed. Please read ERROR.md in the _TEMP directory.
 
 ### Revise and update CLAUDE.md in the _TEMP directory to only contain essential application information for continued development. This should be a concise, specific, outline of the application. Lets keep it under 500 lines. 
 

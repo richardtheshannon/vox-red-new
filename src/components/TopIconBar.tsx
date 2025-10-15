@@ -1,11 +1,15 @@
 import Link from 'next/link';
 import { useTheme } from '../contexts/ThemeContext';
 
-export default function TopIconBar() {
+interface TopIconBarProps {
+  hasBackgroundImage?: boolean;
+}
+
+export default function TopIconBar({ hasBackgroundImage = false }: TopIconBarProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-20" style={{padding: '0.2rem'}}>
+    <header className={`icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-20 ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem'}}>
       <div className="flex items-center">
         <Link href="https://app.lilde.com">
           <span className="material-symbols-outlined cursor-pointer hover:opacity-70" title="Home">home</span>

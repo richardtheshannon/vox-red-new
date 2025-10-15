@@ -32,6 +32,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   const [videoUrl, setVideoUrl] = useState(slide?.video_url || '');
   const [layoutType, setLayoutType] = useState<'STANDARD' | 'OVERFLOW' | 'MINIMAL'>(slide?.layout_type || 'STANDARD');
   const [position, setPosition] = useState(slide?.position || 1);
+  const [contentTheme, setContentTheme] = useState<'light' | 'dark' | ''>(slide?.content_theme || '');
+  const [titleBgOpacity, setTitleBgOpacity] = useState<number>(slide?.title_bg_opacity ?? 0);
+  const [bodyBgOpacity, setBodyBgOpacity] = useState<number>(slide?.body_bg_opacity ?? 0);
   const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -87,6 +90,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         image_url: imageUrl || undefined,
         video_url: videoUrl || undefined,
         layout_type: layoutType,
+        content_theme: contentTheme || undefined,
+        title_bg_opacity: titleBgOpacity > 0 ? titleBgOpacity : undefined,
+        body_bg_opacity: bodyBgOpacity > 0 ? bodyBgOpacity : undefined,
         // For new slides, don't send position - let server auto-calculate
         // For existing slides, keep the current position
         ...(isNewSlide ? {} : { position: slide?.position }),
@@ -116,6 +122,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       video_url: videoUrl || undefined,
       position,
       layout_type: layoutType,
+      content_theme: contentTheme || undefined,
+      title_bg_opacity: titleBgOpacity > 0 ? titleBgOpacity : undefined,
+      body_bg_opacity: bodyBgOpacity > 0 ? bodyBgOpacity : undefined,
       view_count: slide?.view_count || 0,
       completion_count: slide?.completion_count || 0,
       created_at: slide?.created_at || new Date(),
@@ -369,6 +378,77 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   border: '1px solid var(--border-color)'
                 }}
               />
+            </div>
+
+            {/* Slide Theme Settings */}
+            <div className="mt-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <h3 className="text-md font-semibold mb-3" style={{ color: 'var(--text-color)' }}>
+                Slide Display Settings
+              </h3>
+
+              {/* Content Theme */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
+                  Content Theme (Optional)
+                </label>
+                <select
+                  value={contentTheme}
+                  onChange={(e) => setContentTheme(e.target.value as 'light' | 'dark' | '')}
+                  className="w-full px-4 py-2 rounded"
+                  style={{
+                    backgroundColor: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  <option value="">Use Global Theme</option>
+                  <option value="light">Light (Force light text/icons)</option>
+                  <option value="dark">Dark (Force dark text/icons)</option>
+                </select>
+                <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  Override global theme for this slide (useful with background images)
+                </p>
+              </div>
+
+              {/* Title Background Opacity */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
+                  Title Background Opacity: {titleBgOpacity.toFixed(2)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={titleBgOpacity}
+                  onChange={(e) => setTitleBgOpacity(parseFloat(e.target.value))}
+                  className="w-full"
+                  style={{ accentColor: '#dc2626' }}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  0 = transparent, 1 = fully opaque. Adds semi-transparent background behind title text.
+                </p>
+              </div>
+
+              {/* Body Background Opacity */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
+                  Body Background Opacity: {bodyBgOpacity.toFixed(2)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={bodyBgOpacity}
+                  onChange={(e) => setBodyBgOpacity(parseFloat(e.target.value))}
+                  className="w-full"
+                  style={{ accentColor: '#dc2626' }}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  0 = transparent, 1 = fully opaque. Adds semi-transparent background behind body text.
+                </p>
+              </div>
             </div>
 
             {/* YouTube Video URL */}

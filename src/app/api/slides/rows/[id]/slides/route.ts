@@ -47,7 +47,7 @@ export async function GET(
 
 /**
  * POST /api/slides/rows/[id]/slides
- * Body: { title, subtitle, body_content, audio_url, image_url, position, layout_type }
+ * Body: { title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity }
  * Creates a new slide in the specified row
  */
 export async function POST(
@@ -95,6 +95,41 @@ export async function POST(
       }
     }
 
+    // Validate content_theme if provided
+    if (body.content_theme) {
+      const validThemes = ['light', 'dark'];
+      if (!validThemes.includes(body.content_theme)) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: `Invalid content_theme. Must be one of: ${validThemes.join(', ')}`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate opacity values if provided
+    if (body.title_bg_opacity !== undefined && (body.title_bg_opacity < 0 || body.title_bg_opacity > 1)) {
+      return NextResponse.json(
+        {
+          status: 'error',
+          message: 'Invalid title_bg_opacity. Must be between 0 and 1',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (body.body_bg_opacity !== undefined && (body.body_bg_opacity < 0 || body.body_bg_opacity > 1)) {
+      return NextResponse.json(
+        {
+          status: 'error',
+          message: 'Invalid body_bg_opacity. Must be between 0 and 1',
+        },
+        { status: 400 }
+      );
+    }
+
     // If position not provided, get the next available position
     let position = body.position;
     if (!position) {
@@ -109,8 +144,12 @@ export async function POST(
       body_content: body.body_content,
       audio_url: body.audio_url,
       image_url: body.image_url,
+      video_url: body.video_url,
       position,
       layout_type: body.layout_type || 'STANDARD',
+      content_theme: body.content_theme,
+      title_bg_opacity: body.title_bg_opacity,
+      body_bg_opacity: body.body_bg_opacity,
     });
 
     return NextResponse.json(

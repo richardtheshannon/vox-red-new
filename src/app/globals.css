@@ -206,6 +206,11 @@ aside.icon-container.right-0 {
   background: var(--right-sidebar-bg);
 }
 
+/* Remove gradients when background image is present */
+.no-gradient {
+  background: transparent !important;
+}
+
 /* Font family utility classes */
 h1, h2, h3, h4, h5, h6, .font-title {
   font-family: var(--font-title);

@@ -2,11 +2,12 @@ interface RightIconBarProps {
   hasVideo?: boolean;
   onVideoToggle?: () => void;
   videoMode?: 'cover' | 'contained';
+  hasBackgroundImage?: boolean;
 }
 
-export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover' }: RightIconBarProps) {
+export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false }: RightIconBarProps) {
   return (
-    <aside className="icon-container fixed right-0 flex flex-col justify-between items-center z-10" style={{padding: '0.2rem', top: '0', bottom: '0', paddingTop: '50px', paddingBottom: '50px'}}>
+    <aside className={`icon-container fixed right-0 flex flex-col justify-between items-center z-10 ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem', top: '0', bottom: '0', paddingTop: '50px', paddingBottom: '50px'}}>
       <div className="flex flex-col items-center">
         <span className="material-symbols-outlined" title="Group">group</span>
         <span className="material-symbols-outlined" title="ATR">atr</span>
