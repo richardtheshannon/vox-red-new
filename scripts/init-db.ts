@@ -8,8 +8,14 @@ config()
 import { Pool } from 'pg'
 import { pool, closeDatabase } from '../src/lib/db'
 
-// Create database if it doesn't exist
+// Create database if it doesn't exist (only for local development)
 async function createDatabaseIfNotExists() {
+  // Skip database creation on Railway/production - database already exists
+  if (process.env.DATABASE_URL) {
+    console.log('ℹ️ Using DATABASE_URL - skipping database creation')
+    return
+  }
+
   const adminConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
