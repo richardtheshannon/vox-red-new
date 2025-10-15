@@ -43,7 +43,7 @@ export interface UpdateSlideData {
   body_content?: string
   audio_url?: string
   image_url?: string
-  video_url?: string
+  video_url?: string | null
   position?: number
   layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
   content_theme?: 'light' | 'dark'

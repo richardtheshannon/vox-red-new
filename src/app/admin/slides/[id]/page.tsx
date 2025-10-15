@@ -87,6 +87,8 @@ export default function ManageSlidesPage() {
     try {
       const slideIds = reorderedSlides.map(s => s.id);
 
+      console.log('Reordering slides:', slideIds);
+
       const response = await fetch(`/api/slides/rows/${rowId}/slides/reorder`, {
         method: 'POST',
         headers: {
@@ -95,14 +97,20 @@ export default function ManageSlidesPage() {
         body: JSON.stringify({ slide_ids: slideIds }),
       });
 
+      const data = await response.json();
+      console.log('Reorder response:', data);
+
       if (!response.ok) {
-        throw new Error('Failed to reorder slides');
+        throw new Error(data.message || 'Failed to reorder slides');
       }
 
-      await fetchRowData();
+      // Update local state immediately without refetch for better UX
+      setSlides(reorderedSlides);
     } catch (err) {
       console.error('Error reordering slides:', err);
       alert('Failed to reorder slides. Please try again.');
+      // Refetch on error to restore correct order
+      await fetchRowData();
     }
   };
 

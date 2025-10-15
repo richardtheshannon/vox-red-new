@@ -1,24 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { Slide } from '@/lib/queries/slides';
 
 interface SlideRow {
@@ -40,23 +23,24 @@ interface SlideManagerProps {
   onRefresh: () => void;
 }
 
-function SortableSlideItem({ slide, rowId, onDelete }: { slide: Slide; rowId: string; onDelete: (id: string) => void }) {
+function SlideItem({
+  slide,
+  rowId,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast
+}: {
+  slide: Slide;
+  rowId: string;
+  onDelete: (id: string) => void;
+  onMoveUp: (id: string) => void;
+  onMoveDown: (id: string) => void;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: slide.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
 
   const getBodyPreview = (bodyContent: string) => {
     // Strip HTML tags and get first 100 characters
@@ -66,24 +50,60 @@ function SortableSlideItem({ slide, rowId, onDelete }: { slide: Slide; rowId: st
 
   return (
     <>
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="p-6 rounded mb-4"
-        {...attributes}
-        {...listeners}
-      >
+      <div className="mb-4">
         <div
           style={{
             backgroundColor: 'var(--card-bg)',
             border: '1px solid var(--border-color)',
             padding: '1.5rem',
             borderRadius: '0.5rem',
-            cursor: isDragging ? 'grabbing' : 'grab',
           }}
         >
-          {/* Position Badge */}
+          {/* Position Badge and Reorder Controls */}
           <div className="flex items-start gap-4">
+            {/* Reorder Buttons */}
+            <div className="flex-shrink-0 flex flex-col gap-1">
+              <button
+                onClick={() => onMoveUp(slide.id)}
+                disabled={isFirst}
+                className="transition-opacity hover:opacity-80 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Move up"
+              >
+                <span className="material-symbols-rounded" style={{ fontSize: '20px', color: 'var(--icon-color)' }}>
+                  expand_less
+                </span>
+              </button>
+              <button
+                onClick={() => onMoveDown(slide.id)}
+                disabled={isLast}
+                className="transition-opacity hover:opacity-80 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Move down"
+              >
+                <span className="material-symbols-rounded" style={{ fontSize: '20px', color: 'var(--icon-color)' }}>
+                  expand_more
+                </span>
+              </button>
+            </div>
+
+            {/* Position Badge */}
             <div
               className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold"
               style={{
@@ -217,41 +237,48 @@ export default function SlideManager({
 }: SlideManagerProps) {
   const [localSlides, setLocalSlides] = useState<Slide[]>(slides);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  // Update local slides when prop changes (e.g., after a delete or external update)
+  useEffect(() => {
+    setLocalSlides(slides);
+  }, [slides]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  // Move slide up (decrease position number)
+  const handleMoveUp = (slideId: string) => {
+    const currentIndex = localSlides.findIndex(s => s.id === slideId);
+    if (currentIndex <= 0) return; // Already at top
 
-    if (over && active.id !== over.id) {
-      setLocalSlides((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+    const newSlides = [...localSlides];
+    // Swap with previous item
+    [newSlides[currentIndex - 1], newSlides[currentIndex]] = [newSlides[currentIndex], newSlides[currentIndex - 1]];
 
-        const reordered = arrayMove(items, oldIndex, newIndex);
+    // Update positions
+    const updatedSlides = newSlides.map((slide, index) => ({
+      ...slide,
+      position: index + 1,
+    }));
 
-        // Update positions
-        const updatedSlides = reordered.map((slide, index) => ({
-          ...slide,
-          position: index + 1,
-        }));
-
-        // Call API to save new order
-        onReorderSlides(updatedSlides);
-
-        return updatedSlides;
-      });
-    }
+    setLocalSlides(updatedSlides);
+    onReorderSlides(updatedSlides);
   };
 
-  // Update local state when slides prop changes
-  useState(() => {
-    setLocalSlides(slides);
-  });
+  // Move slide down (increase position number)
+  const handleMoveDown = (slideId: string) => {
+    const currentIndex = localSlides.findIndex(s => s.id === slideId);
+    if (currentIndex >= localSlides.length - 1) return; // Already at bottom
+
+    const newSlides = [...localSlides];
+    // Swap with next item
+    [newSlides[currentIndex], newSlides[currentIndex + 1]] = [newSlides[currentIndex + 1], newSlides[currentIndex]];
+
+    // Update positions
+    const updatedSlides = newSlides.map((slide, index) => ({
+      ...slide,
+      position: index + 1,
+    }));
+
+    setLocalSlides(updatedSlides);
+    onReorderSlides(updatedSlides);
+  };
 
   return (
     <div className="space-y-6">
@@ -262,7 +289,7 @@ export default function SlideManager({
             {row.slide_count} {row.slide_count === 1 ? 'slide' : 'slides'} in this row
           </p>
           <p className="text-sm" style={{ color: 'var(--secondary-text)' }}>
-            Drag and drop slides to reorder them
+            Use chevron buttons to reorder slides
           </p>
         </div>
 
@@ -302,25 +329,20 @@ export default function SlideManager({
           </Link>
         </div>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={localSlides.map(s => s.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {localSlides.map((slide) => (
-              <SortableSlideItem
-                key={slide.id}
-                slide={slide}
-                rowId={row.id}
-                onDelete={onDeleteSlide}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+        <div>
+          {localSlides.map((slide, index) => (
+            <SlideItem
+              key={slide.id}
+              slide={slide}
+              rowId={row.id}
+              onDelete={onDeleteSlide}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+              isFirst={index === 0}
+              isLast={index === localSlides.length - 1}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

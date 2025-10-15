@@ -26,6 +26,34 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
     }
   };
 
+  // Determine text color based on content theme (matches MainContent.tsx logic)
+  const getTextColor = () => {
+    const effectiveTheme = slide.content_theme || 'dark'; // Default to dark in preview
+    return effectiveTheme === 'light' ? '#ffffff' : '#000000';
+  };
+
+  // Create semi-transparent background style (matches MainContent.tsx lines 164-184)
+  const createBgStyle = (opacity: number | undefined) => {
+    const numOpacity = Number(opacity) || 0;
+    if (numOpacity === 0) return {};
+
+    const effectiveTheme = slide.content_theme || 'dark';
+    const bgColor = effectiveTheme === 'light'
+      ? `rgba(0, 0, 0, ${numOpacity})` // Dark background for light text
+      : `rgba(255, 255, 255, ${numOpacity})`; // Light background for dark text
+
+    return {
+      backgroundColor: bgColor,
+      padding: '8px',
+      borderRadius: '4px',
+      display: 'inline-block',
+      width: 'fit-content',
+      maxWidth: '100%'
+    };
+  };
+
+  const textColor = getTextColor();
+
   return (
     <div className="space-y-4">
       {/* Preview Info */}
@@ -65,27 +93,33 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
             }}
           >
             {/* Title */}
-            <h1
-              className="text-3xl font-bold mb-2"
-              style={{
-                fontFamily: 'var(--font-title)',
-                color: 'var(--text-color)'
-              }}
-            >
-              {slide.title || 'Untitled Slide'}
-            </h1>
+            <div style={createBgStyle(slide.title_bg_opacity)} className="mb-2">
+              <h1
+                className="text-3xl font-bold"
+                style={{
+                  fontFamily: 'var(--font-title)',
+                  color: textColor,
+                  margin: 0
+                }}
+              >
+                {slide.title || 'Untitled Slide'}
+              </h1>
+            </div>
 
             {/* Subtitle */}
             {slide.subtitle && (
-              <p
-                className="text-lg mb-4"
-                style={{
-                  fontFamily: 'var(--font-title)',
-                  color: 'var(--secondary-text)'
-                }}
-              >
-                {slide.subtitle}
-              </p>
+              <div style={createBgStyle(slide.title_bg_opacity)} className="mb-4">
+                <p
+                  className="text-lg"
+                  style={{
+                    fontFamily: 'var(--font-title)',
+                    color: textColor,
+                    margin: 0
+                  }}
+                >
+                  {slide.subtitle}
+                </p>
+              </div>
             )}
 
             {/* Audio Player Placeholder */}
@@ -117,14 +151,16 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
 
             {/* Body Content */}
             {slide.layout_type !== 'MINIMAL' && (
-              <div
-                className="prose prose-sm max-w-none"
-                style={{
-                  fontFamily: 'var(--font-paragraph)',
-                  color: 'var(--text-color)'
-                }}
-                dangerouslySetInnerHTML={{ __html: slide.body_content || '<p>No content yet...</p>' }}
-              />
+              <div style={createBgStyle(slide.body_bg_opacity)}>
+                <div
+                  className="prose prose-sm max-w-none"
+                  style={{
+                    fontFamily: 'var(--font-paragraph)',
+                    color: textColor
+                  }}
+                  dangerouslySetInnerHTML={{ __html: slide.body_content || '<p>No content yet...</p>' }}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -156,27 +192,33 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
               }}
             >
               {/* Title */}
-              <h1
-                className="text-2xl font-bold mb-2"
-                style={{
-                  fontFamily: 'var(--font-title)',
-                  color: 'var(--text-color)'
-                }}
-              >
-                {slide.title || 'Untitled Slide'}
-              </h1>
+              <div style={createBgStyle(slide.title_bg_opacity)} className="mb-2">
+                <h1
+                  className="text-2xl font-bold"
+                  style={{
+                    fontFamily: 'var(--font-title)',
+                    color: textColor,
+                    margin: 0
+                  }}
+                >
+                  {slide.title || 'Untitled Slide'}
+                </h1>
+              </div>
 
               {/* Subtitle */}
               {slide.subtitle && (
-                <p
-                  className="text-sm mb-3"
-                  style={{
-                    fontFamily: 'var(--font-title)',
-                    color: 'var(--secondary-text)'
-                  }}
-                >
-                  {slide.subtitle}
-                </p>
+                <div style={createBgStyle(slide.title_bg_opacity)} className="mb-3">
+                  <p
+                    className="text-sm"
+                    style={{
+                      fontFamily: 'var(--font-title)',
+                      color: textColor,
+                      margin: 0
+                    }}
+                  >
+                    {slide.subtitle}
+                  </p>
+                </div>
               )}
 
               {/* Audio Player Placeholder */}
@@ -204,14 +246,16 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
 
               {/* Body Content */}
               {slide.layout_type !== 'MINIMAL' && (
-                <div
-                  className="prose prose-sm max-w-none text-sm"
-                  style={{
-                    fontFamily: 'var(--font-paragraph)',
-                    color: 'var(--text-color)'
-                  }}
-                  dangerouslySetInnerHTML={{ __html: slide.body_content || '<p>No content yet...</p>' }}
-                />
+                <div style={createBgStyle(slide.body_bg_opacity)}>
+                  <div
+                    className="prose prose-sm max-w-none text-sm"
+                    style={{
+                      fontFamily: 'var(--font-paragraph)',
+                      color: textColor
+                    }}
+                    dangerouslySetInnerHTML={{ __html: slide.body_content || '<p>No content yet...</p>' }}
+                  />
+                </div>
               )}
             </div>
           </div>

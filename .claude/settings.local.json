@@ -38,7 +38,8 @@
       "Bash(del nul)",
       "Bash(cmd /c:*)",
       "Bash(set DB_PASSWORD=Superculture1@)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

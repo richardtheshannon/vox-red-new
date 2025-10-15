@@ -6,6 +6,7 @@ import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import EssentialAudioPlayer from './EssentialAudioPlayer';
 import { useSwiperContext } from '@/contexts/SwiperContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Slide } from '@/lib/queries/slides';
 
 interface MainContentProps {
@@ -39,6 +40,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Get swiper context to register horizontal swipers
   const { setHorizontalSwiper } = useSwiperContext();
+
+  // Get global theme
+  const { theme: globalTheme } = useTheme();
 
   // Memoize parsed icon sets to avoid repeated JSON parsing
   const iconSetsCache = useMemo(() => {
@@ -141,31 +145,38 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
 
-    // Determine text color based on slide-specific theme or default to black
+    // Determine text color based on slide-specific theme or global theme
     const getTextColor = () => {
-      if (slide.content_theme === 'light') {
+      // Determine which theme to use: slide override or global theme
+      const effectiveTheme = slide.content_theme || globalTheme;
+
+      if (effectiveTheme === 'light') {
         return '#ffffff'; // White text for light theme
-      } else if (slide.content_theme === 'dark') {
+      } else if (effectiveTheme === 'dark') {
         return '#000000'; // Black text for dark theme
       }
-      return undefined; // Use default (var(--text-color) or existing classes)
+      return undefined; // Fallback
     };
 
     const textColor = getTextColor();
 
     // Helper to create semi-transparent background style
     const createBgStyle = (opacity: number | undefined) => {
-      if (!opacity || opacity === 0) return {};
+      // Convert to number and check if valid
+      const numOpacity = Number(opacity) || 0;
+      if (numOpacity === 0) return {};
 
-      // Use slide theme to determine background color, or fallback to black with opacity
-      const bgColor = slide.content_theme === 'light'
-        ? `rgba(0, 0, 0, ${opacity})` // Dark background for light text
-        : `rgba(255, 255, 255, ${opacity})`; // Light background for dark text
+      // Determine which theme to use: slide override or global theme
+      const effectiveTheme = slide.content_theme || globalTheme;
+
+      // Use effective theme to determine background color
+      const bgColor = effectiveTheme === 'light'
+        ? `rgba(0, 0, 0, ${numOpacity})` // Dark background for light text
+        : `rgba(255, 255, 255, ${numOpacity})`; // Light background for dark text
 
       return {
         backgroundColor: bgColor,
-        padding: '12px 16px',
-        borderRadius: '8px',
+        padding: '5px',
         display: 'inline-block',
         width: 'fit-content',
         maxWidth: '100%'
@@ -295,7 +306,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   // Loading state
   if (loading) {
     return (
-      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px'}}>
+      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px', zIndex: 20, backgroundColor: 'transparent'}}>
         <div className="text-center">
           <p className="text-xl text-black">Loading content...</p>
         </div>
@@ -306,7 +317,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   // Error state
   if (error) {
     return (
-      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px'}}>
+      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px', zIndex: 20, backgroundColor: 'transparent'}}>
         <div className="text-center">
           <p className="text-xl text-red-600">{error}</p>
           <button
@@ -323,7 +334,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   // No content state
   if (slideRows.length === 0) {
     return (
-      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px'}}>
+      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px', zIndex: 20, backgroundColor: 'transparent'}}>
         <div className="text-center">
           <p className="text-xl text-black">No content available</p>
         </div>
@@ -332,9 +343,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   }
 
   return (
-    <main className="absolute inset-0 overflow-hidden" style={{padding: '50px'}}>
+    <main className="absolute inset-0 overflow-hidden" style={{padding: '50px', zIndex: 20, backgroundColor: 'transparent', pointerEvents: 'none'}}>
       {/* Desktop View - Vertical Swiper with nested Horizontal Swipers */}
-      <div className="hidden md:block h-full">
+      <div className="hidden md:block h-full" style={{pointerEvents: 'auto'}}>
         <div className="h-full">
           <Swiper
             direction="vertical"
@@ -390,7 +401,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       </div>
 
       {/* Mobile View - Vertical Swiper with nested Horizontal Swipers */}
-      <div className="md:hidden h-full">
+      <div className="md:hidden h-full" style={{pointerEvents: 'auto'}}>
         <Swiper
           direction="vertical"
           spaceBetween={20}

@@ -6,6 +6,9 @@ Ask me any questions you have, strictly one question at a time before we get sta
 
 # Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze your latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
 
+Delete the nul file in the root directory
+del C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\nul
+
 # git add .&& git commit -m "general quick commit" && git push origin master
 
 Update CLAUDE.md in the _TEMP directory, with any relevant application update overviews.

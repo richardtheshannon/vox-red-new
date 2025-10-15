@@ -33,8 +33,8 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   const [layoutType, setLayoutType] = useState<'STANDARD' | 'OVERFLOW' | 'MINIMAL'>(slide?.layout_type || 'STANDARD');
   const [position, setPosition] = useState(slide?.position || 1);
   const [contentTheme, setContentTheme] = useState<'light' | 'dark' | ''>(slide?.content_theme || '');
-  const [titleBgOpacity, setTitleBgOpacity] = useState<number>(slide?.title_bg_opacity ?? 0);
-  const [bodyBgOpacity, setBodyBgOpacity] = useState<number>(slide?.body_bg_opacity ?? 0);
+  // Unified opacity - use title_bg_opacity as source, apply to both title and body
+  const [textBgOpacity, setTextBgOpacity] = useState<number>(Number(slide?.title_bg_opacity) || 0);
   const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -88,11 +88,12 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         body_content: bodyContent,
         audio_url: audioUrl || undefined,
         image_url: imageUrl || undefined,
-        video_url: videoUrl || undefined,
+        video_url: videoUrl.trim() || undefined,
         layout_type: layoutType,
         content_theme: contentTheme || undefined,
-        title_bg_opacity: titleBgOpacity > 0 ? titleBgOpacity : undefined,
-        body_bg_opacity: bodyBgOpacity > 0 ? bodyBgOpacity : undefined,
+        // Apply unified opacity to both title and body
+        title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
+        body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
         // For new slides, don't send position - let server auto-calculate
         // For existing slides, keep the current position
         ...(isNewSlide ? {} : { position: slide?.position }),
@@ -123,8 +124,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       position,
       layout_type: layoutType,
       content_theme: contentTheme || undefined,
-      title_bg_opacity: titleBgOpacity > 0 ? titleBgOpacity : undefined,
-      body_bg_opacity: bodyBgOpacity > 0 ? bodyBgOpacity : undefined,
+      // Apply unified opacity to both title and body in preview
+      title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
+      body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
       view_count: slide?.view_count || 0,
       completion_count: slide?.completion_count || 0,
       created_at: slide?.created_at || new Date(),
@@ -410,43 +412,23 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 </p>
               </div>
 
-              {/* Title Background Opacity */}
+              {/* Text Background Opacity (applies to both title and body) */}
               <div className="mb-4">
                 <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
-                  Title Background Opacity: {titleBgOpacity.toFixed(2)}
+                  Text Background Opacity: {textBgOpacity.toFixed(2)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.05"
-                  value={titleBgOpacity}
-                  onChange={(e) => setTitleBgOpacity(parseFloat(e.target.value))}
+                  value={textBgOpacity}
+                  onChange={(e) => setTextBgOpacity(parseFloat(e.target.value))}
                   className="w-full"
                   style={{ accentColor: '#dc2626' }}
                 />
                 <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
-                  0 = transparent, 1 = fully opaque. Adds semi-transparent background behind title text.
-                </p>
-              </div>
-
-              {/* Body Background Opacity */}
-              <div className="mb-4">
-                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
-                  Body Background Opacity: {bodyBgOpacity.toFixed(2)}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={bodyBgOpacity}
-                  onChange={(e) => setBodyBgOpacity(parseFloat(e.target.value))}
-                  className="w-full"
-                  style={{ accentColor: '#dc2626' }}
-                />
-                <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
-                  0 = transparent, 1 = fully opaque. Adds semi-transparent background behind body text.
+                  0 = transparent, 1 = fully opaque. Adds semi-transparent background behind title and body content.
                 </p>
               </div>
             </div>
