@@ -162,6 +162,15 @@ export async function deleteSlide(slideId: string): Promise<void> {
 // Reorder slides (update positions atomically)
 export async function reorderSlides(slideIds: string[]): Promise<void> {
   await transaction(async (client: PoolClient) => {
+    // Step 1: Set all slides to temporary negative positions to avoid unique constraint violations
+    for (let i = 0; i < slideIds.length; i++) {
+      await client.query(
+        'UPDATE slides SET position = $1 WHERE id = $2',
+        [-(i + 1), slideIds[i]]
+      )
+    }
+
+    // Step 2: Update to final positive positions
     for (let i = 0; i < slideIds.length; i++) {
       await client.query(
         'UPDATE slides SET position = $1 WHERE id = $2',

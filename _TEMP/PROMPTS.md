@@ -1,13 +1,16 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
+
+The linear gradient background in the icon-containers, lets remove them, all of them. 
+
+-----------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
 Ask me any questions you have, strictly one question at a time before we get started. 
 
 # Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze your latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
 
-Delete the nul file in the root directory
-del C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\nul
+cd "c:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app" && cmd /c "del \\\\?\\%CD%\\nul"
 
 # git add .&& git commit -m "general quick commit" && git push origin master
 
