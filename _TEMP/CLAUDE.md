@@ -1,378 +1,408 @@
-# Claude Configuration
+# Claude Development Reference
 
-This file contains configuration and notes for Claude Code.
+**Project**: Icon Border Template - Spiritual Content Platform
+**Platform**: Windows | **Branch**: master | **Status**: Phase 5 Complete
 
-## Project Information
-- Working Directory: nextjs-app
-- Platform: Windows
-- Git Repository: Yes
-- Current Branch: master
+---
 
-## Common Commands
-- `npm run dev` - Start development server on http://localhost:3000
-- `npm install` - Install dependencies
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run db:init` - Initialize PostgreSQL database schema
-- `npm run db:seed` - Seed database with sample data
+## Quick Start
 
-## Recent Application Updates
+```bash
+npm run dev              # Start dev server (http://localhost:3000)
+npm run build            # Production build
+npm run db:init          # Initialize PostgreSQL schema
+npm run db:seed          # Seed sample data
+npm run db:slides:init   # Initialize slide tables
+npm run db:slides:seed   # Seed slide content
+```
 
-### Development Environment Fixes
-- **Fixed Tailwind CSS v4 compatibility issue**: Downgraded from Tailwind v4 to stable v3 due to LightningCSS Windows compatibility issues
-- **Updated CSS configuration**: Changed from `@import "tailwindcss"` to standard Tailwind v3 directives (`@tailwind base; @tailwind components; @tailwind utilities;`)
-- **Created tailwind.config.js**: Added proper Tailwind v3 configuration file
-- **Updated postcss.config.mjs**: Changed from Tailwind v4 syntax to v3 syntax with autoprefixer
+---
 
-### UI/UX Improvements
-- **Implemented 3-column layout**: Main content area now has responsive grid layout (1/8, 6/8, 1/8 proportions on desktop)
-- **Improved icon styling**: Made Material Symbols icons thinner using font-variation-settings
-- **Removed Next.js branding**: Deleted next.svg file and added CSS to hide development indicator
+## Tech Stack
 
-### Layout Structure
-- **MainContent.tsx**: Updated to use responsive grid layout with side panels
-- **globals.css**: Enhanced with better icon styling and Next.js dev tool hiding
+- **Framework**: Next.js 15.5.4, React 19.1.0, TypeScript
+- **Styling**: Tailwind CSS v3, Material Symbols Icons
+- **Database**: PostgreSQL (direct `pg` client, no ORM)
+- **UI Libraries**: Swiper.js 12.0.2, Tiptap (rich text), @dnd-kit (drag-drop)
+- **Audio**: Essential Audio Player (custom red theme)
 
-### Backend Admin Interface (NEW)
-- **Created `/admin` route**: Complete backend management interface at http://localhost:3000/admin
-- **Duplicated layout structure**: Admin interface uses identical 3-column responsive layout (1/8, 6/8, 1/8)
-- **Backend-focused components**: 5 new admin components with management-specific icons and functionality
-  - **AdminTopIconBar.tsx**: Dashboard, bug reports, documentation, exit to main app
-  - **AdminBottomIconBar.tsx**: Import/export, backup, sync, system updates
-  - **AdminLeftIconBar.tsx**: User management, groups, moderation, content management
-  - **AdminRightIconBar.tsx**: Analytics, library, audio files, monitoring, storage
-  - **AdminMainContent.tsx**: Admin dashboard with bug reports, documentation, content library stats
+---
 
-### Navigation Integration
-- **Settings icon navigation**: Main app settings icon (/) now links to admin interface (/admin)
-- **Exit navigation**: Admin interface exit icon (/admin) links back to main app (/)
-- **Bidirectional routing**: Seamless navigation between frontend and backend interfaces
-- **Preserved styling**: All existing CSS classes and responsive behavior maintained
+## Application Architecture
 
-### Admin Dashboard Features
-- **Content Library Management**: Statistics for Meditation (125), Yoga (89), Courses (45), Mantras (67)
-- **Service Commitments Repository**: Management interface for 50-100 daily service prompts
-- **System Status Panel**: Real-time display of server status, active users, storage usage, open tickets
-- **Bug Reports & Documentation**: Dedicated management sections for issue tracking and help articles
+### Frontend (/)
+- **Icon Border Layout**: 50px padding, fixed header/footer/sidebars
+- **Dynamic Slides**: Multi-level Swiper navigation (vertical rows + horizontal slides)
+- **Background Images**: Full-browser slide backgrounds via `image_url` field
+- **YouTube Videos**: Full-browser embedded videos via `video_url` field with cover/contained toggle
+- **Video Display Modes**: Toggle between cover (full-screen) and contained (60px padding) views
+- **Theme System**: Light/dark mode with session persistence
+- **4-Direction Navigation**: Footer arrows (prev/next slide, scroll up/down)
+- **Audio Playback**: Essential Audio Player integrated on all slides
 
-### Icon Corrections
-- **Fixed Material Symbols compatibility**: Replaced invalid icons that were causing rendering issues
-  - `moderation` → `gavel`, `audio_file` → `audiotrack`, `monitoring` → `monitor`
-  - `data_usage` → `pie_chart`, `system_update_alt` → `system_update`
-- **Eliminated text fallbacks**: Resolved "RATION" text display issue from invalid icon names
+### Admin Interface (/admin)
+- **Slide Management** (`/admin/slides`): CRUD interface for dynamic content
+- **Rich Text Editor**: Tiptap WYSIWYG with live preview
+- **Drag-and-Drop**: @dnd-kit for slide reordering
+- **File Upload**: Audio (MP3/WAV/OGG), Images (JPG/PNG/WebP)
+- **YouTube Video Integration**: Add YouTube URLs to slides via `video_url` field
+- **Same Layout**: Identical 50px border structure as frontend
 
-### Swiper.js Integration (NEW)
-- **Touch-Based Navigation**: Integrated Swiper.js 12.0.2 for smooth touch/swipe gestures in main content area
-- **3-Slide Content Structure**: Main content now consists of swipeable slides:
-  1. **Audio Library** - Browse meditation tracks, yoga sessions, spiritual courses
-  2. **Playlists** - Personal collections, recommendations, recently played content
-  3. **Service Commitments** - Daily practices, progress tracking, spiritual growth
-- **Footer Arrow Navigation**: Connected existing footer arrow icons to control slide navigation
-  - `arrow_circle_left` → Previous slide (with hover effects)
-  - `arrow_circle_right` → Next slide (with hover effects)
-- **Context-Based Communication**: Created SwiperContext for component communication between MainContent and BottomIconBar
-- **Removed Built-in Controls**: Eliminated Swiper's default navigation arrows and pagination dots for cleaner interface
-- **Preserved Responsive Design**: Maintained 3-column layout (1/8, 6/8, 1/8) with mobile fallbacks
-- **Enhanced User Experience**:
-  - Touch/swipe gestures work on both mobile and desktop
-  - Smooth animations between content sections
-  - Visual feedback on interactive elements
-  - Content organized by functional areas (library, playlists, commitments)
+---
 
-### Enhanced Footer Navigation (NEW)
-- **Complete 4-Direction Navigation**: All footer arrow icons now provide interactive navigation
-  - `arrow_circle_left` → Previous slide (Audio Library ← Playlists ← Service Commitments)
-  - `arrow_circle_right` → Next slide (Audio Library → Playlists → Service Commitments)
-  - `arrow_circle_up` → Scroll up within current slide content (200px smooth scroll)
-  - `arrow_circle_down` → Scroll down within current slide content (200px smooth scroll)
-- **Centralized Context Management**: Moved SwiperProvider to page level for global component access
-- **Enhanced SwiperContext**: Extended with `scrollUp` and `scrollDown` methods for vertical navigation
-- **Consistent UI Interaction**: All arrow icons feature hover effects and cursor pointer styling
-- **Debugging & Error Resolution**: Fixed duplicate export error and context accessibility issues
-- **Smart Scroll Targeting**: Automatically tracks active slide's scroll container for precise vertical navigation
+## Database Schema
 
-### Typography & Design Updates (LATEST)
-- **Google Fonts Integration**: Added Ubuntu and Open Sans fonts via Google Fonts API
-  - **Title Font**: Ubuntu (300, 400, 500, 700 weights) for all H1-H6 elements and `.font-title` class
-  - **Paragraph Font**: Open Sans (300, 400, 500, 600, 700 weights) for all `p` elements and body text
-  - **CSS Custom Properties**: Defined `--font-title` and `--font-paragraph` variables for consistent usage
-  - **Cross-Platform Coverage**: Fonts applied automatically to both main app and admin interface
-- **Slide Content Simplification**: Streamlined all swiper slides to minimal design
-  - **Reduced Content**: Each slide now contains only H1 title + single descriptive paragraph
-  - **Removed Clutter**: Eliminated colored content cards, extra sections, and H2 headings
-  - **Vertical Centering**: All slide content is perfectly centered vertically using flexbox
-  - **Consistent Messaging**: Unified content across desktop and mobile layouts
-- **Layout Optimization**: Simplified desktop layout structure
-  - **Removed Side Panels**: Eliminated left and right columns from desktop 3-column grid
-  - **Full-Width Content**: Main content now uses entire available screen width
-  - **Clean Design**: Focused user attention on core slide content without distractions
-  - **Mobile Unchanged**: Preserved existing mobile layout and functionality
-- **Navigation Enhancement**: Improved home icon functionality
-  - **Home Icon Click**: Top-left home icon now navigates to main page (/) with hover effects
-  - **Visual Feedback**: Added cursor pointer and opacity hover transition
+### Core Tables (8)
+1. **users**: Role-based access (Admin, Moderator, User)
+2. **audio_files**: MP3 metadata (artist, album, duration, bitrate)
+3. **playlists** + **playlist_items**: User playlist management
+4. **categories**: Meditation, Yoga, Courses, Mantras
+5. **service_commitments**: Daily prompts repository
+6. **bug_reports** + **documentation**: Admin tools
 
-### Database Architecture Migration (MAJOR UPDATE)
-- **Complete Prisma Removal**: Migrated from Prisma ORM to direct PostgreSQL using `pg` client library
-- **Unified Database Platform**: PostgreSQL for both local development and Railway production environments
-- **Performance Optimization**: Direct SQL queries eliminate ORM overhead and provide full database control
-- **Schema Conversion**: Converted Prisma schema to native PostgreSQL DDL with proper constraints and indexes
-- **Connection Pooling**: Implemented efficient connection management with pg.Pool for production-ready scalability
-- **Transaction Support**: Added transaction helpers for complex multi-table operations
-- **Error Handling**: Comprehensive database error handling with graceful degradation
+### Slide System Tables (3) - Phase 1
+1. **slide_rows**: Collections of slides (ROUTINE/COURSE/TEACHING/CUSTOM)
+   - `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set`, `theme_color`, `slide_count`
+2. **slides**: Individual slide content
+   - `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `audio_url`, `image_url`, `video_url`, `position`, `layout_type`
+3. **slide_icons**: Optional custom icons per slide
 
-### Database Integration (PostgreSQL Native)
-- **Direct PostgreSQL Integration**: Native SQL queries with `pg` client library (v8.16.3)
-- **Unified Database Support**: PostgreSQL for both local development and Railway production
-- **Comprehensive Schema**: 8 core models supporting full MP3 Manager functionality
-  - **User Management**: Role-based access (Admin, Moderator, User)
-  - **Audio File System**: Complete metadata support (artist, album, duration, bitrate, file size)
-  - **Playlist Management**: User playlists with ordering and privacy controls
-  - **Category Organization**: Pre-seeded with Meditation, Yoga, Courses, Mantras
-  - **Service Commitments**: Repository system for 50-100 daily service prompts
-  - **Admin Tools**: Bug reporting, documentation management, system analytics
-  - **Content Moderation**: File approval workflow with status tracking
-- **Database Health Check**: `/api/test-db` endpoint for monitoring and Railway deployment
-- **Seeded Sample Data**: Default admin user, categories, and service commitments
-- **Railway Ready**: Deployment configuration with PostgreSQL schema optimization
+**Key Features**:
+- Auto-updating `slide_count` trigger
+- Cascading deletes (delete row → deletes all slides)
+- Unique position constraint per row
 
-### Essential Audio Player Integration (LATEST)
-- **Third-Party Audio Player**: Integrated Essential Audio Player from essential-audio-player.net for MP3 playback functionality
-- **React Component Wrapper**: Created `EssentialAudioPlayer.tsx` with proper TypeScript types and SSR handling
-- **Hydration Fix**: Implemented client-side only rendering to prevent server/client mismatch errors
-- **Custom Red Theme Styling**: Comprehensive CSS customization in `globals.css`
-  - **Red Color Scheme**: Play button (#dc2626) and progress bar with hover effects and transitions
-  - **Left Alignment**: Removed center alignment for left-justified layout matching design requirements
-  - **Professional Layout**: Play button → Progress bar → Time display horizontal arrangement
-  - **Responsive Design**: Maximum width constraint (400px) with flexible gap spacing
-- **Slide Integration**: Audio players positioned between H1 titles and paragraph content on all 3 slides
-  - **Audio Library**: `/media/meditation-sample.mp3`
-  - **Playlists**: `/media/playlist-sample.mp3`
-  - **Service Commitments**: `/media/service-sample.mp3`
-- **File Structure**: Essential Audio Player files located in `public/essential-audio-player/` directory
-- **Cross-Platform Support**: Works on both desktop and mobile with consistent styling
+---
 
-### Railway Deployment Preparation (LATEST)
-- **Production Build Optimization**: Fixed all TypeScript and Next.js compatibility issues for Railway deployment
-- **Next.js Configuration**: Removed deprecated `buildActivity` setting from `next.config.ts`
-- **Font Loading Optimization**: Added `display=optional` parameters to Google Fonts for better performance
-- **Script Loading**: Migrated from manual `<script>` tags to Next.js `<Script>` component with `beforeInteractive` strategy
-- **TypeScript Strict Mode**: Eliminated all `any` types with proper type definitions
-  - **EssentialAudioPlayer**: Window globals properly typed with interface definitions
-  - **Database Layer**: `PoolClient` and `Record<string, unknown>` types for query functions
-- **Build Validation**: All components pass TypeScript compilation (`npx tsc --noEmit`) with zero errors
-- **Production Ready**:
-  - **Build Size**: Optimized at 132KB first load JS
-  - **Static Generation**: 7/7 pages successfully generated
-  - **Route Optimization**: Static and dynamic routes properly configured
-  - **Database Health Check**: Functional `/api/test-db` endpoint for Railway monitoring
+## API Endpoints (14 total) - Phase 2
 
-## Technical Stack
-- Next.js 15.5.4
-- React 19.1.0
-- Tailwind CSS v3 (stable)
-- TypeScript
-- Material Symbols Icons
-- Swiper.js 12.0.2 (touch/swipe navigation)
-- Essential Audio Player (MP3 playback)
-- PostgreSQL with `pg` client library
-- Direct SQL queries (no ORM)
+### Slide Rows
+- `GET /api/slides/rows` - List all rows (`?published=true` for frontend)
+- `POST /api/slides/rows` - Create row
+- `GET /api/slides/rows/[id]` - Get single row
+- `PATCH /api/slides/rows/[id]` - Update row
+- `DELETE /api/slides/rows/[id]` - Delete row
 
-## Routes
-- **Main Application**: http://localhost:3000/ - Frontend user interface
-- **Admin Interface**: http://localhost:3000/admin - Backend management dashboard
-- **Database Test**: http://localhost:3000/api/test-db - Database connection health check
+### Slides
+- `GET /api/slides/rows/[id]/slides` - Get slides for row
+- `POST /api/slides/rows/[id]/slides` - Create slide
+- `GET /api/slides/rows/[id]/slides/[slideId]` - Get single slide
+- `PATCH /api/slides/rows/[id]/slides/[slideId]` - Update slide
+- `DELETE /api/slides/rows/[id]/slides/[slideId]` - Delete slide
+- `POST /api/slides/rows/[id]/slides/reorder` - Reorder slides
 
-## Database Setup (PostgreSQL)
+### Utilities
+- `GET /api/slides/upload` - Get upload config
+- `POST /api/slides/upload` - Upload audio/image files
+- `GET /api/test-db` - Database health check
 
-### Local Development Setup
-1. **Install PostgreSQL**: Ensure PostgreSQL 17+ is installed locally
-2. **Create Database**: `createdb mp3_manager`
-3. **Configure Connection**: Set `DATABASE_URL` in `.env.local`:
-   ```
-   DATABASE_URL="postgresql://postgres:your_password@localhost:5432/mp3_manager"
-   ```
-4. **Initialize Schema**: `npm run db:init`
-5. **Seed Data**: `npm run db:seed`
+---
 
-### Railway Deployment (PostgreSQL)
-- **Environment**: Uses Railway's automatically provided DATABASE_URL
-- **Auto-initialization**: Database schema and seeding handled automatically
-- **Health check**: `/api/test-db` endpoint for Railway health monitoring
+## Key Components
 
-### Database Features
-- **User Management**: Admin, Moderator, User roles with authentication ready
-- **Audio File Management**: Complete metadata support (artist, album, duration, file size, etc.)
-- **Playlist System**: User playlists with item ordering and privacy controls
-- **Category Organization**: Meditation, Yoga, Courses, Mantras with color coding
-- **Service Commitments**: Repository for 50-100 daily service prompts
-- **Admin Tools**: Bug reporting, documentation management, system analytics
-- **Content Moderation**: File approval workflow with status tracking
+### Frontend
+- **MainContent.tsx**: Dynamic slides with API integration, lazy loading, caching
+- **YouTubeEmbed.tsx**: Full-browser YouTube video player component with cover/contained display modes
+- **RightIconBar.tsx**: Right sidebar with conditional videocam toggle icon
+- **SwiperContext.tsx**: Multi-level navigation (vertical rows + horizontal slides)
+- **ThemeContext.tsx**: Light/dark mode state management
+- **EssentialAudioPlayer.tsx**: MP3 player wrapper (SSR-safe)
 
-## Notes
-- Development server runs on http://localhost:3000
-- Uses icon border layout with fixed positioning
-- Responsive design with mobile fallbacks
-- Windows-optimized setup for CSS processing
-- Database-ready with direct PostgreSQL integration (no ORM)
-- PostgreSQL for both local development and Railway production
-- All admin components follow same architectural patterns as frontend
-- Railway deployment configured with health monitoring and optimized builds
-- Touch-enabled main content with swipeable slides controlled by footer navigation
-- Context-based component communication for Swiper navigation controls
-- Complete 4-direction footer arrow navigation (slide + scroll control)
-- Centralized SwiperProvider context management for cross-component communication
-- Integrated MP3 audio playback on all slides with Essential Audio Player
-- Custom red-themed audio player styling with left alignment
-- Production-ready with TypeScript strict mode and zero build errors
+### Admin
+- **SlideRowList.tsx**: Card-based list with filtering/sorting
+- **SlideRowForm.tsx**: Create/edit row with validation
+- **SlideManager.tsx**: Drag-and-drop slide reordering
+- **SlideEditor.tsx**: Tiptap rich text editor + live preview
+- **AudioUploader.tsx**: File upload with progress
+- **IconPicker.tsx**: Material Symbols icon selector
 
-### Mobile Layout Optimization (LATEST)
-- **Mobile Alignment Fix**: Corrected mobile view content alignment to be left-aligned while maintaining vertical centering
-  - **Layout Enhancement**: Changed mobile slides from `justify-center` to `justify-center items-start`
-  - **Audio Player Position**: Updated from `mx-auto` to `w-full` for proper left alignment
-  - **Visual Consistency**: Maintained vertical centering with `justify-center` while ensuring left text/content alignment
-- **Mobile Audio Player Improvements**: Enhanced mobile audio player display and functionality
-  - **Full Width Display**: Ensured MP3 player shows completely with full progress bar on mobile devices
-  - **Border Removal**: Eliminated unwanted grey borders at bottom of mobile audio player
-  - **Responsive Sizing**: Added mobile-specific CSS with minimum 280px width and proper flex layout
-  - **Touch Optimization**: Improved mobile controls visibility and interaction areas
+---
 
-### Content Slide Testing & Alignment Fix (LATEST)
-- **Overflow Test Slide Addition**: Added fourth slide "Spiritual Teachings" with extensive paragraph content for testing scroll functionality
-  - **Content Volume**: 12 comprehensive paragraphs covering spiritual traditions (Buddhism, Hinduism, Christianity, Islam, Zen, etc.)
-  - **Scroll Testing**: Content intentionally exceeds slide height to test vertical scrolling with footer up/down arrows
-  - **Audio Player Integration**: Maintains consistency with existing slides including Essential Audio Player
-- **Vertical Alignment Standardization**: Fixed alignment inconsistency across all slides
-  - **Desktop Fix**: Changed overflow slide from `justify-start` to `justify-center` to match other slides
-  - **Mobile Fix**: Changed overflow slide from `justify-start items-start` to `justify-center items-start` for consistency
-  - **Design Principle**: All slides maintain vertical centering (`justify-center`) regardless of content volume
-  - **Scroll Behavior**: Vertical centering preserved even when content overflows and requires scrolling
+## Development Phases
 
-### Mobile Overflow Slide Fix (LATEST)
-- **Mobile Vertical Alignment Issue Resolution**: Fixed mobile "Spiritual Teachings" slide content visibility problem
-  - **Problem**: Mobile overflow slide was vertically centered, hiding title and top content from view
-  - **Root Cause**: `justify-center` CSS class on mobile slide pushed extensive content below viewport
-  - **Surgical Fix**: Changed mobile overflow slide from `justify-center` to `justify-start` in MainContent.tsx:205
-  - **Impact**: Users can now see title, icons, and first paragraphs immediately on mobile
-  - **Preserved Functionality**: Full scroll access maintained with footer up/down arrows and touch gestures
-  - **Minimal Change**: Only affected problematic overflow slide, other slides maintain original alignment
+### ✅ Completed (Phases 1-5)
+1. **Database Foundation**: Slide tables, triggers, query functions
+2. **API Endpoints**: 14 REST endpoints with validation
+3. **Admin UI - List & Forms**: Slide row CRUD interface
+4. **Admin UI - Editor**: Rich text editor, drag-drop, uploads
+5. **Frontend Integration**: Dynamic slides, multi-level navigation, performance optimization
 
-### Railway Deployment ESLint Fix
-- **ESLint Error Resolution**: Fixed Railway deployment failure caused by unescaped quotes in spiritual teachings content
-  - **Error Details**: Lines 100 and 196 in MainContent.tsx had unescaped quotes around the word "union"
-  - **Fix Applied**: Replaced straight quotes with HTML entities (`&ldquo;` and `&rdquo;`) in both desktop and mobile slide versions
-  - **Build Validation**: ESLint now passes with only warnings (no blocking errors)
-  - **Deployment Ready**: All TypeScript compilation clean, Railway deployment should now succeed
+### 🔄 Current Phase (Phase 6)
+**Polish & Deployment** - Estimated 1-2 weeks
+- View tracking (increment `view_count`)
+- Admin analytics dashboard
+- Search functionality
+- Bulk operations
+- Database optimization (indexes)
+- Security audit (SQL injection, XSS)
+- User documentation
+- Railway production deployment
 
-### Slide Icon Enhancement & Material Symbols Fix (LATEST)
-- **Icon Row Addition**: Added consistent icon row above H1 titles on all slides for visual enhancement
-  - **Icon Selection**: `check_circle_unread`, `clock_arrow_up`, `select_check_box` across all 4 slides
-  - **Layout Integration**: Left-aligned icons positioned above titles with proper spacing (`gap-4 mb-4`)
-  - **Cross-Platform**: Applied to both desktop (centered content) and mobile (left-aligned content) versions
-- **Material Symbols Font Loading Resolution**: Fixed widespread issue with icons displaying as text instead of symbols
-  - **Root Cause**: Missing CSS definitions for `material-symbols-rounded` class and font loading conflicts
-  - **Font Import Strategy**: Added direct CSS `@import` statements for reliable font loading
-    - Material Symbols Rounded (primary usage)
-    - Material Symbols Outlined (legacy compatibility)
-  - **Enhanced CSS Classes**: Complete font family definitions with proper variation settings
-    - Font size: 24px standardized across interface
-    - Font weight: 100 (thin) for consistent appearance
-    - Font variation: `'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24`
-    - Theme integration: `var(--icon-color)` for light/dark mode support
-- **Icon Consistency Standardization**: Unified styling across all interface icons
-  - **Slide Title Icons**: Updated to match exact specifications of interface icons
-  - **Global Standards**: 24px size, weight 100, proper Material Symbols variation settings
-  - **Theme Integration**: All icons now properly adapt to light/dark theme changes
-- **Cross-Interface Coverage**: All icon locations now properly styled and themed
-  - Header navigation icons (home, settings, theme toggle, menu)
-  - Footer navigation arrows (left, right, up, down)
-  - Slide content icons (check, clock, checkbox above titles)
-  - Admin interface icons (all backend management icons)
+---
 
-### Swiper Runtime Error Fix (LATEST)
-- **Critical Runtime Error Resolution**: Fixed `Cannot read properties of undefined (reading 'undefined')` TypeError in Swiper slide change handler
-  - **Root Cause**: `swiper.activeIndex` was undefined during Swiper initialization timing issues between desktop and mobile instances
-  - **Error Location**: `src/app/page.tsx:39` in `handleSlideChange` function when accessing `swiper.slides[swiper.activeIndex]`
-  - **Surgical Fix**: Added comprehensive safety checks to prevent crashes without affecting functionality
-    - Validates `swiper` object exists
-    - Checks `swiper.activeIndex` is defined (not undefined)
-    - Ensures `swiper.slides` array is available
-  - **Preserved Functionality**: All existing slide navigation and scroll behavior maintained
-  - **Zero Layout Impact**: No visual or behavioral changes to user interface
-  - **Development Stability**: Local development server now runs without TypeError crashes
+## Performance Optimizations
 
-### Railway Deployment Resolution
-- **Build Phase Fix**: Resolved Railway deployment failures by moving database initialization from build to runtime
-  - **Database Timing**: Moved `tsx scripts/railway-init.ts` from build script to start script
-  - **Connection Availability**: Fixed `ENOTFOUND postgres.railway.internal` errors by ensuring database access only at runtime
-  - **Graceful Handling**: Added error handling for existing database schemas to prevent startup failures
-- **Database Connection Optimization**: Enhanced PostgreSQL connection settings for Railway environment
-  - **SSL Configuration**: Added SSL support with `rejectUnauthorized: false` for Railway PostgreSQL
-  - **Timeout Adjustments**: Increased connection timeouts to 20s and query timeouts to 45s for Railway network latency
-  - **Pool Optimization**: Reduced connection pool from 20 to 10 connections for Railway resource limits
-- **Health Check Resilience**: Improved `/api/test-db` endpoint reliability for Railway health monitoring
-  - **Retry Logic**: Enhanced from 3 to 5 retry attempts with exponential backoff (1s, 2s, 4s, 8s, 10s max)
-  - **Error Recovery**: Better error handling and logging for Railway deployment diagnostics
-  - **Graceful Degradation**: Startup continues even if database is already initialized
+### Frontend (Phase 5)
+- **Lazy Loading**: Slides loaded on-demand (90%+ API improvement)
+- **Client Caching**: `slidesCache` prevents redundant API calls
+- **Preloading**: First 2 rows on mount, adjacent rows on navigation
+- **Memoization**: Icon parsing cached with `useMemo`
+- **Server Caching**: `next: { revalidate: 60 }` on fetch calls
 
-### Light/Dark Theme System (LATEST)
-- **Complete Theme Toggle Implementation**: Added comprehensive light/dark mode system with session persistence
-- **Theme Context**: Created `ThemeContext.tsx` with React context for global theme state management
-  - **Session Storage**: Theme preference persists during browser session but resets on new session
-  - **Dynamic Icon**: Toggle shows moon icon in light mode, sun icon in dark mode
-  - **Cross-Interface Support**: Available in both main app and admin interface
-- **Header Integration**: Theme toggle positioned between settings and menu icons in top navigation
-  - **Main App**: TopIconBar.tsx includes theme toggle with hover effects
-  - **Admin Interface**: AdminTopIconBar.tsx includes identical theme toggle functionality
-- **Comprehensive CSS Variables**: Full theme system with extensive variable coverage
-  - **Core Colors**: `--bg-color`, `--text-color`, `--icon-color` for primary elements
-  - **UI Elements**: `--header-bg`, `--footer-bg`, `--content-bg` for layout components
-  - **Interactive Elements**: `--icon-hover`, `--progress-bg` for user interactions
-  - **Admin Specific**: `--card-bg`, `--border-color`, `--secondary-text` for admin interface
-- **Complete UI Coverage**: All elements properly themed for both light and dark modes
-  - **Background**: Full dark background (#1a1a1a) in dark mode, white in light mode
-  - **Text Elements**: All headings, paragraphs, and content text properly colored
-  - **Icons**: Material Symbols icons change to white in dark mode, black in light mode
-  - **Audio Player**: Progress bars, time displays, and controls themed appropriately
-  - **Admin Interface**: Cards, panels, borders, and status elements fully themed
-- **Smooth Transitions**: 0.3s ease transitions between theme changes for professional UX
-- **Material Icons Font Loading Fix**: Resolved icon display issues on initial page load
-  - **Font Preloading**: Added preload link for Material Symbols font
-  - **Display Strategy**: Changed from `display=optional` to `display=swap` for better loading
-  - **JavaScript Fallback**: Added font loading detection and repaint trigger
-  - **Hardcoded Style Removal**: Removed conflicting `bg-white text-black` body classes
+### Results
+- Initial API: 473ms → Cached: 39-45ms (90%+ faster)
+- Instant navigation between cached rows
+- Zero layout shift during loading
 
-## File Structure Updates
+---
 
-### Database Migration Files (NEW)
-- **src/lib/db.ts**: PostgreSQL connection utility with pooling, query helpers, and transaction support
-- **scripts/init-db.ts**: Database schema initialization script with full DDL and indexes
-- **scripts/seed-db.ts**: Sample data seeding script with categories, admin user, and service commitments
-- **scripts/railway-init.ts**: Railway deployment initialization combining schema setup and seeding
-- **.env.example**: Environment configuration template for local PostgreSQL setup
+## Critical File Locations
 
-### Swiper Integration Files
-- **src/contexts/SwiperContext.tsx**: React context for Swiper navigation communication with scroll methods
-- **src/components/MainContent.tsx**: Enhanced with Swiper integration and slide content
-- **src/components/BottomIconBar.tsx**: Footer arrows now control slide navigation and content scrolling
-- **src/app/page.tsx**: Updated to provide centralized SwiperProvider context for all components
+### Database
+- `src/lib/db.ts` - PostgreSQL connection utility
+- `src/lib/queries/slideRows.ts` - Slide row queries
+- `src/lib/queries/slides.ts` - Slide queries (includes video_url support)
+- `scripts/init-db.ts` - Schema initialization
+- `scripts/seed-db.ts` - Sample data seeding
+- `scripts/add-video-url-column.ts` - Migration to add video_url field
 
-### Essential Audio Player Files (NEW)
-- **src/components/EssentialAudioPlayer.tsx**: React wrapper component with TypeScript types and SSR compatibility
-- **public/essential-audio-player/essential_audio.js**: Core Essential Audio Player JavaScript library
-- **public/essential-audio-player/essential_audio.css**: Default CSS styles (overridden by custom styles)
-- **public/media/**: Directory containing MP3 audio files (meditation-sample.mp3, playlist-sample.mp3, service-sample.mp3)
-- **src/app/globals.css**: Extended with comprehensive Essential Audio Player custom styling (red theme, left alignment)
+### Frontend
+- `src/app/page.tsx` - Main page with Swiper navigation logic + YouTube embed layer + video mode state
+- `src/components/MainContent.tsx` - Dynamic slide rendering (405+ lines)
+- `src/components/YouTubeEmbed.tsx` - YouTube video player with cover/contained modes
+- `src/components/RightIconBar.tsx` - Right sidebar with conditional videocam icon
+- `src/contexts/SwiperContext.tsx` - Navigation context
+- `src/contexts/ThemeContext.tsx` - Theme state
 
-### Theme System Files (NEW)
-- **src/contexts/ThemeContext.tsx**: React context for global theme state management with session storage
-- **src/components/TopIconBar.tsx**: Updated with theme toggle integration between settings and menu icons
-- **src/components/admin/AdminTopIconBar.tsx**: Updated with theme toggle for admin interface consistency
-- **src/app/page.tsx**: Enhanced with ThemeProvider wrapper for main application
-- **src/app/admin/page.tsx**: Enhanced with ThemeProvider wrapper for admin interface
-- **src/app/layout.tsx**: Updated with improved Material Symbols font loading and removed conflicting body classes
-- **src/app/globals.css**: Comprehensive theme system with CSS variables and complete UI coverage overrides
+### Admin
+- `src/app/admin/slides/page.tsx` - Slide row list
+- `src/app/admin/slides/[id]/page.tsx` - Slide manager
+- `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
+- `src/components/admin/slides/*.tsx` - All admin slide components
 
-### Removed Files
-- **prisma/**: Complete Prisma directory removed (schema.prisma, migrations, seed.ts)
-- **railway.schema.prisma**: Railway-specific Prisma schema removed
-- **src/lib/prisma.ts**: Prisma client configuration removed
+### Styling
+- `src/app/globals.css` - Theme system, Essential Audio Player overrides, YouTube embed styling (cover + contained modes)
+- `tailwind.config.js` - Tailwind v3 configuration
+
+---
+
+## Database Connection
+
+### Local Development
+```env
+# .env.local
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_NAME=mp3_manager
+DB_PORT=5432
+```
+
+### Railway Production
+```env
+# Automatically provided by Railway
+DATABASE_URL=postgresql://...
+```
+
+**Health Check**: http://localhost:3000/api/test-db
+
+---
+
+## Common Issues & Fixes
+
+### Tiptap SSR Hydration Error
+**Error**: "SSR has been detected, please set `immediatelyRender` explicitly"
+**Fix**: Add `immediatelyRender: false` to `useEditor()` config
+
+### Nested Scrollbars
+**Issue**: Multiple scrollbars on page
+**Fix**: Remove `overflow-y-auto` from containers, use single page-level scroll
+
+### Material Icons Not Loading
+**Fix**: Icons load via CSS `@import` in `globals.css`, font-weight: 100
+
+### Background Images Not Displaying ✅ FIXED (Oct 15, 2025)
+**Issue**: Background images set via admin `image_url` field not showing on frontend
+**Root Cause**: Opaque `background-color: var(--content-bg)` on main containers blocked parent background image
+**Fix**: Changed `globals.css` lines 64-67 to use `transparent` instead of `var(--content-bg)`
+**Files Modified**:
+- `src/app/globals.css` - Made main/swiper containers transparent
+- `src/app/page.tsx` - Added fallback background color for slides without images
+
+---
+
+## Navigation Structure
+
+### Main App (/)
+- **Home Icon**: Navigate to main page
+- **Settings Icon**: Navigate to /admin
+- **Theme Toggle**: Switch light/dark mode
+- **Videocam Icon** (conditional): Toggle video display mode (only visible when slide has video)
+- **Footer Arrows**: Prev/next slide, scroll up/down
+
+### Admin (/admin)
+- **Exit Icon**: Navigate back to /
+- **Slide Management Icon**: Navigate to /admin/slides
+- **Theme Toggle**: Same as main app
+
+---
+
+## Testing Commands
+
+```bash
+# Database
+psql -U postgres -d mp3_manager -c "SELECT * FROM slide_rows;"
+curl http://localhost:3000/api/test-db
+
+# API Endpoints
+curl http://localhost:3000/api/slides/rows?published=true
+curl http://localhost:3000/api/slides/rows/[id]/slides
+
+# Build Validation
+npm run build
+npx tsc --noEmit
+npm run lint
+```
+
+---
+
+## Deployment Checklist
+
+### Pre-deployment
+- ✅ All TypeScript errors resolved
+- ✅ Database schema initialized
+- ✅ Sample data seeded
+- ✅ API endpoints tested
+- ✅ Responsive design verified
+- ✅ Theme system working
+- ✅ Audio player functional
+
+### Railway Deployment
+1. Push to Git repository
+2. Connect Railway to repo
+3. Set `DATABASE_URL` environment variable (auto-provided)
+4. Deploy with `railway up`
+5. Monitor with `/api/test-db` endpoint
+
+---
+
+## Project Status
+
+**Current State**: Production-ready with dynamic slide management
+**Last Major Update**: Phase 5 Frontend Integration (Complete)
+**Next Milestone**: Phase 6 - Polish & Deployment
+
+### Key Achievements
+- ✅ Zero code deployments for content changes
+- ✅ 90%+ performance improvement (caching)
+- ✅ Complete admin interface
+- ✅ Multi-level navigation system
+- ✅ Responsive design (desktop/mobile)
+- ✅ Light/dark theme system
+- ✅ Full-browser background images per slide
+- ✅ Full-browser YouTube video embeds per slide
+- ✅ Interactive video display mode toggle (cover/contained)
+
+---
+
+## Important Notes
+
+- **50px Padding**: All pages have 50px border for icon layout
+- **Icon Specifications**: 24px size, weight 100, `var(--icon-color)` for theming
+- **Audio Files**: Stored in `/public/media/` directory
+- **Slide Images**: Stored in `/public/media/slides/[row-id]/`
+- **Background Images**: Set via `image_url` field in slides table, covers entire browser with `background-size: cover`
+- **YouTube Videos**: Set via `video_url` field in slides table, supports multiple URL formats (youtube.com, youtu.be, video ID)
+- **Video Display Modes**: Toggle between 'cover' (full-screen) and 'contained' (60px padding) via videocam icon in right sidebar
+- **Media Layering**: Background image (z-0) → YouTube video (z-10) → Content (z-20) → Icon borders (z-30)
+- **Transparent Containers**: Main/swiper containers use `transparent` backgrounds to allow background images/videos to show through
+- **No ORM**: Direct PostgreSQL queries for performance
+- **SSR Considerations**: Some components need client-side rendering (`'use client'`)
+
+---
+
+## Quick Reference URLs
+
+- **Frontend**: http://localhost:3000/
+- **Admin Dashboard**: http://localhost:3000/admin
+- **Slide Management**: http://localhost:3000/admin/slides
+- **Database Health**: http://localhost:3000/api/test-db
+
+---
+
+## Documentation Files
+
+- **PHASE_5_COMPLETION_SUMMARY.md**: 650+ line detailed implementation guide
+- **SLIDE_ROW_MANAGEMENT_SPEC.md**: Original 6-phase development plan
+- **ERROR.md**: Current errors/issues to address
+
+---
+
+---
+
+## Recent Updates
+
+### October 15, 2025 - YouTube Video Display Mode Toggle
+**Feature**: Interactive toggle between 'cover' and 'contained' video display modes
+**Implementation**: Added conditional videocam icon with click-to-toggle functionality
+- Updated `YouTubeEmbed.tsx` to accept `displayMode` prop ('cover' | 'contained')
+- Added contained mode CSS classes to `globals.css`:
+  - `.youtube-contained`: 60px padding for icon borders, flexbox centering
+  - `.youtube-iframe-contained`: Responsive 16:9 aspect ratio, fits within viewport
+- Updated `RightIconBar.tsx` to conditionally show videocam icon:
+  - Only visible when slide has `video_url` present
+  - Clickable with hover cursor
+  - Dynamic tooltip based on current mode
+  - Accepts `hasVideo`, `onVideoToggle`, `videoMode` props
+- State management already existed in `page.tsx` (no new state needed)
+
+**Files Modified**: 3 files (~60 lines total)
+- `src/components/YouTubeEmbed.tsx` - Display mode prop support
+- `src/app/globals.css` - Contained mode styling (lines 451-486)
+- `src/components/RightIconBar.tsx` - Conditional icon rendering
+
+**User Experience**:
+- **No Video**: Videocam icon hidden
+- **Video Present**: Videocam icon appears in right sidebar
+- **Cover Mode** (default): Video fills entire browser like `background-size: cover`
+- **Contained Mode**: Video fits within viewport with 60px padding, maintains 16:9 aspect ratio
+- **Toggle**: Click videocam icon to switch modes instantly
+
+**Impact**: Users can now choose between cinematic full-screen (cover) or contained video viewing while maintaining icon border visibility
+
+### October 15, 2025 - YouTube Video Integration (with Cover Behavior)
+**Feature**: Full-browser YouTube video embeds for slides with background cover behavior
+**Implementation**: Added `video_url` field to slides table with complete frontend/admin support
+- Added `video_url VARCHAR` column to `slides` table via migration script
+- Created `YouTubeEmbed.tsx` component with URL parsing for multiple YouTube formats
+- Updated admin `SlideEditor.tsx` with YouTube URL input field
+- Integrated video layer in `page.tsx` with proper z-index layering
+- Updated `MainContent.tsx` to propagate video URLs on slide changes
+- Added YouTube iframe CSS styling to `globals.css` with responsive cover behavior
+- Videos layer between background images and content (z-index: 10)
+- **Cover Styling**: Videos behave like `background-size: cover`, filling entire viewport while maintaining aspect ratio
+- Responsive media queries ensure proper coverage on all screen sizes (16:9 aspect ratio handling)
+- Center-positioned with `transform: translate(-50%, -50%)` for optimal display
+- Smooth transitions between videos on slide navigation
+- Supports: `youtube.com/watch?v=`, `youtu.be/`, and raw video IDs
+
+**Files Modified**: 9 files modified, 2 files created (~220 lines total)
+**Migration**: `npx tsx scripts/add-video-url-column.ts` (successfully executed)
+**CSS Enhancement**: Updated `.youtube-embed-iframe` with absolute positioning, min-width/height constraints, and responsive aspect ratio media queries
+**Impact**: Slides can now have full-browser YouTube videos that cover the entire background, independent of background images, with proper cropping like CSS `background-size: cover`
+
+### October 15, 2025 - Background Image Fix
+**Issue**: Background images not displaying on frontend despite being set in admin
+**Solution**: Fixed CSS transparency layer issue
+- Changed `globals.css` main containers from opaque `var(--content-bg)` to `transparent`
+- Added fallback background color in `page.tsx` for slides without images
+- Background images now properly cover entire browser window
+- Smooth 500ms transition between slide backgrounds
+- Theme system preserved (text/icon colors still respect light/dark mode)
+
+**Impact**: Slides with `image_url` now display full-browser backgrounds as intended
+
+---
+
+**Last Updated**: YouTube Video Display Mode Toggle - October 15, 2025
+**Total Lines**: 545

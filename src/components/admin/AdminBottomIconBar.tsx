@@ -1,4 +1,8 @@
-export default function AdminBottomIconBar() {
+interface AdminBottomIconBarProps {
+  onMenuClick: () => void;
+}
+
+export default function AdminBottomIconBar({ onMenuClick }: AdminBottomIconBarProps) {
   return (
     <footer className="icon-container fixed bottom-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem'}}>
       <div className="flex items-center">
@@ -11,7 +15,7 @@ export default function AdminBottomIconBar() {
         <span className="material-symbols-outlined" title="Refresh">refresh</span>
         <span className="material-symbols-outlined" title="Settings">settings</span>
         <span className="material-symbols-outlined" title="More Options">more_horiz</span>
-        <span className="material-symbols-outlined" title="Menu">menu</span>
+        <span className="material-symbols-outlined" title="Menu" onClick={onMenuClick}>menu</span>
       </div>
     </footer>
   );

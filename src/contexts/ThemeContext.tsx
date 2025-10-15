@@ -19,6 +19,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (savedTheme) {
       setTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      // Set initial theme attribute if no saved theme exists
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
 

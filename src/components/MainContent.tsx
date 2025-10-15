@@ -1,246 +1,395 @@
 'use client';
 
+import { useEffect, useState, useMemo } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import EssentialAudioPlayer from './EssentialAudioPlayer';
+import { useSwiperContext } from '@/contexts/SwiperContext';
+import { Slide } from '@/lib/queries/slides';
 
 interface MainContentProps {
   setSwiperRef: (swiper: SwiperType | null) => void;
   handleSlideChange: (swiper: SwiperType) => void;
+  setActiveRow: (rowId: string) => void;
+  setActiveSlideImageUrl: (imageUrl: string | null) => void;
+  setActiveSlideVideoUrl: (videoUrl: string | null) => void;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange }: MainContentProps) {
+// TypeScript interfaces for API data
+interface SlideRow {
+  id: string;
+  title: string;
+  description: string | null;
+  row_type: string;
+  is_published: boolean;
+  display_order: number;
+  slide_count: number;
+  icon_set: string;
+  theme_color: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl }: MainContentProps) {
+  const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
+  const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Get swiper context to register horizontal swipers
+  const { setHorizontalSwiper } = useSwiperContext();
+
+  // Memoize parsed icon sets to avoid repeated JSON parsing
+  const iconSetsCache = useMemo(() => {
+    const cache: Record<string, string[]> = {};
+    slideRows.forEach(row => {
+      try {
+        const parsed = JSON.parse(row.icon_set || '[]');
+        cache[row.id] = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        cache[row.id] = [];
+      }
+    });
+    return cache;
+  }, [slideRows]);
+
+  // Fetch published slide rows on mount
+  useEffect(() => {
+    const fetchSlideRows = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/slides/rows?published=true', {
+          // Enable caching for better performance
+          next: { revalidate: 60 } // Revalidate every 60 seconds
+        });
+        const data = await response.json();
+
+        if (data.status === 'success' && data.rows) {
+          setSlideRows(data.rows);
+
+          // Preload slides for first 2 rows for better UX
+          if (data.rows.length > 0) {
+            await loadSlidesForRow(data.rows[0].id);
+            if (data.rows.length > 1) {
+              // Preload second row in background
+              loadSlidesForRow(data.rows[1].id);
+            }
+          }
+        } else {
+          setError('Failed to load slide rows');
+        }
+      } catch (err) {
+        console.error('Error fetching slide rows:', err);
+        setError('Error loading content');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSlideRows();
+  }, []);
+
+  // Set initial background image and video when first row's slides are loaded
+  useEffect(() => {
+    if (slideRows.length > 0) {
+      const firstRowId = slideRows[0].id;
+      const slides = slidesCache[firstRowId];
+      if (slides && slides.length > 0) {
+        setActiveSlideImageUrl(slides[0].image_url || null);
+        setActiveSlideVideoUrl(slides[0].video_url || null);
+      }
+    }
+  }, [slidesCache, slideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl]);
+
+  // Load slides for a specific row
+  const loadSlidesForRow = async (rowId: string) => {
+    // Check if already cached
+    if (slidesCache[rowId]) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/slides/rows/${rowId}/slides`);
+      const data = await response.json();
+
+      if (data.status === 'success' && data.slides) {
+        setSlidesCache(prev => ({
+          ...prev,
+          [rowId]: data.slides
+        }));
+      }
+    } catch (err) {
+      console.error(`Error fetching slides for row ${rowId}:`, err);
+    }
+  };
+
+  // Parse icon_set JSON string to array
+  const parseIconSet = (iconSet: string | null): string[] => {
+    if (!iconSet) return [];
+    try {
+      const parsed = JSON.parse(iconSet);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  // Render slide content
+  const renderSlideContent = (slide: Slide, icons: string[], isMobile: boolean = false) => {
+    const containerClass = slide.layout_type === 'OVERFLOW'
+      ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
+      : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
+
+    return (
+      <div className={containerClass}>
+        {/* Icons */}
+        {icons.length > 0 && (
+          <div className={`flex justify-start gap-4 mb-4 ${isMobile ? 'w-full' : ''}`}>
+            {icons.map((icon, idx) => (
+              <span
+                key={idx}
+                className="material-symbols-rounded"
+                style={{
+                  fontSize: '24px',
+                  fontWeight: '100',
+                  fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24",
+                  color: 'var(--icon-color)'
+                }}
+              >
+                {icon}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Title */}
+        <h1 className="text-4xl font-bold mb-4 text-black">{slide.title}</h1>
+
+        {/* Subtitle (if exists) */}
+        {slide.subtitle && (
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">{slide.subtitle}</h2>
+        )}
+
+        {/* Audio Player (if audio_url exists) */}
+        {slide.audio_url && (
+          <EssentialAudioPlayer
+            audioUrl={slide.audio_url}
+            preload={true}
+            className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
+          />
+        )}
+
+        {/* Body Content */}
+        <div
+          className="text-black space-y-4"
+          dangerouslySetInnerHTML={{ __html: slide.body_content }}
+        />
+      </div>
+    );
+  };
+
+  // Render horizontal swiper for a row's slides
+  const renderHorizontalSwiper = (row: SlideRow, slides: Slide[], isMobile: boolean = false) => {
+    // Use memoized icon cache for better performance
+    const icons = iconSetsCache[row.id] || parseIconSet(row.icon_set);
+
+    if (slides.length === 0) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <p className="text-xl text-black">Loading slides...</p>
+        </div>
+      );
+    }
+
+    return (
+      <Swiper
+        key={`horizontal-${row.id}`}
+        direction="horizontal"
+        spaceBetween={20}
+        slidesPerView={1}
+        className="h-full"
+        onSwiper={(swiper) => {
+          // Register this horizontal swiper in context
+          setHorizontalSwiper(row.id, swiper);
+          // Set initial image URL and video URL for first slide
+          if (slides.length > 0) {
+            setActiveSlideImageUrl(slides[0].image_url || null);
+            setActiveSlideVideoUrl(slides[0].video_url || null);
+          }
+        }}
+        onSlideChange={(swiper) => {
+          // Update the scroll container when horizontal slide changes
+          handleSlideChange(swiper);
+          // Update background image and video when slide changes
+          const currentSlide = slides[swiper.activeIndex];
+          setActiveSlideImageUrl(currentSlide?.image_url || null);
+          setActiveSlideVideoUrl(currentSlide?.video_url || null);
+        }}
+      >
+        {slides.map((slide) => (
+          <SwiperSlide key={slide.id}>
+            {renderSlideContent(slide, icons, isMobile)}
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    );
+  };
+
+  // Get slides for a row
+  const getSlidesForRow = (rowId: string): Slide[] => {
+    return slidesCache[rowId] || [];
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px'}}>
+        <div className="text-center">
+          <p className="text-xl text-black">Loading content...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px'}}>
+        <div className="text-center">
+          <p className="text-xl text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Reload
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // No content state
+  if (slideRows.length === 0) {
+    return (
+      <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px'}}>
+        <div className="text-center">
+          <p className="text-xl text-black">No content available</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
-      <main className="absolute inset-0 overflow-hidden" style={{padding: '50px'}}>
+    <main className="absolute inset-0 overflow-hidden" style={{padding: '50px'}}>
+      {/* Desktop View - Vertical Swiper with nested Horizontal Swipers */}
       <div className="hidden md:block h-full">
-        {/* Full width main content with Swiper */}
         <div className="h-full">
           <Swiper
+            direction="vertical"
             spaceBetween={20}
             slidesPerView={1}
             className="h-full"
             onSwiper={(swiper) => {
-              console.log('Desktop Swiper initialized:', swiper);
+              console.log('Desktop Vertical Swiper initialized:', swiper);
               setSwiperRef(swiper);
-              // Initialize with first slide
               setTimeout(() => handleSlideChange(swiper), 100);
             }}
-            onSlideChange={handleSlideChange}
+            onSlideChange={(swiper) => {
+              handleSlideChange(swiper);
+
+              // Load slides for the active row and update active row ID
+              const activeRow = slideRows[swiper.activeIndex];
+              if (activeRow) {
+                loadSlidesForRow(activeRow.id);
+                setActiveRow(activeRow.id);
+
+                // Update background image and video for first slide of the new row
+                const rowSlides = getSlidesForRow(activeRow.id);
+                if (rowSlides.length > 0) {
+                  setActiveSlideImageUrl(rowSlides[0].image_url || null);
+                  setActiveSlideVideoUrl(rowSlides[0].video_url || null);
+                }
+
+                // Preload adjacent rows for smoother navigation
+                const nextIndex = swiper.activeIndex + 1;
+                const prevIndex = swiper.activeIndex - 1;
+                if (nextIndex < slideRows.length) {
+                  loadSlidesForRow(slideRows[nextIndex].id);
+                }
+                if (prevIndex >= 0) {
+                  loadSlidesForRow(slideRows[prevIndex].id);
+                }
+              }
+            }}
           >
-            <SwiperSlide>
-              <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-start gap-4 mb-4">
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-                </div>
-                <h1 className="text-4xl font-bold mb-4 text-black">Audio Library</h1>
-                <EssentialAudioPlayer
-                  audioUrl="/media/meditation-sample.mp3"
-                  preload={true}
-                  className="max-w-md"
-                />
-                <p className="text-black">
-                  Browse meditation tracks, yoga sessions, and spiritual courses.
-                </p>
-              </div>
-            </SwiperSlide>
+            {slideRows.map((row) => {
+              const slides = getSlidesForRow(row.id);
 
-            <SwiperSlide>
-              <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-start gap-4 mb-4">
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-                </div>
-                <h1 className="text-4xl font-bold mb-4 text-black">Playlists</h1>
-                <EssentialAudioPlayer
-                  audioUrl="/media/playlist-sample.mp3"
-                  preload={true}
-                  className="max-w-md"
-                />
-                <p className="text-black">
-                  Create and manage your personal playlists. Organize your favorite content by mood, activity, or spiritual practice.
-                </p>
-              </div>
-            </SwiperSlide>
-
-            <SwiperSlide>
-              <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-start gap-4 mb-4">
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-                </div>
-                <h1 className="text-4xl font-bold mb-4 text-black">Service Commitments</h1>
-                <EssentialAudioPlayer
-                  audioUrl="/media/service-sample.mp3"
-                  preload={true}
-                  className="max-w-md"
-                />
-                <p className="text-black">
-                  Daily service prompts and spiritual practices to deepen your journey and commitment to growth.
-                </p>
-              </div>
-            </SwiperSlide>
-
-            <SwiperSlide>
-              <div className="h-full overflow-y-auto p-4 flex flex-col justify-center">
-                <div className="flex justify-start gap-4 mb-4">
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                  <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-                </div>
-                <h1 className="text-4xl font-bold mb-4 text-black">Spiritual Teachings</h1>
-                <EssentialAudioPlayer
-                  audioUrl="/media/meditation-sample.mp3"
-                  preload={true}
-                  className="max-w-md mb-4"
-                />
-                <div className="text-black space-y-4">
-                  <p>Welcome to our comprehensive collection of spiritual teachings and wisdom traditions that have guided seekers for millennia. These ancient practices offer profound insights into the nature of consciousness, the path to inner peace, and the cultivation of compassion in daily life.</p>
-
-                  <p>The journey of spiritual development begins with self-awareness and the recognition that true fulfillment comes not from external circumstances, but from inner transformation. Through meditation, contemplation, and mindful living, we develop the capacity to observe our thoughts, emotions, and reactions without becoming entangled in them.</p>
-
-                  <p>Eastern wisdom traditions such as Buddhism, Hinduism, and Taoism emphasize the interconnectedness of all beings and the illusion of separateness that causes suffering. The Buddhist concept of emptiness teaches that all phenomena arise through interdependence, without inherent existence. This understanding naturally leads to compassion for all sentient beings.</p>
-
-                  <p>The practice of mindfulness, derived from ancient Buddhist meditation techniques, has been proven by modern neuroscience to literally rewire the brain, increasing areas associated with attention, emotional regulation, and empathy while decreasing the activity in regions linked to anxiety and stress.</p>
-
-                  <p>Western contemplative traditions, including Christian mysticism, Jewish Kabbalah, and Islamic Sufism, offer complementary approaches to spiritual development. These paths emphasize the direct experience of the divine through prayer, contemplation, and surrender of the ego-mind to a higher reality.</p>
-
-                  <p>The Hindu tradition of Advaita Vedanta points to the fundamental truth that individual consciousness and universal consciousness are one and the same. This recognition, achieved through inquiry and meditation, dissolves the illusion of separation and reveals our true nature as pure awareness.</p>
-
-                  <p>In the Zen tradition, enlightenment is understood as the sudden recognition of what has always been present - our original Buddha nature. Through the practice of sitting meditation (zazen) and koan study, practitioners develop the ability to see beyond the conceptual mind to the reality that underlies all experience.</p>
-
-                  <p>The Sufi path emphasizes the purification of the heart through love, remembrance of the divine, and service to others. The whirling meditation of the dervishes, the poetry of Rumi and Hafez, and the practice of dhikr (remembrance) all serve to dissolve the ego and awaken divine consciousness.</p>
-
-                  <p>Contemporary spiritual teachers like Eckhart Tolle, Adyashanti, and Rupert Spira have made these ancient teachings accessible to modern seekers, emphasizing the simplicity of awakening to our true nature in the present moment. Their teachings point to the fact that what we seek is not something to be attained in the future, but recognized as our current reality.</p>
-
-                  <p>The practice of yoga, literally meaning &ldquo;union,&rdquo; offers a complete system for physical, mental, and spiritual development. Through asanas (postures), pranayama (breath work), and meditation, practitioners prepare the body and mind for deeper states of consciousness and ultimately, samadhi or union with the divine.</p>
-
-                  <p>Sacred texts such as the Bhagavad Gita, the Tao Te Ching, the Bible, the Quran, and the Buddhist sutras contain timeless wisdom that speaks to the deepest questions of human existence. Regular study and contemplation of these texts, combined with personal practice, provides guidance for navigating the challenges of spiritual growth.</p>
-
-                  <p>The cultivation of virtues such as patience, compassion, humility, and wisdom naturally arises as we deepen our spiritual practice. These qualities are not mere ethical guidelines but spontaneous expressions of our awakened nature, manifesting as we align more closely with truth and love.</p>
-                </div>
-              </div>
-            </SwiperSlide>
+              return (
+                <SwiperSlide key={row.id}>
+                  <div className="h-full">
+                    {renderHorizontalSwiper(row, slides, false)}
+                  </div>
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         </div>
       </div>
 
-      {/* Mobile fallback with Swiper */}
+      {/* Mobile View - Vertical Swiper with nested Horizontal Swipers */}
       <div className="md:hidden h-full">
         <Swiper
+          direction="vertical"
           spaceBetween={20}
           slidesPerView={1}
           className="h-full"
           onSwiper={(swiper) => {
-            // Only set ref for mobile if we're actually on mobile
             if (window.innerWidth < 768) {
               setSwiperRef(swiper);
               setTimeout(() => handleSlideChange(swiper), 100);
             }
           }}
-          onSlideChange={handleSlideChange}
+          onSlideChange={(swiper) => {
+            handleSlideChange(swiper);
+
+            // Load slides for the active row and update active row ID
+            const activeRow = slideRows[swiper.activeIndex];
+            if (activeRow) {
+              loadSlidesForRow(activeRow.id);
+              setActiveRow(activeRow.id);
+
+              // Update background image and video for first slide of the new row
+              const rowSlides = getSlidesForRow(activeRow.id);
+              if (rowSlides.length > 0) {
+                setActiveSlideImageUrl(rowSlides[0].image_url || null);
+                setActiveSlideVideoUrl(rowSlides[0].video_url || null);
+              }
+
+              // Preload adjacent rows for smoother navigation
+              const nextIndex = swiper.activeIndex + 1;
+              const prevIndex = swiper.activeIndex - 1;
+              if (nextIndex < slideRows.length) {
+                loadSlidesForRow(slideRows[nextIndex].id);
+              }
+              if (prevIndex >= 0) {
+                loadSlidesForRow(slideRows[prevIndex].id);
+              }
+            }
+          }}
         >
-          <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
-              <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-              </div>
-              <h1 className="text-4xl font-bold mb-4 text-black">Audio Library</h1>
-              <EssentialAudioPlayer
-                audioUrl="/media/meditation-sample.mp3"
-                preload={true}
-                className="w-full max-w-md mb-4"
-              />
-              <p className="text-black">
-                Browse meditation tracks, yoga sessions, and spiritual courses.
-              </p>
-            </div>
-          </SwiperSlide>
+          {slideRows.map((row) => {
+            const slides = getSlidesForRow(row.id);
 
-          <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
-              <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-              </div>
-              <h1 className="text-4xl font-bold mb-4 text-black">Playlists</h1>
-              <EssentialAudioPlayer
-                audioUrl="/media/playlist-sample.mp3"
-                preload={true}
-                className="w-full max-w-md mb-4"
-              />
-              <p className="text-black">
-                Create and manage your personal playlists. Organize your favorite content by mood, activity, or spiritual practice.
-              </p>
-            </div>
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-center items-start">
-              <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-              </div>
-              <h1 className="text-4xl font-bold mb-4 text-black">Service Commitments</h1>
-              <EssentialAudioPlayer
-                audioUrl="/media/service-sample.mp3"
-                preload={true}
-                className="w-full max-w-md mb-4"
-              />
-              <p className="text-black">
-                Daily service prompts and spiritual practices to deepen your journey and commitment to growth.
-              </p>
-            </div>
-          </SwiperSlide>
-
-          <SwiperSlide>
-            <div className="h-full overflow-y-auto p-4 flex flex-col justify-start items-start">
-              <div className="flex justify-start gap-4 mb-4 w-full">
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>check_circle_unread</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>clock_arrow_up</span>
-                <span className="material-symbols-rounded" style={{fontSize: '24px', fontWeight: '100', fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24", color: 'var(--icon-color)'}}>select_check_box</span>
-              </div>
-              <h1 className="text-4xl font-bold mb-4 text-black">Spiritual Teachings</h1>
-              <EssentialAudioPlayer
-                audioUrl="/media/meditation-sample.mp3"
-                preload={true}
-                className="w-full max-w-md mb-4"
-              />
-              <div className="text-black space-y-4">
-                <p>Welcome to our comprehensive collection of spiritual teachings and wisdom traditions that have guided seekers for millennia. These ancient practices offer profound insights into the nature of consciousness, the path to inner peace, and the cultivation of compassion in daily life.</p>
-
-                <p>The journey of spiritual development begins with self-awareness and the recognition that true fulfillment comes not from external circumstances, but from inner transformation. Through meditation, contemplation, and mindful living, we develop the capacity to observe our thoughts, emotions, and reactions without becoming entangled in them.</p>
-
-                <p>Eastern wisdom traditions such as Buddhism, Hinduism, and Taoism emphasize the interconnectedness of all beings and the illusion of separateness that causes suffering. The Buddhist concept of emptiness teaches that all phenomena arise through interdependence, without inherent existence. This understanding naturally leads to compassion for all sentient beings.</p>
-
-                <p>The practice of mindfulness, derived from ancient Buddhist meditation techniques, has been proven by modern neuroscience to literally rewire the brain, increasing areas associated with attention, emotional regulation, and empathy while decreasing the activity in regions linked to anxiety and stress.</p>
-
-                <p>Western contemplative traditions, including Christian mysticism, Jewish Kabbalah, and Islamic Sufism, offer complementary approaches to spiritual development. These paths emphasize the direct experience of the divine through prayer, contemplation, and surrender of the ego-mind to a higher reality.</p>
-
-                <p>The Hindu tradition of Advaita Vedanta points to the fundamental truth that individual consciousness and universal consciousness are one and the same. This recognition, achieved through inquiry and meditation, dissolves the illusion of separation and reveals our true nature as pure awareness.</p>
-
-                <p>In the Zen tradition, enlightenment is understood as the sudden recognition of what has always been present - our original Buddha nature. Through the practice of sitting meditation (zazen) and koan study, practitioners develop the ability to see beyond the conceptual mind to the reality that underlies all experience.</p>
-
-                <p>The Sufi path emphasizes the purification of the heart through love, remembrance of the divine, and service to others. The whirling meditation of the dervishes, the poetry of Rumi and Hafez, and the practice of dhikr (remembrance) all serve to dissolve the ego and awaken divine consciousness.</p>
-
-                <p>Contemporary spiritual teachers like Eckhart Tolle, Adyashanti, and Rupert Spira have made these ancient teachings accessible to modern seekers, emphasizing the simplicity of awakening to our true nature in the present moment. Their teachings point to the fact that what we seek is not something to be attained in the future, but recognized as our current reality.</p>
-
-                <p>The practice of yoga, literally meaning &ldquo;union,&rdquo; offers a complete system for physical, mental, and spiritual development. Through asanas (postures), pranayama (breath work), and meditation, practitioners prepare the body and mind for deeper states of consciousness and ultimately, samadhi or union with the divine.</p>
-
-                <p>Sacred texts such as the Bhagavad Gita, the Tao Te Ching, the Bible, the Quran, and the Buddhist sutras contain timeless wisdom that speaks to the deepest questions of human existence. Regular study and contemplation of these texts, combined with personal practice, provides guidance for navigating the challenges of spiritual growth.</p>
-
-                <p>The cultivation of virtues such as patience, compassion, humility, and wisdom naturally arises as we deepen our spiritual practice. These qualities are not mere ethical guidelines but spontaneous expressions of our awakened nature, manifesting as we align more closely with truth and love.</p>
-              </div>
-            </div>
-          </SwiperSlide>
+            return (
+              <SwiperSlide key={row.id}>
+                <div className="h-full">
+                  {renderHorizontalSwiper(row, slides, true)}
+                </div>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       </div>
     </main>

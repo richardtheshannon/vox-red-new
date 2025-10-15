@@ -30,7 +30,12 @@
       "Bash(railway --version)",
       "Bash(railway status:*)",
       "Bash(railway projects:*)",
-      "Bash(railway:*)"
+      "Bash(railway:*)",
+      "Bash(if not exist \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\lib\\queries\" mkdir \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\lib\\queries\")",
+      "Bash(tsx scripts/verify-slides.ts:*)",
+      "Bash(dir:*)",
+      "Bash(timeout:*)",
+      "Bash(del nul)"
     ],
     "deny": [],
     "ask": []
