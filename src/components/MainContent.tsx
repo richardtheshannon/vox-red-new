@@ -15,6 +15,7 @@ interface MainContentProps {
   setActiveRow: (rowId: string) => void;
   setActiveSlideImageUrl: (imageUrl: string | null) => void;
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
+  activeSlideVideoUrl: string | null;
 }
 
 // TypeScript interfaces for API data
@@ -32,7 +33,7 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -144,6 +145,24 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     const containerClass = slide.layout_type === 'OVERFLOW'
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
+
+    // If video exists, only show audio player (if present) and allow clicks to pass through
+    if (slide.video_url) {
+      return (
+        <div className={containerClass} style={{ pointerEvents: 'none' }}>
+          {/* Audio Player (if audio_url exists) */}
+          {slide.audio_url && (
+            <div style={{ pointerEvents: 'auto' }}>
+              <EssentialAudioPlayer
+                audioUrl={slide.audio_url}
+                preload={true}
+                className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
 
     // Determine text color based on slide-specific theme or global theme
     const getTextColor = () => {
@@ -345,8 +364,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   return (
     <main className="absolute inset-0 overflow-hidden" style={{padding: '50px', zIndex: 20, backgroundColor: 'transparent', pointerEvents: 'none'}}>
       {/* Desktop View - Vertical Swiper with nested Horizontal Swipers */}
-      <div className="hidden md:block h-full" style={{pointerEvents: 'auto'}}>
-        <div className="h-full">
+      <div className="hidden md:block h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
+        <div className="h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
           <Swiper
             direction="vertical"
             spaceBetween={20}
@@ -390,7 +409,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
               return (
                 <SwiperSlide key={row.id}>
-                  <div className="h-full">
+                  <div className="h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
                     {renderHorizontalSwiper(row, slides, false)}
                   </div>
                 </SwiperSlide>
@@ -401,7 +420,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       </div>
 
       {/* Mobile View - Vertical Swiper with nested Horizontal Swipers */}
-      <div className="md:hidden h-full" style={{pointerEvents: 'auto'}}>
+      <div className="md:hidden h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
         <Swiper
           direction="vertical"
           spaceBetween={20}
@@ -446,7 +465,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
             return (
               <SwiperSlide key={row.id}>
-                <div className="h-full">
+                <div className="h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
                   {renderHorizontalSwiper(row, slides, true)}
                 </div>
               </SwiperSlide>

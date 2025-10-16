@@ -2,7 +2,7 @@
 
 **Project**: Icon Border Template - Spiritual Content Platform
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: October 15, 2025
+**Last Updated**: October 16, 2025
 
 Imortant: DO NOT CREATE A NUL FILE
 ---
@@ -137,11 +137,18 @@ npm run db:slides:seed   # Seed slide content
 - `src/components/RightIconBar.tsx` - Right sidebar (z-10, videocam toggle)
 
 ### Admin
+- `src/app/admin/page.tsx` - Admin dashboard main page
 - `src/app/admin/slides/page.tsx` - Slide row list
 - `src/app/admin/slides/new/page.tsx` - Create row
 - `src/app/admin/slides/[id]/edit/page.tsx` - Edit row metadata
 - `src/app/admin/slides/[id]/page.tsx` - Slide manager (reorder slides)
 - `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
+- `src/components/admin/AdminQuickActions.tsx` - Reusable quick actions sidebar (all admin pages)
+- `src/components/admin/AdminMainContent.tsx` - Admin dashboard content
+- `src/components/admin/AdminTopIconBar.tsx` - Admin header (z-10, theme-based background)
+- `src/components/admin/AdminBottomIconBar.tsx` - Admin footer (z-10, theme-based background)
+- `src/components/admin/AdminLeftIconBar.tsx` - Admin left sidebar (z-10, theme-based background)
+- `src/components/admin/AdminRightIconBar.tsx` - Admin right sidebar (z-10, expandable)
 - `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI
 - `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
 
@@ -182,6 +189,16 @@ npm run db:slides:seed   # Seed slide content
 - **Cover Mode**: Full-screen like `background-size: cover` (default)
 - **Contained Mode**: 60px padding, 16:9 aspect ratio, fits viewport
 - Toggle via videocam icon in right sidebar (only visible when video present)
+- **Interactivity Fix**: MainContent passes `activeSlideVideoUrl` prop for conditional pointer-events handling
+- When video present: Swiper containers use `pointer-events: none` to allow video interaction
+- YouTube iframe at z-10 receives clicks through MainContent at z-20
+
+### Admin Interface
+- **50px Icon Border Layout**: All admin pages maintain consistent border layout
+- **Solid Theme Backgrounds**: All admin icon bars use `var(--bg-color)` (light/dark adaptive)
+- **Admin Quick Actions Sidebar**: Consistent left column (12.5% width, 150-200px range) on all pages
+  - Links: "Admin Dashboard" → `/admin`, "View Live Site" → `/`, "Manage Articles" → `/admin/slides`
+  - Component: `AdminQuickActions.tsx` (reusable across all admin pages)
 
 ---
 
@@ -303,6 +320,32 @@ npm run lint
 
 ## Recent Critical Updates
 
+### YouTube Video Interactivity Fix (Oct 16, 2025)
+Fixed YouTube video click-through issue. Added `activeSlideVideoUrl` prop to MainContent component, passed from page.tsx. When video present, Swiper containers apply `pointer-events: none` to allow clicks to reach YouTube iframe at z-10. Audio player remains interactive with explicit `pointer-events: auto`. Icon bars at z-20 remain visible and functional.
+
+**Files Modified**:
+- `src/components/MainContent.tsx` - Added prop, conditional pointer-events on desktop/mobile wrappers
+- `src/app/page.tsx` - Pass activeSlideVideoUrl to MainContentWithRef
+
+### Admin Interface Consistency Updates (Oct 16, 2025)
+Standardized admin interface with theme-aware backgrounds and consistent quick actions sidebar across all pages.
+
+**Changes**:
+1. **Solid Theme Backgrounds**: All admin icon bars now use `var(--bg-color)` for light/dark theme adaptation
+   - Files: `AdminTopIconBar.tsx`, `AdminBottomIconBar.tsx`, `AdminLeftIconBar.tsx`, `AdminRightIconBar.tsx`
+2. **Admin Quick Actions Component**: Created reusable sidebar component with consistent width (12.5%, 150-200px)
+   - Component: `src/components/admin/AdminQuickActions.tsx`
+   - Links: "Admin Dashboard", "View Live Site", "Manage Articles"
+   - Applied to all 6 admin pages for consistent navigation
+
+**Admin Pages Updated**:
+- `/admin` (main dashboard)
+- `/admin/slides` (slide list)
+- `/admin/slides/new` (create row)
+- `/admin/slides/[id]` (slide manager)
+- `/admin/slides/[id]/edit` (edit row)
+- `/admin/slides/[id]/slide/[slideId]` (slide editor)
+
 ### Per-Slide Theme Settings (Oct 15, 2025)
 Added `content_theme`, `title_bg_opacity`, `body_bg_opacity` columns to slides table. Admin UI includes dropdown + sliders. Frontend applies theme-aware semi-transparent backgrounds. Migration runs automatically on Railway via `railway-init.ts`.
 
@@ -317,4 +360,4 @@ Icon borders conditionally transparent when background images present. `.no-grad
 
 ---
 
-**Lines**: ~480 | **Status**: Production Ready | **Railway**: Deployment Safe
+**Lines**: ~540 | **Status**: Production Ready | **Railway**: Deployment Safe

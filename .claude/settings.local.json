@@ -39,7 +39,8 @@
       "Bash(cmd /c:*)",
       "Bash(set DB_PASSWORD=Superculture1@)",
       "Bash(git reset:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(if exist \".next\" rmdir /s /q .next)"
     ],
     "deny": [],
     "ask": []

@@ -6,6 +6,7 @@ import AdminTopIconBar from '@/components/admin/AdminTopIconBar';
 import AdminBottomIconBar from '@/components/admin/AdminBottomIconBar';
 import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
+import AdminQuickActions from '@/components/admin/AdminQuickActions';
 import SlideManager from '@/components/admin/slides/SlideManager';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Slide } from '@/lib/queries/slides';
@@ -126,9 +127,14 @@ export default function ManageSlidesPage() {
 
         {/* Main Content Area */}
         <div className="absolute inset-0" style={{ padding: '50px' }}>
-          <div className="h-full flex">
+          <div className="h-full flex gap-4">
             {/* Left Sidebar */}
             <AdminLeftIconBar />
+
+            {/* Quick Actions Column */}
+            <div style={{ width: '12.5%', minWidth: '150px', maxWidth: '200px' }} className="flex-shrink-0">
+              <AdminQuickActions />
+            </div>
 
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto p-8">

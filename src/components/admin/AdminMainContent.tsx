@@ -1,18 +1,12 @@
+import AdminQuickActions from './AdminQuickActions';
+
 export default function AdminMainContent() {
   return (
     <main className="absolute inset-0 overflow-y-auto" style={{padding: '50px'}}>
       <div className="hidden md:grid md:grid-cols-8 gap-4 h-full">
         {/* Left Column - 1/8 width */}
         <div className="col-span-1">
-          <div className="h-full bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Admin Quick Actions</h3>
-            <div className="space-y-2 text-xs text-gray-600">
-              <p>Recent Activity</p>
-              <p>User Approvals</p>
-              <p>System Alerts</p>
-              <p>Pending Reviews</p>
-            </div>
-          </div>
+          <AdminQuickActions />
         </div>
 
         {/* Main Column - 6/8 width */}

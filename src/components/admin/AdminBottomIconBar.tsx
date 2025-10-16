@@ -4,7 +4,7 @@ interface AdminBottomIconBarProps {
 
 export default function AdminBottomIconBar({ onMenuClick }: AdminBottomIconBarProps) {
   return (
-    <footer className="icon-container fixed bottom-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem'}}>
+    <footer className="icon-container fixed bottom-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem', backgroundColor: 'var(--bg-color)'}}>
       <div className="flex items-center">
         <span className="material-symbols-outlined" title="Import Export">import_export</span>
         <span className="material-symbols-outlined" title="Backup">backup</span>

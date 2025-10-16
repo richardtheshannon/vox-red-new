@@ -38,8 +38,8 @@
   --right-sidebar-bg: transparent;
   --icon-hover: #ef4444;
   --content-bg: #1a1a1a;
-  --progress-bg: #374151;
-  --card-bg: #374151;
+  --progress-bg: #232323;
+  --card-bg: #232323;
   --border-color: #4b5563;
   --secondary-text: #d1d5db;
 }
@@ -155,6 +155,17 @@ h1, h2, h3, h4, h5, h6, p, span, div {
     'opsz' 24
 }
 
+/* Icon containers - allow clicks to pass through except on icons */
+.icon-container {
+  pointer-events: none;
+}
+
+/* Allow pointer events on child divs and links */
+.icon-container > div,
+.icon-container a {
+  pointer-events: auto;
+}
+
 /* Style for the icons for better visual feedback */
 .icon-container .material-symbols-outlined {
   font-size: 24px; /* Icon size */
@@ -164,6 +175,7 @@ h1, h2, h3, h4, h5, h6, p, span, div {
   cursor: pointer;
   color: var(--icon-color);
   transition: color 0.2s ease-in-out;
+  pointer-events: auto;
 }
 
 /* Hover effects removed */
@@ -179,6 +191,7 @@ h1, h2, h3, h4, h5, h6, p, span, div {
   cursor: pointer;
   color: var(--icon-color);
   transition: color 0.2s ease-in-out;
+  pointer-events: auto;
 }
 
 /* Hover effects removed */
@@ -434,7 +447,7 @@ body:has(.admin-sidebar:hover) {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 10; /* Above background image (z-0) but below content (z-20) */
+  z-index: 10; /* Above background image (z-0), same level as sidebars, below icon bars (z-20) */
   pointer-events: none; /* Allow clicks to pass through to content */
   transition: opacity 0.5s ease;
   overflow: hidden;

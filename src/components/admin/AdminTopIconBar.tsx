@@ -5,7 +5,7 @@ export default function AdminTopIconBar() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem'}}>
+    <header className="icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem', backgroundColor: 'var(--bg-color)'}}>
       <div className="flex items-center">
         <Link href="/admin">
           <span className="material-symbols-outlined" title="Dashboard">dashboard</span>

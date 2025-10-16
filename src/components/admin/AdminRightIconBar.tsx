@@ -4,7 +4,7 @@ interface AdminRightIconBarProps {
 
 export default function AdminRightIconBar({ isExpanded }: AdminRightIconBarProps) {
   return (
-    <aside className={`admin-sidebar icon-container fixed right-0 flex flex-col justify-between z-10 ${isExpanded ? 'expanded' : 'collapsed'}`} style={{padding: '0.2rem'}}>
+    <aside className={`admin-sidebar icon-container fixed right-0 flex flex-col justify-between z-10 ${isExpanded ? 'expanded' : 'collapsed'}`} style={{padding: '0.2rem', backgroundColor: 'var(--bg-color)'}}>
       <div className="flex flex-col">
         <div className="flex items-center justify-end gap-2">
           {isExpanded && <span>Analytics</span>}

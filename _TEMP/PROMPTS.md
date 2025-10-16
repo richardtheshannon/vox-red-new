@@ -1,8 +1,7 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
 
-The linear gradient background in the icon-containers, lets remove them, all of them. 
-
+Lets implement Phase 2 of the "Course Import Feature.md" in the _TEMP directory. 
 -----------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 

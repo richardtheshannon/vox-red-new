@@ -125,6 +125,7 @@ export default function Home() {
             setActiveRow={setActiveRow}
             setActiveSlideImageUrl={setActiveSlideImageUrl}
             setActiveSlideVideoUrl={setActiveSlideVideoUrl}
+            activeSlideVideoUrl={activeSlideVideoUrl}
           />
         </SwiperProvider>
       </div>
@@ -138,13 +139,15 @@ function MainContentWithRef({
   handleSlideChange,
   setActiveRow,
   setActiveSlideImageUrl,
-  setActiveSlideVideoUrl
+  setActiveSlideVideoUrl,
+  activeSlideVideoUrl
 }: {
   setSwiperRef: (swiper: SwiperType | null) => void;
   handleSlideChange: (swiper: SwiperType) => void;
   setActiveRow: (rowId: string) => void;
   setActiveSlideImageUrl: (imageUrl: string | null) => void;
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
+  activeSlideVideoUrl: string | null;
 }) {
   return (
     <MainContent
@@ -153,6 +156,7 @@ function MainContentWithRef({
       setActiveRow={setActiveRow}
       setActiveSlideImageUrl={setActiveSlideImageUrl}
       setActiveSlideVideoUrl={setActiveSlideVideoUrl}
+      activeSlideVideoUrl={activeSlideVideoUrl}
     />
   );
 }

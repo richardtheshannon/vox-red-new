@@ -20,9 +20,10 @@ interface SlideRowListProps {
   rows: SlideRow[];
   onDelete: (id: string) => void;
   onRefresh: () => void;
+  onImportClick: () => void;
 }
 
-export default function SlideRowList({ rows, onDelete, onRefresh }: SlideRowListProps) {
+export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick }: SlideRowListProps) {
   const [filter, setFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'created' | 'title' | 'slides'>('created');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -64,16 +65,28 @@ export default function SlideRowList({ rows, onDelete, onRefresh }: SlideRowList
     <div className="space-y-4">
       {/* Header with Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <Link
-          href="/admin/slides/new"
-          className="px-4 py-2 rounded transition-opacity hover:opacity-80"
-          style={{
-            backgroundColor: '#dc2626',
-            color: 'white'
-          }}
-        >
-          + Create New Slide Row
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/admin/slides/new"
+            className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#dc2626',
+              color: 'white'
+            }}
+          >
+            + Create New Slide Row
+          </Link>
+          <button
+            onClick={onImportClick}
+            className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#16a34a',
+              color: 'white'
+            }}
+          >
+            Import Course
+          </button>
+        </div>
 
         <div className="flex flex-wrap gap-3 items-center">
           {/* Type Filter */}
