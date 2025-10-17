@@ -141,13 +141,17 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   };
 
   // Render slide content
-  const renderSlideContent = (slide: Slide, icons: string[], isMobile: boolean = false) => {
+  const renderSlideContent = (slide: Slide, icons: string[], row: SlideRow, isMobile: boolean = false) => {
     const containerClass = slide.layout_type === 'OVERFLOW'
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
 
     // If video exists, only show audio player (if present) and allow clicks to pass through
     if (slide.video_url) {
+      // Get text color for pill styling
+      const effectiveTheme = slide.content_theme || globalTheme;
+      const textColor = effectiveTheme === 'light' ? '#ffffff' : '#000000';
+
       return (
         <div className={containerClass} style={{ pointerEvents: 'none' }}>
           {/* Audio Player (if audio_url exists) */}
@@ -158,6 +162,41 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 preload={true}
                 className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
               />
+              {/* Subtitle and Row Type Pills */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {slide.subtitle && (
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: textColor === '#ffffff'
+                        ? 'rgba(0, 0, 0, 0.3)'
+                        : 'rgba(255, 255, 255, 0.3)',
+                      color: textColor
+                    }}
+                  >
+                    {slide.subtitle}
+                  </div>
+                )}
+                <div
+                  style={{
+                    display: 'inline-block',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    backgroundColor: textColor === '#ffffff'
+                      ? 'rgba(0, 0, 0, 0.3)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    color: textColor
+                  }}
+                >
+                  {row.row_type.charAt(0) + row.row_type.slice(1).toLowerCase()}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -237,28 +276,50 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           </h1>
         </div>
 
-        {/* Subtitle (if exists) */}
-        {slide.subtitle && (
-          <div style={createBgStyle(slide.title_bg_opacity)} className="mt-4">
-            <h2
-              className="text-2xl font-semibold mb-4"
-              style={{
-                color: textColor || '#4b5563',
-                marginBottom: slide.title_bg_opacity ? '0' : undefined
-              }}
-            >
-              {slide.subtitle}
-            </h2>
-          </div>
-        )}
-
         {/* Audio Player (if audio_url exists) */}
         {slide.audio_url && (
-          <EssentialAudioPlayer
-            audioUrl={slide.audio_url}
-            preload={true}
-            className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
-          />
+          <>
+            <EssentialAudioPlayer
+              audioUrl={slide.audio_url}
+              preload={true}
+              className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
+            />
+            {/* Subtitle and Row Type Pills */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              {slide.subtitle && (
+                <div
+                  style={{
+                    display: 'inline-block',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    backgroundColor: textColor === '#ffffff'
+                      ? 'rgba(0, 0, 0, 0.3)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    color: textColor || '#000000'
+                  }}
+                >
+                  {slide.subtitle}
+                </div>
+              )}
+              <div
+                style={{
+                  display: 'inline-block',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  backgroundColor: textColor === '#ffffff'
+                    ? 'rgba(0, 0, 0, 0.3)'
+                    : 'rgba(255, 255, 255, 0.3)',
+                  color: textColor || '#000000'
+                }}
+              >
+                {row.row_type.charAt(0) + row.row_type.slice(1).toLowerCase()}
+              </div>
+            </div>
+          </>
         )}
 
         {/* Body Content */}
@@ -310,7 +371,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id}>
-            {renderSlideContent(slide, icons, isMobile)}
+            {renderSlideContent(slide, icons, row, isMobile)}
           </SwiperSlide>
         ))}
       </Swiper>

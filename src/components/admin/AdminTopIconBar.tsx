@@ -10,10 +10,13 @@ export default function AdminTopIconBar() {
         <Link href="/admin">
           <span className="material-symbols-outlined" title="Dashboard">dashboard</span>
         </Link>
-        <span className="material-symbols-outlined" title="Bug Report">bug_report</span>
         <Link href="/admin/slides">
           <span className="material-symbols-outlined" title="Documentation">description</span>
         </Link>
+        <a href="https://media.lilde.com" target="_blank" rel="noopener noreferrer">
+          <span className="material-symbols-outlined" title="Media">perm_media</span>
+        </a>
+        <span className="material-symbols-outlined" title="Bug Report">bug_report</span>
       </div>
       <div className="flex items-center">
         <Link href="/">

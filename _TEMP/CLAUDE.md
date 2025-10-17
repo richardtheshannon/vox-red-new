@@ -320,6 +320,26 @@ npm run lint
 
 ## Recent Critical Updates
 
+### Subtitle and Row Type Pills (Oct 17, 2025)
+Redesigned subtitle display as compact pill badges alongside row type indicators beneath the MP3 player.
+
+**Changes**:
+- **Subtitle Display**: Removed large h2 subtitle heading, now displays as first pill in horizontal row
+- **Row Type Badge**: Added row type (ROUTINE/COURSE/TEACHING/CUSTOM) as second pill
+- **Styling**: Theme-aware semi-transparent pills (30% opacity), 12px font, 8px gap between pills
+- **Layout**: Flexbox row with wrap support, appears 8px below audio player
+- **Conditional**: Only displays when audio player exists (maintains existing logic)
+- **Formatting**: Row type capitalized (e.g., "Course"), subtitle displays as-is
+
+**Files Modified**:
+- `src/components/MainContent.tsx` - Updated `renderSlideContent()` signature, removed subtitle h2 section, added pill row for both video and non-video slides
+
+**Benefits**:
+- Cleaner, more compact slide layout
+- Consistent metadata display pattern
+- Better visual hierarchy (title remains prominent, subtitle becomes supporting detail)
+- Theme-aware styling matches existing per-slide theme system
+
 ### YouTube Video Interactivity Fix (Oct 16, 2025)
 Fixed YouTube video click-through issue. Added `activeSlideVideoUrl` prop to MainContent component, passed from page.tsx. When video present, Swiper containers apply `pointer-events: none` to allow clicks to reach YouTube iframe at z-10. Audio player remains interactive with explicit `pointer-events: auto`. Icon bars at z-20 remain visible and functional.
 
