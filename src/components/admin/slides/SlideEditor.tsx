@@ -123,6 +123,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       // Apply unified opacity to both title and body in preview
       title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
       body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
+      is_published: slide?.is_published ?? true,
       view_count: slide?.view_count || 0,
       completion_count: slide?.completion_count || 0,
       created_at: slide?.created_at || new Date(),

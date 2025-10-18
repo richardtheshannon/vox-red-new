@@ -1,7 +1,10 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
 
-when adding an MP3 for a slide, there should be a field to paste a  link to an MP3, not upload a file. 
+When managing slides, for example this view: /admin/slides/a605064b-f2bc-4561-b7dc-89cb9d067e8f I would like check boxes to mark slides as published or unpublished, so that we can have an option to "select all" and then publish all or unpublish all. As well, we should be able to publish and unpublish them individually.
+
+On each individual slide, I would like a section for dynamic publishing. 
+I would like to be able to set a slide to only publish on certain days of the week, for example" "Friday" "Sunday" "Tuesday" and or have it published according to time of day (prefferably the users browser or system time and time zone) For example, an article could only be published on: Saturday, Sunday, Monday from 5pm - 3am. 
 
 
 -----------------------------------------------------------------
