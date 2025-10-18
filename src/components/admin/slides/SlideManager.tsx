@@ -50,17 +50,17 @@ function SlideItem({
 
   return (
     <>
-      <div className="mb-4">
+      <div className="mb-3">
         <div
           style={{
             backgroundColor: 'var(--card-bg)',
             border: '1px solid var(--border-color)',
-            padding: '1.5rem',
+            padding: '1rem',
             borderRadius: '0.5rem',
           }}
         >
-          {/* Position Badge and Reorder Controls */}
-          <div className="flex items-start gap-4">
+          {/* Condensed Header with Controls, Title, and Buttons */}
+          <div className="flex items-center gap-3">
             {/* Reorder Buttons */}
             <div className="flex-shrink-0 flex flex-col gap-1">
               <button
@@ -78,7 +78,7 @@ function SlideItem({
                 }}
                 title="Move up"
               >
-                <span className="material-symbols-rounded" style={{ fontSize: '20px', color: 'var(--icon-color)' }}>
+                <span className="material-symbols-rounded" style={{ fontSize: '18px', color: 'var(--icon-color)' }}>
                   expand_less
                 </span>
               </button>
@@ -97,7 +97,7 @@ function SlideItem({
                 }}
                 title="Move down"
               >
-                <span className="material-symbols-rounded" style={{ fontSize: '20px', color: 'var(--icon-color)' }}>
+                <span className="material-symbols-rounded" style={{ fontSize: '18px', color: 'var(--icon-color)' }}>
                   expand_more
                 </span>
               </button>
@@ -105,7 +105,7 @@ function SlideItem({
 
             {/* Position Badge */}
             <div
-              className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold"
+              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
               style={{
                 backgroundColor: '#dc2626',
                 color: 'white'
@@ -114,66 +114,66 @@ function SlideItem({
               {slide.position}
             </div>
 
-            <div className="flex-1">
-              {/* Title and Subtitle */}
-              <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-color)' }}>
+            {/* Title and Subtitle */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-bold truncate" style={{ color: 'var(--text-color)' }}>
                 {slide.title}
               </h3>
               {slide.subtitle && (
-                <p className="text-sm mb-2" style={{ color: 'var(--secondary-text)' }}>
+                <p className="text-xs truncate" style={{ color: 'var(--secondary-text)' }}>
                   {slide.subtitle}
                 </p>
               )}
+            </div>
 
-              {/* Body Preview */}
-              <p className="text-sm mb-3" style={{ color: 'var(--secondary-text)' }}>
-                {getBodyPreview(slide.body_content)}
-              </p>
+            {/* Action Buttons */}
+            <div className="flex gap-2 flex-shrink-0">
+              <Link
+                href={`/admin/slides/${rowId}/slide/${slide.id}`}
+                className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: 'white'
+                }}
+              >
+                Edit Slide
+              </Link>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirm(true);
+                }}
+                className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                style={{
+                  backgroundColor: '#991b1b',
+                  color: 'white'
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
 
-              {/* Metadata */}
-              <div className="flex items-center gap-4 mb-4 text-sm" style={{ color: 'var(--secondary-text)' }}>
-                {slide.audio_url && (
-                  <>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-rounded" style={{ fontSize: '16px' }}>
-                        audiotrack
-                      </span>
-                      {slide.audio_url.split('/').pop()}
+          {/* Body Preview and Metadata Row */}
+          <div className="flex items-center justify-between gap-4 mt-2 ml-11">
+            <p className="text-sm flex-1 truncate" style={{ color: 'var(--secondary-text)' }}>
+              {getBodyPreview(slide.body_content)}
+            </p>
+            <div className="flex items-center gap-3 text-xs flex-shrink-0" style={{ color: 'var(--secondary-text)' }}>
+              {slide.audio_url && (
+                <>
+                  <span className="flex items-center gap-1">
+                    <span className="material-symbols-rounded" style={{ fontSize: '14px' }}>
+                      audiotrack
                     </span>
-                    <span>•</span>
-                  </>
-                )}
-                <span>Views: {slide.view_count}</span>
-                <span>•</span>
-                <span>{slide.layout_type}</span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href={`/admin/slides/${rowId}/slide/${slide.id}`}
-                  className="px-4 py-2 rounded text-sm transition-opacity hover:opacity-80"
-                  style={{
-                    backgroundColor: '#dc2626',
-                    color: 'white'
-                  }}
-                >
-                  Edit Slide
-                </Link>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirm(true);
-                  }}
-                  className="px-4 py-2 rounded text-sm transition-opacity hover:opacity-80"
-                  style={{
-                    backgroundColor: '#991b1b',
-                    color: 'white'
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
+                    {slide.audio_url.split('/').pop()?.substring(0, 15)}
+                  </span>
+                  <span>•</span>
+                </>
+              )}
+              <span>Views: {slide.view_count}</span>
+              <span>•</span>
+              <span>{slide.layout_type}</span>
             </div>
           </div>
         </div>

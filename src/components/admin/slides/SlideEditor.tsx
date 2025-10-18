@@ -5,7 +5,6 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import AudioUploader from './AudioUploader';
 import SlidePreview from './SlidePreview';
 import IconPicker from './IconPicker';
 import { Slide } from '@/lib/queries/slides';
@@ -107,9 +106,6 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
     }
   };
 
-  const handleAudioUpload = (url: string) => {
-    setAudioUrl(url);
-  };
 
   const getPreviewData = (): Slide => {
     return {
@@ -356,12 +352,41 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
               Media Files
             </h2>
 
-            {/* Audio Upload */}
-            <AudioUploader
-              currentAudioUrl={audioUrl}
-              onUploadComplete={handleAudioUpload}
-              rowId={row.id}
-            />
+            {/* Audio URL Input */}
+            <div className="mb-4">
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
+                Audio File URL (MP3, WAV, OGG)
+              </label>
+              <input
+                type="text"
+                value={audioUrl}
+                onChange={(e) => setAudioUrl(e.target.value)}
+                placeholder="https://example.com/audio.mp3 or /media/audio.mp3"
+                className="w-full px-4 py-2 rounded"
+                style={{
+                  backgroundColor: 'var(--bg-color)',
+                  color: 'var(--text-color)',
+                  border: '1px solid var(--border-color)'
+                }}
+              />
+              <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                Paste a link to an MP3 file (external URL or local path like /media/audio.mp3)
+              </p>
+              {audioUrl && (
+                <div className="mt-2 p-2 rounded" style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-color)' }}>Current Audio:</p>
+                  <a
+                    href={audioUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs hover:underline"
+                    style={{ color: '#dc2626' }}
+                  >
+                    {audioUrl}
+                  </a>
+                </div>
+              )}
+            </div>
 
             {/* Image URL (simple text input for now) */}
             <div className="mt-4">

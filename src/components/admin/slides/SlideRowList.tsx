@@ -151,101 +151,106 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick 
           sortedRows.map((row) => (
             <div
               key={row.id}
-              className="p-6 rounded"
+              className="p-4 rounded"
               style={{
                 backgroundColor: 'var(--card-bg)',
                 border: '1px solid var(--border-color)'
               }}
             >
-              {/* Header */}
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span
-                      className="text-xs font-semibold px-2 py-1 rounded"
-                      style={{
-                        backgroundColor: row.theme_color || '#dc2626',
-                        color: 'white'
-                      }}
-                    >
-                      {row.row_type}
-                    </span>
-                    <span
-                      className="text-xs px-2 py-1 rounded"
-                      style={{
-                        backgroundColor: row.is_published ? '#16a34a' : '#64748b',
-                        color: 'white'
-                      }}
-                    >
-                      {row.is_published ? 'Published' : 'Draft'}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--text-color)' }}>
+              {/* Condensed Header with Title and Buttons */}
+              <div className="flex justify-between items-center gap-4 mb-2">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {/* Badges */}
+                  <span
+                    className="text-xs font-semibold px-2 py-1 rounded flex-shrink-0"
+                    style={{
+                      backgroundColor: row.theme_color || '#dc2626',
+                      color: 'white'
+                    }}
+                  >
+                    {row.row_type}
+                  </span>
+                  <span
+                    className="text-xs px-2 py-1 rounded flex-shrink-0"
+                    style={{
+                      backgroundColor: row.is_published ? '#16a34a' : '#64748b',
+                      color: 'white'
+                    }}
+                  >
+                    {row.is_published ? 'Published' : 'Draft'}
+                  </span>
+
+                  {/* Title */}
+                  <h3 className="text-lg font-bold truncate" style={{ color: 'var(--text-color)' }}>
                     {row.title}
                   </h3>
-                  {row.description && (
-                    <p className="text-sm mb-2" style={{ color: 'var(--secondary-text)' }}>
-                      {row.description}
-                    </p>
+
+                  {/* Icons */}
+                  {row.icon_set && row.icon_set.length > 0 && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      {row.icon_set.slice(0, 3).map((icon, idx) => (
+                        <span
+                          key={idx}
+                          className="material-symbols-rounded"
+                          style={{ fontSize: '20px', color: 'var(--icon-color)' }}
+                        >
+                          {icon}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
 
-                {/* Icons */}
-                {row.icon_set && row.icon_set.length > 0 && (
-                  <div className="flex gap-2 ml-4">
-                    {row.icon_set.map((icon, idx) => (
-                      <span
-                        key={idx}
-                        className="material-symbols-rounded"
-                        style={{ fontSize: '24px', color: 'var(--icon-color)' }}
-                      >
-                        {icon}
-                      </span>
-                    ))}
-                  </div>
+                {/* Action Buttons */}
+                <div className="flex gap-2 flex-shrink-0">
+                  <Link
+                    href={`/admin/slides/${row.id}/edit`}
+                    className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                    style={{
+                      backgroundColor: 'var(--bg-color)',
+                      color: 'var(--text-color)',
+                      border: '1px solid var(--border-color)'
+                    }}
+                  >
+                    Edit Row
+                  </Link>
+                  <Link
+                    href={`/admin/slides/${row.id}`}
+                    className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                    style={{
+                      backgroundColor: '#dc2626',
+                      color: 'white'
+                    }}
+                  >
+                    Manage Slides
+                  </Link>
+                  <button
+                    onClick={() => setDeleteConfirm(row.id)}
+                    className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                    style={{
+                      backgroundColor: '#991b1b',
+                      color: 'white'
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              {/* Description and Metadata */}
+              <div className="flex items-center justify-between gap-4 text-sm">
+                {row.description ? (
+                  <p className="flex-1 truncate" style={{ color: 'var(--secondary-text)' }}>
+                    {row.description}
+                  </p>
+                ) : (
+                  <div className="flex-1"></div>
                 )}
-              </div>
-
-              {/* Metadata */}
-              <div className="flex items-center gap-4 mb-4 text-sm" style={{ color: 'var(--secondary-text)' }}>
-                <span>{row.slide_count} slides</span>
-                <span>•</span>
-                <span>Created {formatDate(row.created_at)}</span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href={`/admin/slides/${row.id}/edit`}
-                  className="px-4 py-2 rounded text-sm transition-opacity hover:opacity-80"
-                  style={{
-                    backgroundColor: 'var(--bg-color)',
-                    color: 'var(--text-color)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
-                  Edit Row
-                </Link>
-                <Link
-                  href={`/admin/slides/${row.id}`}
-                  className="px-4 py-2 rounded text-sm transition-opacity hover:opacity-80"
-                  style={{
-                    backgroundColor: '#dc2626',
-                    color: 'white'
-                  }}
-                >
-                  Manage Slides
-                </Link>
-                <button
-                  onClick={() => setDeleteConfirm(row.id)}
-                  className="px-4 py-2 rounded text-sm transition-opacity hover:opacity-80"
-                  style={{
-                    backgroundColor: '#991b1b',
-                    color: 'white'
-                  }}
-                >
-                  Delete
-                </button>
+                <div className="flex items-center gap-3 flex-shrink-0" style={{ color: 'var(--secondary-text)' }}>
+                  <span>{row.slide_count} slides</span>
+                  <span>•</span>
+                  <span>Created {formatDate(row.created_at)}</span>
+                </div>
               </div>
 
               {/* Delete Confirmation Modal */}

@@ -141,7 +141,12 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   };
 
   // Render slide content
-  const renderSlideContent = (slide: Slide, icons: string[], row: SlideRow, isMobile: boolean = false) => {
+  const renderSlideContent = (slide: Slide, icons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true) => {
+    // Log audio URL for debugging (only for active slides to reduce noise)
+    if (slide.audio_url && isActive) {
+      console.log('[MainContent] Active Slide:', slide.id, 'Audio URL:', slide.audio_url);
+    }
+
     const containerClass = slide.layout_type === 'OVERFLOW'
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
@@ -154,16 +159,34 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
       return (
         <div className={containerClass} style={{ pointerEvents: 'none' }}>
-          {/* Audio Player (if audio_url exists) */}
-          {slide.audio_url && (
+          {/* Audio Player (if audio_url exists AND slide is active) */}
+          {slide.audio_url && isActive && (
             <div style={{ pointerEvents: 'auto' }}>
               <EssentialAudioPlayer
+                key={`audio-${slide.id}`}
                 audioUrl={slide.audio_url}
-                preload={true}
+                preload={false}
                 className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
               />
-              {/* Subtitle and Row Type Pills */}
+              {/* Row Description, Subtitle and Row Type Pills */}
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {row.description && (
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: textColor === '#ffffff'
+                        ? 'rgba(0, 0, 0, 0.3)'
+                        : 'rgba(255, 255, 255, 0.3)',
+                      color: textColor
+                    }}
+                  >
+                    {row.description}
+                  </div>
+                )}
                 {slide.subtitle && (
                   <div
                     style={{
@@ -276,16 +299,34 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           </h1>
         </div>
 
-        {/* Audio Player (if audio_url exists) */}
-        {slide.audio_url && (
+        {/* Audio Player (if audio_url exists AND slide is active) */}
+        {slide.audio_url && isActive && (
           <>
             <EssentialAudioPlayer
+              key={`audio-${slide.id}`}
               audioUrl={slide.audio_url}
-              preload={true}
+              preload={false}
               className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
             />
-            {/* Subtitle and Row Type Pills */}
+            {/* Row Description, Subtitle and Row Type Pills */}
             <div style={{ display: 'flex', gap: '8px', marginTop: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              {row.description && (
+                <div
+                  style={{
+                    display: 'inline-block',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    backgroundColor: textColor === '#ffffff'
+                      ? 'rgba(0, 0, 0, 0.3)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    color: textColor || '#000000'
+                  }}
+                >
+                  {row.description}
+                </div>
+              )}
               {slide.subtitle && (
                 <div
                   style={{
@@ -371,7 +412,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id}>
-            {renderSlideContent(slide, icons, row, isMobile)}
+            {({ isActive }) => renderSlideContent(slide, icons, row, isMobile, isActive)}
           </SwiperSlide>
         ))}
       </Swiper>
