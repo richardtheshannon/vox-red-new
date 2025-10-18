@@ -30,7 +30,9 @@ function SlideItem({
   onMoveUp,
   onMoveDown,
   isFirst,
-  isLast
+  isLast,
+  isSelected,
+  onToggleSelect,
 }: {
   slide: Slide;
   rowId: string;
@@ -39,6 +41,8 @@ function SlideItem({
   onMoveDown: (id: string) => void;
   isFirst: boolean;
   isLast: boolean;
+  isSelected: boolean;
+  onToggleSelect: (id: string) => void;
 }) {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -61,6 +65,15 @@ function SlideItem({
         >
           {/* Condensed Header with Controls, Title, and Buttons */}
           <div className="flex items-center gap-3">
+            {/* Checkbox */}
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelect(slide.id)}
+              className="flex-shrink-0 w-5 h-5 cursor-pointer"
+              style={{ accentColor: '#dc2626' }}
+            />
+
             {/* Reorder Buttons */}
             <div className="flex-shrink-0 flex flex-col gap-1">
               <button
@@ -116,9 +129,22 @@ function SlideItem({
 
             {/* Title and Subtitle */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold truncate" style={{ color: 'var(--text-color)' }}>
-                {slide.title}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold truncate" style={{ color: 'var(--text-color)' }}>
+                  {slide.title}
+                </h3>
+                {!slide.is_published && (
+                  <span
+                    className="px-2 py-0.5 text-xs rounded"
+                    style={{
+                      backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                      color: '#dc2626',
+                    }}
+                  >
+                    Unpublished
+                  </span>
+                )}
+              </div>
               {slide.subtitle && (
                 <p className="text-xs truncate" style={{ color: 'var(--secondary-text)' }}>
                   {slide.subtitle}
@@ -236,10 +262,14 @@ export default function SlideManager({
   onRefresh,
 }: SlideManagerProps) {
   const [localSlides, setLocalSlides] = useState<Slide[]>(slides);
+  const [selectedSlideIds, setSelectedSlideIds] = useState<Set<string>>(new Set());
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   // Update local slides when prop changes (e.g., after a delete or external update)
   useEffect(() => {
     setLocalSlides(slides);
+    // Clear selections when slides refresh
+    setSelectedSlideIds(new Set());
   }, [slides]);
 
   // Move slide up (decrease position number)
@@ -280,29 +310,137 @@ export default function SlideManager({
     onReorderSlides(updatedSlides);
   };
 
+  // Toggle slide selection
+  const handleToggleSelect = (slideId: string) => {
+    setSelectedSlideIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(slideId)) {
+        newSet.delete(slideId);
+      } else {
+        newSet.add(slideId);
+      }
+      return newSet;
+    });
+  };
+
+  // Select all slides
+  const handleSelectAll = () => {
+    if (selectedSlideIds.size === localSlides.length) {
+      setSelectedSlideIds(new Set());
+    } else {
+      setSelectedSlideIds(new Set(localSlides.map((s) => s.id)));
+    }
+  };
+
+  // Bulk publish/unpublish
+  const handleBulkPublish = async (isPublished: boolean) => {
+    if (selectedSlideIds.size === 0) return;
+
+    try {
+      setBulkActionLoading(true);
+      const response = await fetch('/api/slides/bulk-publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          slide_ids: Array.from(selectedSlideIds),
+          is_published: isPublished,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update slides');
+      }
+
+      // Refresh to get updated data
+      await onRefresh();
+      setSelectedSlideIds(new Set());
+    } catch (err) {
+      console.error('Error updating slides:', err);
+      alert('Failed to update slides. Please try again.');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <p className="text-sm mb-2" style={{ color: 'var(--secondary-text)' }}>
-            {row.slide_count} {row.slide_count === 1 ? 'slide' : 'slides'} in this row
-          </p>
-          <p className="text-sm" style={{ color: 'var(--secondary-text)' }}>
-            Use chevron buttons to reorder slides
-          </p>
+      {/* Header with Bulk Actions */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <p className="text-sm mb-2" style={{ color: 'var(--secondary-text)' }}>
+              {row.slide_count} {row.slide_count === 1 ? 'slide' : 'slides'} in this row
+            </p>
+            <p className="text-sm" style={{ color: 'var(--secondary-text)' }}>
+              Use checkboxes to select slides, chevron buttons to reorder
+            </p>
+          </div>
+
+          <Link
+            href={`/admin/slides/${row.id}/slide/new`}
+            className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#dc2626',
+              color: 'white'
+            }}
+          >
+            + Add New Slide
+          </Link>
         </div>
 
-        <Link
-          href={`/admin/slides/${row.id}/slide/new`}
-          className="px-4 py-2 rounded transition-opacity hover:opacity-80"
-          style={{
-            backgroundColor: '#dc2626',
-            color: 'white'
-          }}
-        >
-          + Add New Slide
-        </Link>
+        {/* Bulk Actions Bar */}
+        {localSlides.length > 0 && (
+          <div
+            className="flex flex-wrap items-center gap-3 p-4 rounded"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={selectedSlideIds.size === localSlides.length && localSlides.length > 0}
+                onChange={handleSelectAll}
+                className="w-5 h-5 cursor-pointer"
+                style={{ accentColor: '#dc2626' }}
+              />
+              <span className="text-sm font-medium" style={{ color: 'var(--text-color)' }}>
+                Select All ({selectedSlideIds.size} of {localSlides.length} selected)
+              </span>
+            </div>
+
+            {selectedSlideIds.size > 0 && (
+              <>
+                <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)' }} />
+                <button
+                  onClick={() => handleBulkPublish(true)}
+                  disabled={bulkActionLoading}
+                  className="px-4 py-1.5 rounded text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: '#16a34a',
+                    color: 'white',
+                  }}
+                >
+                  {bulkActionLoading ? 'Publishing...' : 'Publish Selected'}
+                </button>
+                <button
+                  onClick={() => handleBulkPublish(false)}
+                  disabled={bulkActionLoading}
+                  className="px-4 py-1.5 rounded text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                  }}
+                >
+                  {bulkActionLoading ? 'Unpublishing...' : 'Unpublish Selected'}
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Slide List */}
@@ -340,6 +478,8 @@ export default function SlideManager({
               onMoveDown={handleMoveDown}
               isFirst={index === 0}
               isLast={index === localSlides.length - 1}
+              isSelected={selectedSlideIds.has(slide.id)}
+              onToggleSelect={handleToggleSelect}
             />
           ))}
         </div>

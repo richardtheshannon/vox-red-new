@@ -8,6 +8,7 @@ import { seedData } from './seed-db'
 import { initializeSlideTables } from './init-slide-tables'
 import { seedSlideData } from './seed-slide-data'
 import { addSlideThemeSettings } from './add-slide-theme-settings'
+import { addSlideIsPublishedColumn } from './add-slide-is-published'
 
 async function railwayInit() {
   try {
@@ -50,6 +51,20 @@ async function railwayInit() {
         console.error('❌ Slide theme settings migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without theme settings columns')
+      }
+    }
+
+    // Add is_published column to slides (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addSlideIsPublishedColumn()
+      console.log('✅ Slide is_published column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide is_published column already exists, skipping')
+      } else {
+        console.error('❌ Slide is_published migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without is_published column')
       }
     }
 

@@ -16,6 +16,7 @@ export interface Slide {
   content_theme?: 'light' | 'dark'
   title_bg_opacity?: number
   body_bg_opacity?: number
+  is_published: boolean
   view_count: number
   completion_count: number
   created_at: Date
@@ -35,6 +36,7 @@ export interface CreateSlideData {
   content_theme?: 'light' | 'dark'
   title_bg_opacity?: number
   body_bg_opacity?: number
+  is_published?: boolean
 }
 
 export interface UpdateSlideData {
@@ -49,14 +51,16 @@ export interface UpdateSlideData {
   content_theme?: 'light' | 'dark'
   title_bg_opacity?: number
   body_bg_opacity?: number
+  is_published?: boolean
 }
 
 // Get all slides for a specific row
-export async function getSlidesForRow(rowId: string): Promise<Slide[]> {
-  return await query<Slide>(
-    'SELECT * FROM slides WHERE slide_row_id = $1 ORDER BY position',
-    [rowId]
-  )
+export async function getSlidesForRow(rowId: string, publishedOnly: boolean = false): Promise<Slide[]> {
+  const sql = publishedOnly
+    ? 'SELECT * FROM slides WHERE slide_row_id = $1 AND is_published = true ORDER BY position'
+    : 'SELECT * FROM slides WHERE slide_row_id = $1 ORDER BY position'
+
+  return await query<Slide>(sql, [rowId])
 }
 
 // Get slide by ID
@@ -67,8 +71,8 @@ export async function getSlideById(slideId: string): Promise<Slide | null> {
 // Create new slide
 export async function createSlide(data: CreateSlideData): Promise<Slide> {
   const sql = `
-    INSERT INTO slides (slide_row_id, title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    INSERT INTO slides (slide_row_id, title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity, is_published)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     RETURNING *
   `
 
@@ -85,6 +89,7 @@ export async function createSlide(data: CreateSlideData): Promise<Slide> {
     data.content_theme || null,
     data.title_bg_opacity !== undefined ? data.title_bg_opacity : null,
     data.body_bg_opacity !== undefined ? data.body_bg_opacity : null,
+    data.is_published !== undefined ? data.is_published : true,
   ])
 
   if (!slide) throw new Error('Failed to create slide')
@@ -143,6 +148,10 @@ export async function updateSlide(slideId: string, data: UpdateSlideData): Promi
     fields.push(`body_bg_opacity = $${paramCount++}`)
     values.push(data.body_bg_opacity)
   }
+  if (data.is_published !== undefined) {
+    fields.push(`is_published = $${paramCount++}`)
+    values.push(data.is_published)
+  }
 
   if (fields.length === 0) {
     return getSlideById(slideId) // No updates, return existing slide
@@ -197,4 +206,14 @@ export async function getNextPosition(rowId: string): Promise<number> {
     [rowId]
   )
   return (result?.max ?? 0) + 1
+}
+
+// Bulk update publish status
+export async function bulkUpdatePublishStatus(slideIds: string[], isPublished: boolean): Promise<void> {
+  if (slideIds.length === 0) return
+
+  const placeholders = slideIds.map((_, i) => `$${i + 1}`).join(', ')
+  const sql = `UPDATE slides SET is_published = $${slideIds.length + 1} WHERE id IN (${placeholders})`
+
+  await query(sql, [...slideIds, isPublished])
 }

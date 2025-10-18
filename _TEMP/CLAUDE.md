@@ -250,6 +250,14 @@ npm run build           # Production build test
 
 ## Common Issues
 
+### Audio Player Not Showing/Playing
+**Status**: FIXED (Oct 18, 2025)
+**Solution**: Now using native HTML5 `<audio>` element instead of Essential Audio Player
+**Note**: If audio still doesn't play, check:
+- Browser console for CORS errors
+- Audio URL is accessible (try opening in new tab)
+- File format is supported (MP3, WAV, OGG)
+
 ### Tiptap SSR Hydration
 **Fix**: Add `immediatelyRender: false` to `useEditor()` config
 
@@ -320,6 +328,13 @@ npm run lint
 
 ## Recent Critical Updates
 
+**Latest Session Summary (Oct 18, 2025):**
+- 🎵 **Audio Player Fixed**: Migrated from Essential Audio (broken with React) to native HTML5 audio player
+- ✅ **MP3s Now Playing**: Resolved `Cannot read properties of undefined (reading 'zo')` error
+- 🚀 **Deployment Ready**: Passed all pre-deployment validation checks (TypeScript, ESLint)
+- 📝 **Documentation Updated**: Updated all references from Essential Audio to HTML5 audio
+- 🔧 **TypeScript Fix**: Fixed `any` type error in check-audio-paths.ts
+
 ### HTML5 Audio Player Migration (Oct 18, 2025)
 Replaced Essential Audio Player library with native HTML5 audio player to resolve initialization issues and improve React compatibility.
 
@@ -346,6 +361,13 @@ Replaced Essential Audio Player library with native HTML5 audio player to resolv
 - `src/components/EssentialAudioPlayer.tsx` - Complete rewrite using HTML5 audio
 
 **Note:** Essential Audio library files remain in `/public/essential-audio-player/` but are no longer loaded or used. Can be safely removed if desired.
+
+**Deployment Validation (Oct 18, 2025):**
+- ✅ TypeScript validation: 0 errors (`npx tsc --noEmit`)
+- ✅ ESLint validation: 0 errors, 29 warnings (acceptable for production)
+- ✅ Fixed TypeScript error in `scripts/check-audio-paths.ts` (replaced `any` type with proper `string | Buffer`)
+- ✅ All database migrations idempotent and Railway-safe
+- ✅ Ready for Railway deployment
 
 ### Subtitle and Row Type Pills (Oct 17, 2025)
 Redesigned subtitle display as compact pill badges alongside row type indicators beneath the MP3 player.
@@ -407,4 +429,4 @@ Icon borders conditionally transparent when background images present. `.no-grad
 
 ---
 
-**Lines**: ~570 | **Status**: Production Ready | **Railway**: Deployment Safe
+**Lines**: ~420 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 18, 2025

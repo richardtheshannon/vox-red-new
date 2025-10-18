@@ -115,7 +115,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
 
     try {
-      const response = await fetch(`/api/slides/rows/${rowId}/slides`);
+      const response = await fetch(`/api/slides/rows/${rowId}/slides?published=true`);
       const data = await response.json();
 
       if (data.status === 'success' && data.slides) {

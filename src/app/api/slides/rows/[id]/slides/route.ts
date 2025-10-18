@@ -3,8 +3,10 @@ import { getSlidesForRow, createSlide } from '@/lib/queries/slides';
 import { getSlideRowById } from '@/lib/queries/slideRows';
 
 /**
- * GET /api/slides/rows/[id]/slides
+ * GET /api/slides/rows/[id]/slides?published=true
  * Returns all slides for a specific slide row, ordered by position
+ * Query params:
+ *   - published: if 'true', only return published slides (for frontend)
  */
 export async function GET(
   request: NextRequest,
@@ -12,6 +14,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const publishedOnly = searchParams.get('published') === 'true';
+
     // Verify the slide row exists
     const row = await getSlideRowById(id);
     if (!row) {
@@ -24,7 +29,7 @@ export async function GET(
       );
     }
 
-    const slides = await getSlidesForRow(id);
+    const slides = await getSlidesForRow(id, publishedOnly);
 
     return NextResponse.json({
       status: 'success',
