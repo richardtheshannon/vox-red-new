@@ -52,10 +52,11 @@ async function checkAudioPaths() {
     if (fs.existsSync(mediaDir)) {
       const files = fs.readdirSync(mediaDir, { recursive: true });
       console.log('Files in public/media:');
-      files.forEach((file: any) => {
-        const filePath = path.join(mediaDir, file.toString());
-        if (fs.statSync(filePath).isFile() && file.toString().match(/\.(mp3|wav|ogg)$/i)) {
-          console.log(`  - ${file}`);
+      files.forEach((file: string | Buffer) => {
+        const fileName = file.toString();
+        const filePath = path.join(mediaDir, fileName);
+        if (fs.statSync(filePath).isFile() && fileName.match(/\.(mp3|wav|ogg)$/i)) {
+          console.log(`  - ${fileName}`);
         }
       });
     } else {

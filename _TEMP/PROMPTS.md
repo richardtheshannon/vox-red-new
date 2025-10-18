@@ -5,7 +5,7 @@ when adding an MP3 for a slide, there should be a field to paste a  link to an M
 
 
 -----------------------------------------------------------------
-# Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3001/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
+# Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
 Ask me any questions you have, strictly one question at a time before we get started. 
 

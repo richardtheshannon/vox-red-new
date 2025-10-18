@@ -2,7 +2,7 @@
 
 **Project**: Icon Border Template - Spiritual Content Platform
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: October 16, 2025
+**Last Updated**: October 18, 2025
 
 Imortant: DO NOT CREATE A NUL FILE
 ---
@@ -32,7 +32,7 @@ npm run db:slides:seed   # Seed slide content
 - **Styling**: Tailwind CSS v3, Material Symbols Icons
 - **Database**: PostgreSQL (direct `pg` client, no ORM)
 - **UI**: Swiper.js 12.0.2, Tiptap (rich text), @dnd-kit (drag-drop)
-- **Audio**: Essential Audio Player (custom red theme)
+- **Audio**: Native HTML5 Audio Player
 
 ---
 
@@ -44,7 +44,7 @@ npm run db:slides:seed   # Seed slide content
 - **Dynamic Content**: Background images, YouTube videos (cover/contained modes)
 - **Per-Slide Themes**: Light/dark text with semi-transparent backgrounds (0-1 opacity)
 - **Global Theme**: Light/dark mode with session persistence
-- **Audio**: Essential Audio Player integrated on all slides
+- **Audio**: Native HTML5 audio player on all slides
 
 ### Admin (/admin)
 - **Slide Management**: Full CRUD interface for slide rows and slides
@@ -153,7 +153,7 @@ npm run db:slides:seed   # Seed slide content
 - `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
 
 ### Styling
-- `src/app/globals.css` - Theme system, gradients, YouTube styling, Essential Audio overrides
+- `src/app/globals.css` - Theme system, gradients, YouTube styling
 
 ---
 
@@ -320,6 +320,33 @@ npm run lint
 
 ## Recent Critical Updates
 
+### HTML5 Audio Player Migration (Oct 18, 2025)
+Replaced Essential Audio Player library with native HTML5 audio player to resolve initialization issues and improve React compatibility.
+
+**Problem:**
+- Essential Audio Player designed for static HTML, incompatible with React's dynamic rendering
+- Destructive `init()` method caused race conditions and registry wipes
+- Window resize handler errors: `Cannot read properties of undefined (reading 'zo')`
+- Players added after DOMContentLoaded were never detected by the library
+
+**Solution:**
+- Migrated to native HTML5 `<audio>` element with built-in controls
+- Removed all Essential Audio initialization code
+- Simplified component to 87 lines (vs 123 lines previously)
+
+**Benefits:**
+- ✅ Zero initialization required - works immediately
+- ✅ No race conditions or registry management issues
+- ✅ Better accessibility (screen reader compatible)
+- ✅ Mobile-optimized native controls
+- ✅ Universal browser support
+- ✅ Simpler codebase and easier maintenance
+
+**Files Modified:**
+- `src/components/EssentialAudioPlayer.tsx` - Complete rewrite using HTML5 audio
+
+**Note:** Essential Audio library files remain in `/public/essential-audio-player/` but are no longer loaded or used. Can be safely removed if desired.
+
 ### Subtitle and Row Type Pills (Oct 17, 2025)
 Redesigned subtitle display as compact pill badges alongside row type indicators beneath the MP3 player.
 
@@ -380,4 +407,4 @@ Icon borders conditionally transparent when background images present. `.no-grad
 
 ---
 
-**Lines**: ~540 | **Status**: Production Ready | **Railway**: Deployment Safe
+**Lines**: ~570 | **Status**: Production Ready | **Railway**: Deployment Safe

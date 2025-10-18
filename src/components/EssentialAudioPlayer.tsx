@@ -17,44 +17,25 @@ function EssentialAudioPlayer({
   preload = true,
   className = ""
 }: EssentialAudioPlayerProps) {
-  const playerRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const hasInitialized = useRef(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    // Set client flag to true after component mounts
     setIsClient(true);
+  }, []);
 
-    // Check if Essential Audio is available
-    if (typeof window !== 'undefined' && !hasInitialized.current) {
-      const essentialAudio = (window as unknown as { Essential_Audio?: { init: () => void; Audio?: object } }).Essential_Audio;
-      if (!essentialAudio) {
-        console.error('[AudioPlayer] Essential_Audio not found');
-        setLoadError('Audio player library not loaded');
-      } else {
-        // Check if Essential Audio has already initialized players
-        const audioPlayers = essentialAudio.Audio;
-        const needsInit = !audioPlayers || Object.keys(audioPlayers).length === 0;
-
-        if (needsInit) {
-          hasInitialized.current = true;
-          const timer = setTimeout(() => {
-            try {
-              essentialAudio.init();
-              console.log('[AudioPlayer] Initialized Essential Audio');
-            } catch (error) {
-              console.error('[AudioPlayer] Init failed:', error);
-            }
-          }, 300);
-
-          return () => clearTimeout(timer);
-        } else {
-          console.log('[AudioPlayer] Essential Audio already initialized');
-        }
-      }
-    }
-  }, []); // Empty deps - only run once per mount
+  // Validate audio URL
+  if (!audioUrl || audioUrl.trim() === '') {
+    console.warn('[AudioPlayer] Empty or invalid audio URL provided');
+    return (
+      <div className={`my-4 ${className}`}>
+        <div className="h-12 bg-yellow-100 rounded flex items-center justify-start pl-4">
+          <span className="text-yellow-700 text-sm">No audio file specified</span>
+        </div>
+      </div>
+    );
+  }
 
   // Show error state if audio failed to load
   if (loadError) {
@@ -78,35 +59,28 @@ function EssentialAudioPlayer({
     );
   }
 
-  // Validate audio URL
-  if (!audioUrl || audioUrl.trim() === '') {
-    console.warn('[AudioPlayer] Empty or invalid audio URL provided');
-    return (
-      <div className={`my-4 ${className}`}>
-        <div className="h-12 bg-yellow-100 rounded flex items-center justify-start pl-4">
-          <span className="text-yellow-700 text-sm">No audio file specified</span>
-        </div>
-      </div>
-    );
-  }
-
-  const playerProps: Record<string, string> = {
-    'data-url': audioUrl,
-  };
-
-  if (loop) playerProps['data-loop'] = '';
-  if (scratch) playerProps['data-scratch'] = '';
-  if (preload) playerProps['data-preload'] = '';
-
-  console.log('[AudioPlayer] Rendering player - URL:', audioUrl);
+  console.log('[AudioPlayer] Rendering HTML5 audio player - URL:', audioUrl);
 
   return (
     <div className={`my-4 ${className}`}>
-      <div
-        key={audioUrl}
-        ref={playerRef}
-        className="essential_audio"
-        {...playerProps}
+      <audio
+        ref={audioRef}
+        src={audioUrl}
+        controls
+        loop={loop}
+        preload={preload ? 'auto' : 'metadata'}
+        className="w-full"
+        style={{
+          maxWidth: '100%',
+          height: '48px',
+        }}
+        onError={(e) => {
+          console.error('[AudioPlayer] Audio load error:', e);
+          setLoadError('Failed to load audio file');
+        }}
+        onLoadedMetadata={() => {
+          console.log('[AudioPlayer] Audio loaded successfully:', audioUrl);
+        }}
       />
     </div>
   );
