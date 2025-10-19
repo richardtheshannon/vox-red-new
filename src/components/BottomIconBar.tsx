@@ -4,9 +4,10 @@ import { useSwiperContext } from '@/contexts/SwiperContext';
 
 interface BottomIconBarProps {
   hasBackgroundImage?: boolean;
+  onQuickSlideClick?: () => void;
 }
 
-export default function BottomIconBar({ hasBackgroundImage = false }: BottomIconBarProps) {
+export default function BottomIconBar({ hasBackgroundImage = false, onQuickSlideClick }: BottomIconBarProps) {
   const { slidePrev, slideNext, scrollUp, scrollDown } = useSwiperContext();
   console.log('BottomIconBar context methods:', { slidePrev, slideNext, scrollUp, scrollDown });
 
@@ -14,7 +15,13 @@ export default function BottomIconBar({ hasBackgroundImage = false }: BottomIcon
     <footer className={`icon-container fixed bottom-0 left-0 right-0 flex justify-between items-center z-20 ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem'}}>
       <div className="flex items-center">
         <span className="material-symbols-outlined" title="Refresh">refresh</span>
-        <span className="material-symbols-outlined" title="Comment">comment</span>
+        <span
+          className="material-symbols-outlined cursor-pointer hover:opacity-70"
+          title="Create Quick Slide"
+          onClick={onQuickSlideClick}
+        >
+          comment
+        </span>
         <span
           className="material-symbols-outlined cursor-pointer hover:text-blue-600 transition-colors"
           title="Scroll Up"

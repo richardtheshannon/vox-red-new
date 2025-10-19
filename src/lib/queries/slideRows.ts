@@ -5,7 +5,7 @@ export interface SlideRow {
   id: string
   title: string
   description?: string
-  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM'
+  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
   is_published: boolean
   display_order: number
   icon_set?: string[] // Parsed from JSON
@@ -19,7 +19,7 @@ export interface SlideRow {
 export interface CreateSlideRowData {
   title: string
   description?: string
-  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM'
+  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
   icon_set?: string[]
   theme_color?: string
   display_order?: number
@@ -30,7 +30,7 @@ export interface CreateSlideRowData {
 export interface UpdateSlideRowData {
   title?: string
   description?: string
-  row_type?: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM'
+  row_type?: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
   icon_set?: string[]
   theme_color?: string
   display_order?: number

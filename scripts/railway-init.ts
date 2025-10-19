@@ -10,6 +10,7 @@ import { seedSlideData } from './seed-slide-data'
 import { addSlideThemeSettings } from './add-slide-theme-settings'
 import { addSlideIsPublishedColumn } from './add-slide-is-published'
 import { addSlideSchedulingColumns } from './add-slide-scheduling'
+import { addQuickslideType } from './add-quickslide-row-type'
 
 async function railwayInit() {
   try {
@@ -80,6 +81,20 @@ async function railwayInit() {
         console.error('❌ Slide scheduling migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without scheduling columns')
+      }
+    }
+
+    // Add QUICKSLIDE row type (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addQuickslideType()
+      console.log('✅ QUICKSLIDE row type added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ QUICKSLIDE row type already exists, skipping')
+      } else {
+        console.error('❌ QUICKSLIDE migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without QUICKSLIDE row type')
       }
     }
 

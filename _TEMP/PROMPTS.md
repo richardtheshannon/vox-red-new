@@ -1,13 +1,8 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
+I would like, on the fron end to have the "comment" icon open a modal for a "quick slide". This will consist of a H1 heading and body text only. It should go into a specific row of slides, that are only "Quick slides" When a quick slide is added, it is imidiately published. 
 
-When managing slides, for example this view: /admin/slides/a605064b-f2bc-4561-b7dc-89cb9d067e8f I would like check boxes to mark slides as published or unpublished, so that we can have an option to "select all" and then publish all or unpublish all. As well, we should be able to publish and unpublish them individually.
-
-On each individual slide, I would like a section for dynamic publishing. 
-I would like to be able to set a slide to only publish on certain days of the week, for example" "Friday" "Sunday" "Tuesday" and or have it published according to time of day (prefferably the users browser or system time and time zone) For example, an article could only be published on: Saturday, Sunday, Monday from 5pm - 3am. 
-
-
------------------------------------------------------------------
+---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
 Ask me any questions you have, strictly one question at a time before we get started. 

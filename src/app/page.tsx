@@ -10,6 +10,7 @@ import MainContent from '@/components/MainContent';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 import { SwiperProvider } from '@/contexts/SwiperContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import QuickSlideModal from '@/components/QuickSlideModal';
 
 export default function Home() {
   // Vertical swiper (for rows)
@@ -23,6 +24,9 @@ export default function Home() {
   const [activeSlideImageUrl, setActiveSlideImageUrl] = useState<string | null>(null);
   const [activeSlideVideoUrl, setActiveSlideVideoUrl] = useState<string | null>(null);
   const [videoDisplayMode, setVideoDisplayMode] = useState<'cover' | 'contained'>('cover');
+
+  // Quick Slide Modal state
+  const [isQuickSlideModalOpen, setIsQuickSlideModalOpen] = useState(false);
 
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
@@ -85,6 +89,16 @@ export default function Home() {
     setVideoDisplayMode(prev => prev === 'cover' ? 'contained' : 'cover');
   };
 
+  // Handle Quick Slide Modal
+  const handleQuickSlideClick = () => {
+    setIsQuickSlideModalOpen(true);
+  };
+
+  const handleQuickSlideSuccess = () => {
+    // Reload the page to show the new quick slide
+    window.location.reload();
+  };
+
   return (
     <ThemeProvider>
       <div
@@ -118,7 +132,10 @@ export default function Home() {
             videoMode={videoDisplayMode}
             hasBackgroundImage={!!activeSlideImageUrl}
           />
-          <BottomIconBar hasBackgroundImage={!!activeSlideImageUrl} />
+          <BottomIconBar
+            hasBackgroundImage={!!activeSlideImageUrl}
+            onQuickSlideClick={handleQuickSlideClick}
+          />
           <MainContentWithRef
             setSwiperRef={setVerticalSwiperRef}
             handleSlideChange={handleSlideChange}
@@ -128,6 +145,13 @@ export default function Home() {
             activeSlideVideoUrl={activeSlideVideoUrl}
           />
         </SwiperProvider>
+
+        {/* Quick Slide Modal */}
+        <QuickSlideModal
+          isOpen={isQuickSlideModalOpen}
+          onClose={() => setIsQuickSlideModalOpen(false)}
+          onSuccess={handleQuickSlideSuccess}
+        />
       </div>
     </ThemeProvider>
   );
