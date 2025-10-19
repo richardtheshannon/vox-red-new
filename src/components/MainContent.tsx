@@ -142,11 +142,14 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   };
 
   // Render slide content
-  const renderSlideContent = (slide: Slide, icons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true) => {
+  const renderSlideContent = (slide: Slide, rowIcons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true) => {
     // Log audio URL for debugging (only for active slides to reduce noise)
     if (slide.audio_url && isActive) {
       console.log('[MainContent] Active Slide:', slide.id, 'Audio URL:', slide.audio_url);
     }
+
+    // Use per-slide icons if available, otherwise fallback to row icons
+    const slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons;
 
     const containerClass = slide.layout_type === 'OVERFLOW'
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
@@ -267,10 +270,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
     return (
       <div className={containerClass}>
-        {/* Icons */}
-        {icons.length > 0 && (
+        {/* Icons - Show per-slide icons if available, otherwise show row icons */}
+        {slideIcons.length > 0 && (
           <div className={`flex justify-start gap-4 mb-4 ${isMobile ? 'w-full' : ''}`}>
-            {icons.map((icon, idx) => (
+            {slideIcons.map((icon, idx) => (
               <span
                 key={idx}
                 className="material-symbols-rounded"

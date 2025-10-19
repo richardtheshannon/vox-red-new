@@ -11,6 +11,7 @@ import { addSlideThemeSettings } from './add-slide-theme-settings'
 import { addSlideIsPublishedColumn } from './add-slide-is-published'
 import { addSlideSchedulingColumns } from './add-slide-scheduling'
 import { addQuickslideType } from './add-quickslide-row-type'
+import { addSlideIconSet } from './add-slide-icon-set'
 
 async function railwayInit() {
   try {
@@ -95,6 +96,20 @@ async function railwayInit() {
         console.error('❌ QUICKSLIDE migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without QUICKSLIDE row type')
+      }
+    }
+
+    // Add icon_set column to slides (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addSlideIconSet()
+      console.log('✅ Slide icon_set column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide icon_set column already exists, skipping')
+      } else {
+        console.error('❌ Slide icon_set migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without icon_set column')
       }
     }
 

@@ -34,7 +34,16 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   const [contentTheme, setContentTheme] = useState<'light' | 'dark' | ''>(slide?.content_theme || '');
   // Unified opacity - use title_bg_opacity as source, apply to both title and body
   const [textBgOpacity, setTextBgOpacity] = useState<number>(Number(slide?.title_bg_opacity) || 0);
-  const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
+  const [selectedIcons, setSelectedIcons] = useState<string[]>(() => {
+    if (slide?.icon_set) {
+      try {
+        return JSON.parse(slide.icon_set);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +121,8 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         publish_time_start: publishTimeStart || null,
         publish_time_end: publishTimeEnd || null,
         publish_days: publishDays.length > 0 ? JSON.stringify(publishDays) : null,
+        // Icon set
+        icon_set: selectedIcons.length > 0 ? JSON.stringify(selectedIcons) : null,
         // For new slides, don't send position - let server auto-calculate
         // For existing slides, keep the current position
         ...(isNewSlide ? {} : { position: slide?.position }),
@@ -315,6 +326,15 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
 
               {/* Editor Content */}
               <EditorContent editor={editor} />
+            </div>
+
+            {/* Icon Set Picker */}
+            <div className="mb-4">
+              <IconPicker
+                selectedIcons={selectedIcons}
+                onChange={setSelectedIcons}
+                maxIcons={3}
+              />
             </div>
 
             {/* Layout Type */}

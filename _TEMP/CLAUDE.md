@@ -2,7 +2,7 @@
 
 **Project**: Icon Border Template - Spiritual Content Platform
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: October 18, 2025
+**Last Updated**: October 19, 2025
 
 Imortant: DO NOT CREATE A NUL FILE
 ---
@@ -69,6 +69,7 @@ npm run db:slides:seed   # Seed slide content
 ### Slide System (3 tables)
 1. **slide_rows**: Collections of slides
    - `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set`, `theme_color`, `slide_count`
+   - **row_type**: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
 
 2. **slides**: Individual slide content
    - Core: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type`
@@ -87,7 +88,7 @@ npm run db:slides:seed   # Seed slide content
 
 ---
 
-## API Endpoints (14)
+## API Endpoints (15)
 
 ### Slide Rows
 - `GET /api/slides/rows` (query: `?published=true`)
@@ -107,6 +108,7 @@ npm run db:slides:seed   # Seed slide content
 ### Utilities
 - `GET /api/slides/upload`
 - `POST /api/slides/upload`
+- `POST /api/slides/quick-slide` - Create quick slide (title + body only)
 - `GET /api/test-db`
 
 **Validation**: All routes validate content_theme ('light'|'dark'), opacity values (0-1), and layout types.
@@ -125,18 +127,20 @@ npm run db:slides:seed   # Seed slide content
 - `scripts/add-slide-theme-settings.ts` - Theme settings migration
 - `scripts/add-slide-is-published.ts` - Publishing flag migration
 - `scripts/add-slide-scheduling.ts` - Dynamic scheduling migration
+- `scripts/add-quickslide-row-type.ts` - Quick Slide row type migration
 - `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
-- `src/app/page.tsx` - Main page (Swiper navigation + background/video state)
+- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal)
 - `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching)
 - `src/components/YouTubeEmbed.tsx` - YouTube player (cover/contained modes)
+- `src/components/QuickSlideModal.tsx` - Quick slide creation modal
 - `src/contexts/SwiperContext.tsx` - Multi-level navigation context
 - `src/contexts/ThemeContext.tsx` - Global theme state
 
 ### Icon Borders
 - `src/components/TopIconBar.tsx` - Header (z-20)
-- `src/components/BottomIconBar.tsx` - Footer (z-20)
+- `src/components/BottomIconBar.tsx` - Footer (z-20, comment icon for Quick Slides)
 - `src/components/LeftIconBar.tsx` - Left sidebar (z-10)
 - `src/components/RightIconBar.tsx` - Right sidebar (z-10, videocam toggle)
 
@@ -285,6 +289,7 @@ npm run build           # Production build test
 - **Home**: Navigate to /
 - **Settings**: Navigate to /admin
 - **Theme Toggle**: Light/dark mode
+- **Comment** (bottom left): Open Quick Slide creation modal
 - **Videocam** (conditional): Toggle video cover/contained
 - **Footer Arrows**: Prev/next slide, up/down row
 
@@ -333,6 +338,7 @@ npm run lint
 ## Recent Critical Updates
 
 **Latest Session Summary (Oct 19, 2025):**
+- 💬 **Quick Slide Feature**: Frontend modal for creating quick notes (title + body only)
 - 📅 **Dynamic Slide Scheduling**: Time-of-day and day-of-week publishing controls per slide
 - ✅ **Slide Publishing Controls**: Individual checkboxes with bulk publish/unpublish actions
 - 🎯 **Client-Side Filtering**: Browser timezone-aware visibility filtering
@@ -548,4 +554,79 @@ Frontend: /
 
 ---
 
-**Lines**: ~490 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
+## Quick Slide Feature (Oct 19, 2025)
+
+Added frontend modal for creating quick notes and thoughts directly from the main application without admin access.
+
+### Features
+1. **Modal Interface** - Clean, theme-aware modal with title (H1) and body content fields
+2. **Comment Icon Trigger** - Click "comment" icon in bottom left icon bar to open modal
+3. **Immediate Publishing** - All quick slides are published automatically (`is_published: true`)
+4. **Dedicated Row** - Quick slides stored in "Quick Slides" row (row_type: 'QUICKSLIDE')
+5. **Auto-Refresh** - Page reloads after creation to show new slide immediately
+6. **Theme Consistent** - Modal uses CSS variables (`var(--bg-color)`, `var(--card-bg)`, etc.)
+
+### User Flow
+```
+1. User clicks "comment" icon (bottom left icon bar)
+2. Modal opens with title and body content fields
+3. User enters text and clicks "Create Quick Slide"
+4. Success message shown: "Quick slide created successfully! Refreshing..."
+5. After 500ms, page reloads
+6. New quick slide appears in "Quick Slides" row
+```
+
+### Database Schema
+- **row_type**: Added 'QUICKSLIDE' to slide_rows CHECK constraint
+- **Quick Slides Row**: Auto-created if not exists
+  - Title: "Quick Slides"
+  - Description: "Quick thoughts and notes"
+  - Display Order: 999 (appears at end)
+  - Published: true
+  - Icon Set: ["chat", "note", "edit"]
+
+### API Endpoint
+- `POST /api/slides/quick-slide`
+  - Body: `{ title: string, body_content: string }`
+  - Finds or creates "Quick Slides" row
+  - Creates slide with auto-calculated position
+  - Always sets `is_published: true`
+  - Returns: `{ status: 'success', slide: {...}, row_id: string }`
+
+### Files Created
+- `scripts/add-quickslide-row-type.ts` - Database migration for QUICKSLIDE type
+- `src/components/QuickSlideModal.tsx` - Modal component (theme-aware, greyscale)
+- `src/app/api/slides/quick-slide/route.ts` - Quick slide creation API
+
+### Files Modified
+- `src/lib/queries/slideRows.ts` - Added 'QUICKSLIDE' to row_type interfaces
+- `src/components/BottomIconBar.tsx` - Added onQuickSlideClick handler to comment icon
+- `src/app/page.tsx` - Added modal state and window.location.reload() on success
+- `scripts/railway-init.ts` - Added QUICKSLIDE migration to deployment pipeline
+
+### Design Decisions
+- **No Admin Required**: Users can create quick notes without admin access
+- **Simple Form**: Only title and body content (no media, no advanced settings)
+- **Immediate Publish**: Quick slides skip draft state for rapid note-taking
+- **Full Page Reload**: Ensures fresh content and avoids state management complexity
+- **Greyscale Theme**: Modal uses CSS variables for consistent light/dark mode styling
+- **Minimal Impact**: Reuses existing slide system, no new tables required
+
+### Theme Integration
+Modal uses application's CSS variables:
+- Background: `var(--bg-color)` (white in light, #1a1a1a in dark)
+- Input Fields: `var(--card-bg)` (light grey in light, #232323 in dark)
+- Borders: `var(--border-color)` (adaptive greyscale)
+- Text: `var(--text-color)` (black in light, white in dark)
+- Buttons: `var(--card-bg)` and `var(--secondary-text)` (greyscale only)
+
+### Validation
+- ✅ TypeScript: 0 errors
+- ✅ ESLint: 0 errors, 28 warnings
+- ✅ Database: Migration tested, Quick Slides row created
+- ✅ API: Endpoint tested with 2 quick slides created
+- ✅ Railway-Safe: Idempotent migration with IF NOT EXISTS
+
+---
+
+**Lines**: ~615 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
