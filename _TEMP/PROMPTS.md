@@ -1,7 +1,5 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
-I would like, on the fron end to have the "comment" icon open a modal for a "quick slide". This will consist of a H1 heading and body text only. It should go into a specific row of slides, that are only "Quick slides" When a quick slide is added, it is imidiately published. 
-
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 

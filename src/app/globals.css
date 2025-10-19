@@ -480,6 +480,11 @@ body:has(.admin-sidebar:hover) {
   }
 }
 
+/* Dark mode audio player styling */
+[data-theme="dark"] audio {
+  filter: invert(1);
+}
+
 /* Contained mode - video fits within viewport with padding */
 .youtube-contained {
   padding: 60px; /* Space for icon borders */

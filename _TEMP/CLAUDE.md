@@ -74,7 +74,7 @@ npm run db:slides:seed   # Seed slide content
 2. **slides**: Individual slide content
    - Core: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type`
    - Media: `audio_url`, `image_url`, `video_url`
-   - Display: `content_theme` ('light'|'dark'), `title_bg_opacity` (0-1), `body_bg_opacity` (0-1)
+   - Display: `content_theme` ('light'|'dark'), `title_bg_opacity` (0-1), `body_bg_opacity` (0-1), `icon_set` (TEXT/JSON)
    - Publishing: `is_published` (BOOLEAN), `publish_time_start` (TIME), `publish_time_end` (TIME), `publish_days` (TEXT/JSON)
    - Meta: `view_count`, `completion_count`, `created_at`, `updated_at`
 
@@ -128,6 +128,7 @@ npm run db:slides:seed   # Seed slide content
 - `scripts/add-slide-is-published.ts` - Publishing flag migration
 - `scripts/add-slide-scheduling.ts` - Dynamic scheduling migration
 - `scripts/add-quickslide-row-type.ts` - Quick Slide row type migration
+- `scripts/add-slide-icon-set.ts` - Per-slide icon_set column migration
 - `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
@@ -157,8 +158,9 @@ npm run db:slides:seed   # Seed slide content
 - `src/components/admin/AdminBottomIconBar.tsx` - Admin footer (z-10, theme-based background)
 - `src/components/admin/AdminLeftIconBar.tsx` - Admin left sidebar (z-10, theme-based background)
 - `src/components/admin/AdminRightIconBar.tsx` - Admin right sidebar (z-10, expandable)
-- `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI
+- `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI + icon picker
 - `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
+- `src/components/admin/slides/IconPicker.tsx` - Material Symbol icon selection (up to 3 icons)
 
 ### Styling
 - `src/app/globals.css` - Theme system, gradients, YouTube styling
@@ -338,6 +340,7 @@ npm run lint
 ## Recent Critical Updates
 
 **Latest Session Summary (Oct 19, 2025):**
+- 🎨 **Per-Slide Icons**: Admin can set up to 3 Material Symbol icons per slide (displays above title)
 - 💬 **Quick Slide Feature**: Frontend modal for creating quick notes (title + body only)
 - 📅 **Dynamic Slide Scheduling**: Time-of-day and day-of-week publishing controls per slide
 - ✅ **Slide Publishing Controls**: Individual checkboxes with bulk publish/unpublish actions
@@ -629,4 +632,69 @@ Modal uses application's CSS variables:
 
 ---
 
-**Lines**: ~615 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
+## Per-Slide Icon Display (Oct 19, 2025)
+
+Added ability to set custom Material Symbol icons for individual slides that display above the main heading title.
+
+### Features
+1. **IconPicker Component** - Select up to 3 Material Symbol icons per slide
+2. **Database Storage** - Icons stored as JSON array in `icon_set` column (e.g., `["home", "star", "favorite"]`)
+3. **Fallback Behavior** - Uses per-slide icons if set, otherwise displays row-level icons
+4. **Admin Integration** - IconPicker appears in SlideEditor after body content editor
+5. **Frontend Display** - Icons render above slide title in same style as row icons
+
+### User Flow
+```
+Admin: /admin/slides/[id]/slide/[slideId]
+├─ Body Content Editor (Tiptap WYSIWYG)
+├─ Icon Picker Section
+│  ├─ Search box (filter by icon name)
+│  ├─ Grid of Material Symbol icons
+│  ├─ Selected icons displayed as pills
+│  └─ Limit: 3 icons maximum
+└─ Save button updates slide.icon_set
+
+Frontend: /
+├─ MainContent checks slide.icon_set
+├─ If icons exist: Parse JSON and display
+└─ If empty/null: Fall back to row-level icons
+```
+
+### Database Schema
+- **slides.icon_set** (TEXT) - JSON array of icon names
+  - Example: `["home", "star", "favorite"]` or `null`
+  - Stored as TEXT, parsed as JSON in frontend/admin
+  - Optional field (defaults to null)
+
+### Implementation Details
+- **Parse Logic**: `const slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons;`
+- **Save Logic**: `icon_set: selectedIcons.length > 0 ? JSON.stringify(selectedIcons) : null`
+- **Load Logic**: `JSON.parse(slide.icon_set)` with try/catch in SlideEditor useState
+- **Display Priority**: Per-slide icons → Row icons → No icons
+
+### Files Created
+- `scripts/add-slide-icon-set.ts` - Database migration adding icon_set column
+
+### Files Modified
+- `src/lib/queries/slides.ts` - Added icon_set to Slide, CreateSlideData, UpdateSlideData interfaces
+- `src/components/admin/slides/SlideEditor.tsx` - Integrated IconPicker component, load/save icon_set
+- `src/components/MainContent.tsx` - Updated renderSlideContent to use per-slide icons with fallback
+- `scripts/railway-init.ts` - Added icon_set migration to deployment pipeline
+
+### Design Decisions
+- **Column vs Join Table**: Chose TEXT column over slide_icons join table for simplicity
+- **JSON Storage**: Reuses existing pattern from publish_days and row icon_set
+- **Fallback Logic**: Maintains backward compatibility with row-level icons
+- **Admin UX**: IconPicker integrated directly into SlideEditor (no separate page)
+- **Limit**: 3 icons maximum matches row-level icon limit
+
+### Validation
+- ✅ TypeScript: 0 errors
+- ✅ Database: Migration tested, icon_set column added
+- ✅ Admin: IconPicker loads/saves correctly
+- ✅ Frontend: Icons display with proper fallback behavior
+- ✅ Railway-Safe: Idempotent migration with IF NOT EXISTS
+
+---
+
+**Lines**: ~680 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
