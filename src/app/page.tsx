@@ -11,6 +11,7 @@ import YouTubeEmbed from '@/components/YouTubeEmbed';
 import { SwiperProvider } from '@/contexts/SwiperContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function Home() {
   // Vertical swiper (for rows)
@@ -30,6 +31,11 @@ export default function Home() {
 
   // Quick Slide Mode state (toggle between all rows and Quick Slide row only)
   const [isQuickSlideMode, setIsQuickSlideMode] = useState(false);
+
+  // Unpublish confirmation dialog state
+  const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
+  const [slideToUnpublish, setSlideToUnpublish] = useState<{ slideId: string; rowId: string } | null>(null);
+  const [isUnpublishing, setIsUnpublishing] = useState(false);
 
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
@@ -107,6 +113,66 @@ export default function Home() {
     setIsQuickSlideMode(prev => !prev);
   };
 
+  // Handle unpublish dialog open
+  const handleUnpublishDialogOpen = (slideId: string, rowId: string) => {
+    setSlideToUnpublish({ slideId, rowId });
+    setShowUnpublishDialog(true);
+  };
+
+  // Callback ref for MainContent to handle post-unpublish navigation
+  const mainContentUnpublishCallbackRef = useRef<((slideId: string, rowId: string) => void) | null>(null);
+
+  // Confirm unpublish
+  const handleConfirmUnpublish = async () => {
+    if (!slideToUnpublish) return;
+
+    const { slideId, rowId } = slideToUnpublish;
+    setIsUnpublishing(true);
+
+    try {
+      // Call API to unpublish the slide
+      const response = await fetch(`/api/slides/rows/${rowId}/slides/${slideId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is_published: false,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        // Call MainContent's callback to handle navigation
+        if (mainContentUnpublishCallbackRef.current) {
+          mainContentUnpublishCallbackRef.current(slideId, rowId);
+        }
+
+        // Close dialog
+        setIsUnpublishing(false);
+        setShowUnpublishDialog(false);
+        setSlideToUnpublish(null);
+      } else {
+        console.error('Failed to unpublish slide:', data.message);
+        setIsUnpublishing(false);
+        setShowUnpublishDialog(false);
+        setSlideToUnpublish(null);
+      }
+    } catch (err) {
+      console.error('Error unpublishing slide:', err);
+      setIsUnpublishing(false);
+      setShowUnpublishDialog(false);
+      setSlideToUnpublish(null);
+    }
+  };
+
+  // Cancel unpublish
+  const handleCancelUnpublish = () => {
+    setShowUnpublishDialog(false);
+    setSlideToUnpublish(null);
+  };
+
   return (
     <ThemeProvider>
       <div
@@ -154,6 +220,8 @@ export default function Home() {
             setActiveSlideVideoUrl={setActiveSlideVideoUrl}
             activeSlideVideoUrl={activeSlideVideoUrl}
             isQuickSlideMode={isQuickSlideMode}
+            onUnpublishDialogOpen={handleUnpublishDialogOpen}
+            unpublishCallbackRef={mainContentUnpublishCallbackRef}
           />
         </SwiperProvider>
 
@@ -162,6 +230,18 @@ export default function Home() {
           isOpen={isQuickSlideModalOpen}
           onClose={() => setIsQuickSlideModalOpen(false)}
           onSuccess={handleQuickSlideSuccess}
+        />
+
+        {/* Unpublish Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showUnpublishDialog}
+          onConfirm={handleConfirmUnpublish}
+          onCancel={handleCancelUnpublish}
+          title="Hide This Slide?"
+          message="Are you sure you want to hide this slide? It will no longer be visible to you or other users."
+          confirmText="Hide Slide"
+          cancelText="Cancel"
+          isProcessing={isUnpublishing}
         />
       </div>
     </ThemeProvider>
@@ -176,7 +256,9 @@ function MainContentWithRef({
   setActiveSlideImageUrl,
   setActiveSlideVideoUrl,
   activeSlideVideoUrl,
-  isQuickSlideMode
+  isQuickSlideMode,
+  onUnpublishDialogOpen,
+  unpublishCallbackRef
 }: {
   setSwiperRef: (swiper: SwiperType | null) => void;
   handleSlideChange: (swiper: SwiperType) => void;
@@ -185,6 +267,8 @@ function MainContentWithRef({
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
   activeSlideVideoUrl: string | null;
   isQuickSlideMode: boolean;
+  onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
+  unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
 }) {
   return (
     <MainContent
@@ -195,6 +279,8 @@ function MainContentWithRef({
       setActiveSlideVideoUrl={setActiveSlideVideoUrl}
       activeSlideVideoUrl={activeSlideVideoUrl}
       isQuickSlideMode={isQuickSlideMode}
+      onUnpublishDialogOpen={onUnpublishDialogOpen}
+      unpublishCallbackRef={unpublishCallbackRef}
     />
   );
 }

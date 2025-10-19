@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
@@ -18,6 +18,8 @@ interface MainContentProps {
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
   activeSlideVideoUrl: string | null;
   isQuickSlideMode: boolean;
+  onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
+  unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
 }
 
 // TypeScript interfaces for API data
@@ -35,14 +37,17 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, isQuickSlideMode }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Get swiper context to register horizontal swipers
-  const { setHorizontalSwiper } = useSwiperContext();
+  const { setHorizontalSwiper, getHorizontalSwiper, activeRowId } = useSwiperContext();
+
+  // Store vertical swiper ref locally for navigation
+  const verticalSwiperRef = React.useRef<SwiperType | null>(null);
 
   // Get global theme
   const { theme: globalTheme } = useTheme();
@@ -120,6 +125,17 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
   }, [slidesCache, slideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl]);
 
+  // Preload slides when Quick Slide mode changes
+  useEffect(() => {
+    if (filteredSlideRows.length > 0) {
+      const firstRow = filteredSlideRows[0];
+      // Load slides for the first filtered row if not already cached
+      if (!slidesCache[firstRow.id]) {
+        loadSlidesForRow(firstRow.id);
+      }
+    }
+  }, [isQuickSlideMode, filteredSlideRows]);
+
   // Load slides for a specific row
   const loadSlidesForRow = async (rowId: string) => {
     // Check if already cached
@@ -152,6 +168,94 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       return [];
     }
   };
+
+  // Get slides for a row (filtered by schedule) - using useCallback to avoid re-creation
+  const getSlidesForRow = useCallback((rowId: string): Slide[] => {
+    const allSlides = slidesCache[rowId] || [];
+    // Filter slides based on scheduling (time/day restrictions)
+    return filterVisibleSlides(allSlides);
+  }, [slidesCache]);
+
+  // Handle unpublish icon click - delegate to parent
+  const handleUnpublishClick = (slideId: string, rowId: string) => {
+    onUnpublishDialogOpen(slideId, rowId);
+  };
+
+  // Set up the unpublish callback for parent to call after API success
+  React.useEffect(() => {
+    unpublishCallbackRef.current = (slideId: string, rowId: string) => {
+      console.log('[MainContent] Unpublish callback called for slide:', slideId, 'in row:', rowId);
+
+      // Get the horizontal swiper for this row
+      const horizontalSwiper = getHorizontalSwiper(rowId);
+      if (!horizontalSwiper) {
+        console.warn('[MainContent] No horizontal swiper found for row:', rowId);
+        return;
+      }
+
+      // Get current slides for the row
+      const currentSlides = getSlidesForRow(rowId);
+      const currentSlideIndex = currentSlides.findIndex(s => s.id === slideId);
+
+      console.log('[MainContent] Current slides count:', currentSlides.length);
+      console.log('[MainContent] Current slide index:', currentSlideIndex);
+
+      // Remove the slide from cache
+      setSlidesCache(prev => {
+        const updatedSlides = (prev[rowId] || []).filter(s => s.id !== slideId);
+        return {
+          ...prev,
+          [rowId]: updatedSlides
+        };
+      });
+
+      // Determine navigation strategy
+      setTimeout(() => {
+        const updatedSlides = getSlidesForRow(rowId);
+        console.log('[MainContent] Updated slides count after removal:', updatedSlides.length);
+
+        if (updatedSlides.length === 0) {
+          // No slides remain in this row - navigate to first row
+          console.log('[MainContent] No slides left, navigating to first row');
+          if (verticalSwiperRef.current) {
+            verticalSwiperRef.current.slideTo(0);
+            // Update active row and background
+            if (filteredSlideRows.length > 0) {
+              const firstRow = filteredSlideRows[0];
+              setActiveRow(firstRow.id);
+              const firstRowSlides = getSlidesForRow(firstRow.id);
+              if (firstRowSlides.length > 0) {
+                setActiveSlideImageUrl(firstRowSlides[0].image_url || null);
+                setActiveSlideVideoUrl(firstRowSlides[0].video_url || null);
+              }
+            }
+          }
+        } else {
+          // Slides remain - navigate to next or previous slide
+          let targetIndex = currentSlideIndex;
+
+          // If we removed the last slide, go to the new last slide
+          if (currentSlideIndex >= updatedSlides.length) {
+            targetIndex = updatedSlides.length - 1;
+          }
+
+          console.log('[MainContent] Navigating to slide index:', targetIndex);
+          horizontalSwiper.slideTo(targetIndex);
+
+          // Update background image/video
+          const targetSlide = updatedSlides[targetIndex];
+          if (targetSlide) {
+            setActiveSlideImageUrl(targetSlide.image_url || null);
+            setActiveSlideVideoUrl(targetSlide.video_url || null);
+          }
+        }
+      }, 100); // Small delay to ensure state updates
+    };
+
+    return () => {
+      unpublishCallbackRef.current = null;
+    };
+  }, [unpublishCallbackRef, getHorizontalSwiper, getSlidesForRow, filteredSlideRows, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl]);
 
   // Render slide content
   const renderSlideContent = (slide: Slide, rowIcons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true) => {
@@ -285,20 +389,38 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         {/* Icons - Show per-slide icons if available, otherwise show row icons */}
         {slideIcons.length > 0 && (
           <div className={`flex justify-start gap-4 mb-4 ${isMobile ? 'w-full' : ''}`}>
-            {slideIcons.map((icon, idx) => (
-              <span
-                key={idx}
-                className="material-symbols-rounded"
-                style={{
-                  fontSize: '24px',
-                  fontWeight: '100',
-                  fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24",
-                  color: textColor || 'var(--icon-color)'
-                }}
-              >
-                {icon}
-              </span>
-            ))}
+            {slideIcons.map((icon, idx) => {
+              const isUnpublishIcon = icon === 'select_check_box';
+              return (
+                <span
+                  key={idx}
+                  className="material-symbols-rounded"
+                  onClick={isUnpublishIcon ? () => handleUnpublishClick(slide.id, slide.slide_row_id) : undefined}
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: '100',
+                    fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24",
+                    color: isUnpublishIcon ? '#ef4444' : (textColor || 'var(--icon-color)'),
+                    cursor: isUnpublishIcon ? 'pointer' : 'default',
+                    opacity: isUnpublishIcon ? 0.7 : 1,
+                    transition: 'opacity 150ms ease',
+                    pointerEvents: 'auto',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isUnpublishIcon) {
+                      e.currentTarget.style.opacity = '1';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isUnpublishIcon) {
+                      e.currentTarget.style.opacity = '0.7';
+                    }
+                  }}
+                >
+                  {icon}
+                </span>
+              );
+            })}
           </div>
         )}
 
@@ -435,13 +557,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     );
   };
 
-  // Get slides for a row (filtered by schedule)
-  const getSlidesForRow = (rowId: string): Slide[] => {
-    const allSlides = slidesCache[rowId] || [];
-    // Filter slides based on scheduling (time/day restrictions)
-    return filterVisibleSlides(allSlides);
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -493,6 +608,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             className="h-full"
             onSwiper={(swiper) => {
               console.log('Desktop Vertical Swiper initialized:', swiper);
+              verticalSwiperRef.current = swiper;
               setSwiperRef(swiper);
               setTimeout(() => handleSlideChange(swiper), 100);
             }}
@@ -548,6 +664,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           className="h-full"
           onSwiper={(swiper) => {
             if (window.innerWidth < 768) {
+              verticalSwiperRef.current = swiper;
               setSwiperRef(swiper);
               setTimeout(() => handleSlideChange(swiper), 100);
             }

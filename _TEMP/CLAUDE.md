@@ -132,10 +132,11 @@ npm run db:slides:seed   # Seed slide content
 - `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
-- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + Quick Slide mode toggle)
-- `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching, row filtering)
+- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + Quick Slide mode toggle + unpublish dialog)
+- `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching, row filtering, unpublish icon detection)
 - `src/components/YouTubeEmbed.tsx` - YouTube player (cover/contained modes)
 - `src/components/QuickSlideModal.tsx` - Quick slide creation modal
+- `src/components/ConfirmDialog.tsx` - Reusable confirmation dialog (unpublish, etc.)
 - `src/contexts/SwiperContext.tsx` - Multi-level navigation context
 - `src/contexts/ThemeContext.tsx` - Global theme state
 
@@ -340,7 +341,29 @@ npm run lint
 
 ## Recent Critical Updates
 
-**Latest Session (Oct 19, 2025 - Evening):**
+**Latest Session (Oct 19, 2025 - Late Night):**
+- 🎯 **Smart Unpublish Navigation**: Improved UX when unpublishing slides - no more page reloads!
+  - Click unpublish icon → Slide removed → Smooth navigation to next available slide
+  - **Stays in current row**: If slides remain, navigates to next (or previous if last slide)
+  - **Jumps to app start**: Only if all slides in row are removed
+  - **Works in Quick Slide mode**: Maintains context when unpublishing Quick Slides
+  - **Zero page reload**: Pure client-side navigation using existing Swiper system
+  - **Auto-updates**: Background images/videos update automatically after navigation
+  - Architecture: Callback ref pattern between page.tsx and MainContent.tsx
+  - Files modified: [page.tsx:122-168](src/app/page.tsx#L122-L168), [MainContent.tsx:172-258](src/components/MainContent.tsx#L172-L258)
+
+**Previous Session (Oct 19, 2025 - Night):**
+- 🔴 **Frontend Slide Unpublish**: Users can unpublish slides by clicking `select_check_box` icon
+  - Admin sets `select_check_box` icon in IconPicker → appears red on frontend
+  - Click icon → Confirmation dialog: "Hide This Slide?"
+  - On confirm → Slide unpublished via API → Slide disappears with smart navigation
+  - Safety: Confirmation dialog prevents accidental clicks, red color signals destructive action
+  - Architecture: Dialog rendered at page.tsx level (z-50) to avoid pointer-events blocking
+- 🐛 **Quick Slide Loading Fix**: Added useEffect to preload slides when toggling Quick Slide mode
+  - Fixed "Loading slides..." hang when clicking "atr" icon
+  - Automatically loads Quick Slide row slides when entering Quick Slide mode
+
+**Previous Session (Oct 19, 2025 - Evening):**
 - 🎯 **Quick Slide Mode Toggle**: Click "atr" icon in right sidebar to isolate Quick Slide row
   - Toggle between normal view (all rows except Quick Slides) and Quick Slide-only view
   - Visual feedback: Icon opacity changes (60% inactive, 100% active)
@@ -766,4 +789,59 @@ Added interactive "atr" icon in right sidebar to toggle between normal view and 
 
 ---
 
-**Lines**: ~720 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
+## Frontend Slide Unpublish Feature (Oct 19, 2025 - Night)
+
+Added ability for users to unpublish slides directly from the frontend by clicking a designated icon.
+
+### Features
+1. **Icon-Based Unpublish** - Admin sets `select_check_box` icon → users can click to unpublish
+2. **Visual Indicator** - Red color (#ef4444) signals destructive action
+3. **Confirmation Dialog** - "Hide This Slide?" prevents accidental unpublishing
+4. **Immediate Effect** - Page reloads after unpublish to show updated content
+5. **Hover Feedback** - Icon opacity: 70% → 100% on hover
+
+### User Flow
+```
+Admin: /admin/slides/[id]/slide/[slideId]
+└─ Set icon_set to include "select_check_box"
+
+Frontend: /
+1. User sees red select_check_box icon on slide
+2. Clicks icon → ConfirmDialog appears (z-50)
+3. "Hide This Slide?" confirmation message
+4. Clicks "Hide Slide" → API PATCH call
+5. Page reloads → Slide no longer visible
+```
+
+### Implementation Details
+- **Icon Detection**: `icon === 'select_check_box'` in MainContent renderSlideContent
+- **Styling**: Red color, pointer cursor, hover opacity transition (150ms)
+- **Dialog Architecture**: Rendered at page.tsx level (not inside MainContent) to avoid pointer-events blocking
+- **API Call**: `PATCH /api/slides/rows/[rowId]/slides/[slideId]` with `{ is_published: false }`
+- **State Management**: Page-level dialog state, full page reload ensures fresh data
+- **Pointer Events**: Icon has `pointerEvents: 'auto'` to remain clickable despite parent container settings
+
+### Files Created
+- `src/components/ConfirmDialog.tsx` - Reusable confirmation dialog component (theme-aware, greyscale)
+
+### Files Modified
+- `src/components/MainContent.tsx` - Icon rendering with click handler, red styling for unpublish icon
+- `src/app/page.tsx` - Dialog state management, API call handler, ConfirmDialog rendering
+
+### Design Decisions
+- **Page Reload vs State Update**: Chose full reload for simplicity and guaranteed data freshness
+- **Dialog Placement**: Rendered at page.tsx level (z-50) to avoid CSS pointer-events blocking from MainContent
+- **Icon Choice**: `select_check_box` is intuitive for "remove/hide" action
+- **Color Signal**: Red (#ef4444) universally signals caution/destructive action
+- **Confirmation Required**: Prevents accidental unpublishing from errant clicks
+
+### Validation
+- ✅ TypeScript: 0 errors
+- ✅ ESLint: 0 errors, 27 warnings (all pre-existing)
+- ✅ No Database Changes: Reuses existing `is_published` column
+- ✅ No API Changes: Reuses existing PATCH endpoint
+- ✅ Production Ready: Minimal, surgical changes to existing codebase
+
+---
+
+**Lines**: ~790 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025

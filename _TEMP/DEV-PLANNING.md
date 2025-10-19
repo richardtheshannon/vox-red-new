@@ -30,3 +30,6 @@ Have specific slides for:
 # Font Pairings
 Title font: Ubuntu
 Paragraph font: Open Sans
+
+# ICON SELECTIONS & FUNCTIONS
+IF the "select_check_box" icon is selected for a slide on the back end, I would like that icon when selected by the user on the front end to unpublish that slide. This should be live. Once unpublished the slide should effectively "disappear"
