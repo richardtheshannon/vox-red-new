@@ -39,6 +39,21 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Scheduling state
+  const [publishTimeStart, setPublishTimeStart] = useState<string>(slide?.publish_time_start || '');
+  const [publishTimeEnd, setPublishTimeEnd] = useState<string>(slide?.publish_time_end || '');
+  const [publishDays, setPublishDays] = useState<number[]>(() => {
+    if (slide?.publish_days) {
+      try {
+        return JSON.parse(slide.publish_days);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+  const [allDays, setAllDays] = useState(true);
+
   const editor = useEditor({
     immediatelyRender: false, // Fix SSR hydration issue
     extensions: [
@@ -93,6 +108,10 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         // Apply unified opacity to both title and body
         title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
         body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
+        // Scheduling fields
+        publish_time_start: publishTimeStart || null,
+        publish_time_end: publishTimeEnd || null,
+        publish_days: publishDays.length > 0 ? JSON.stringify(publishDays) : null,
         // For new slides, don't send position - let server auto-calculate
         // For existing slides, keep the current position
         ...(isNewSlide ? {} : { position: slide?.position }),
@@ -124,6 +143,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
       body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
       is_published: slide?.is_published ?? true,
+      publish_time_start: publishTimeStart || null,
+      publish_time_end: publishTimeEnd || null,
+      publish_days: publishDays.length > 0 ? JSON.stringify(publishDays) : null,
       view_count: slide?.view_count || 0,
       completion_count: slide?.completion_count || 0,
       created_at: slide?.created_at || new Date(),
@@ -483,18 +505,145 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
           </div>
         </div>
 
-        {/* Right Column: Preview */}
-        <div
-          className="p-6 rounded"
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            border: '1px solid var(--border-color)'
-          }}
-        >
-          <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-color)' }}>
-            Live Preview
-          </h2>
-          <SlidePreview slide={getPreviewData()} />
+        {/* Right Column: Publishing Settings + Preview */}
+        <div className="space-y-6">
+          {/* Publishing Settings Section */}
+          <div
+            className="p-6 rounded"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              border: '1px solid var(--border-color)'
+            }}
+          >
+            <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-color)' }}>
+              PUBLISHING SETTINGS
+            </h2>
+
+            {/* Time Window */}
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-color)' }}>
+                Time Window (optional)
+              </h3>
+
+              {/* Start Time */}
+              <div className="mb-3">
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--secondary-text)' }}>
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  value={publishTimeStart}
+                  onChange={(e) => setPublishTimeStart(e.target.value)}
+                  className="w-full px-3 py-2 rounded"
+                  style={{
+                    backgroundColor: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  Article will only be visible after this time
+                </p>
+              </div>
+
+              {/* End Time */}
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--secondary-text)' }}>
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  value={publishTimeEnd}
+                  onChange={(e) => setPublishTimeEnd(e.target.value)}
+                  className="w-full px-3 py-2 rounded"
+                  style={{
+                    backgroundColor: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    border: '1px solid var(--border-color)'
+                  }}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  Article will only be visible before this time
+                </p>
+              </div>
+            </div>
+
+            {/* Allowed Days */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-color)' }}>
+                Allowed Days
+              </h3>
+
+              {/* All Days Checkbox */}
+              <div className="mb-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allDays}
+                    onChange={(e) => {
+                      setAllDays(e.target.checked);
+                      if (e.target.checked) {
+                        setPublishDays([]);
+                      }
+                    }}
+                    className="w-4 h-4"
+                    style={{ accentColor: '#dc2626' }}
+                  />
+                  <span className="text-sm" style={{ color: 'var(--text-color)' }}>
+                    All days
+                  </span>
+                </label>
+              </div>
+
+              {/* Individual Day Checkboxes */}
+              <div className="space-y-2">
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => {
+                  // Map to JS day numbers (0=Sunday, 1=Monday, etc.)
+                  const dayNum = index === 6 ? 0 : index + 1;
+
+                  return (
+                    <label key={day} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={publishDays.includes(dayNum)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setPublishDays([...publishDays, dayNum]);
+                            setAllDays(false);
+                          } else {
+                            setPublishDays(publishDays.filter(d => d !== dayNum));
+                          }
+                        }}
+                        className="w-4 h-4"
+                        style={{ accentColor: '#dc2626' }}
+                      />
+                      <span className="text-sm" style={{ color: 'var(--text-color)' }}>
+                        {day}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs mt-3" style={{ color: 'var(--secondary-text)' }}>
+                Leave all days unchecked to show article every day
+              </p>
+            </div>
+          </div>
+
+          {/* Live Preview */}
+          <div
+            className="p-6 rounded"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              border: '1px solid var(--border-color)'
+            }}
+          >
+            <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-color)' }}>
+              Live Preview
+            </h2>
+            <SlidePreview slide={getPreviewData()} />
+          </div>
         </div>
       </div>
 

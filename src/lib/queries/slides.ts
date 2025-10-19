@@ -17,6 +17,9 @@ export interface Slide {
   title_bg_opacity?: number
   body_bg_opacity?: number
   is_published: boolean
+  publish_time_start?: string | null
+  publish_time_end?: string | null
+  publish_days?: string | null // JSON array of day numbers [0-6]
   view_count: number
   completion_count: number
   created_at: Date
@@ -37,6 +40,9 @@ export interface CreateSlideData {
   title_bg_opacity?: number
   body_bg_opacity?: number
   is_published?: boolean
+  publish_time_start?: string | null
+  publish_time_end?: string | null
+  publish_days?: string | null
 }
 
 export interface UpdateSlideData {
@@ -52,6 +58,9 @@ export interface UpdateSlideData {
   title_bg_opacity?: number
   body_bg_opacity?: number
   is_published?: boolean
+  publish_time_start?: string | null
+  publish_time_end?: string | null
+  publish_days?: string | null
 }
 
 // Get all slides for a specific row
@@ -71,8 +80,8 @@ export async function getSlideById(slideId: string): Promise<Slide | null> {
 // Create new slide
 export async function createSlide(data: CreateSlideData): Promise<Slide> {
   const sql = `
-    INSERT INTO slides (slide_row_id, title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity, is_published)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    INSERT INTO slides (slide_row_id, title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity, is_published, publish_time_start, publish_time_end, publish_days)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     RETURNING *
   `
 
@@ -90,6 +99,9 @@ export async function createSlide(data: CreateSlideData): Promise<Slide> {
     data.title_bg_opacity !== undefined ? data.title_bg_opacity : null,
     data.body_bg_opacity !== undefined ? data.body_bg_opacity : null,
     data.is_published !== undefined ? data.is_published : true,
+    data.publish_time_start || null,
+    data.publish_time_end || null,
+    data.publish_days || null,
   ])
 
   if (!slide) throw new Error('Failed to create slide')
@@ -151,6 +163,18 @@ export async function updateSlide(slideId: string, data: UpdateSlideData): Promi
   if (data.is_published !== undefined) {
     fields.push(`is_published = $${paramCount++}`)
     values.push(data.is_published)
+  }
+  if (data.publish_time_start !== undefined) {
+    fields.push(`publish_time_start = $${paramCount++}`)
+    values.push(data.publish_time_start)
+  }
+  if (data.publish_time_end !== undefined) {
+    fields.push(`publish_time_end = $${paramCount++}`)
+    values.push(data.publish_time_end)
+  }
+  if (data.publish_days !== undefined) {
+    fields.push(`publish_days = $${paramCount++}`)
+    values.push(data.publish_days)
   }
 
   if (fields.length === 0) {

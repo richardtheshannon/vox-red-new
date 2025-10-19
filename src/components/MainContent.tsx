@@ -8,6 +8,7 @@ import EssentialAudioPlayer from './EssentialAudioPlayer';
 import { useSwiperContext } from '@/contexts/SwiperContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Slide } from '@/lib/queries/slides';
+import { filterVisibleSlides } from '@/lib/utils/scheduleFilter';
 
 interface MainContentProps {
   setSwiperRef: (swiper: SwiperType | null) => void;
@@ -419,9 +420,11 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     );
   };
 
-  // Get slides for a row
+  // Get slides for a row (filtered by schedule)
   const getSlidesForRow = (rowId: string): Slide[] => {
-    return slidesCache[rowId] || [];
+    const allSlides = slidesCache[rowId] || [];
+    // Filter slides based on scheduling (time/day restrictions)
+    return filterVisibleSlides(allSlides);
   };
 
   // Loading state

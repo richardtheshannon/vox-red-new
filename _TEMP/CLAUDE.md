@@ -74,6 +74,7 @@ npm run db:slides:seed   # Seed slide content
    - Core: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type`
    - Media: `audio_url`, `image_url`, `video_url`
    - Display: `content_theme` ('light'|'dark'), `title_bg_opacity` (0-1), `body_bg_opacity` (0-1)
+   - Publishing: `is_published` (BOOLEAN), `publish_time_start` (TIME), `publish_time_end` (TIME), `publish_days` (TEXT/JSON)
    - Meta: `view_count`, `completion_count`, `created_at`, `updated_at`
 
 3. **slide_icons**: Optional custom icons per slide
@@ -122,6 +123,9 @@ npm run db:slides:seed   # Seed slide content
 - `scripts/init-slide-tables.ts` - Slide table creation
 - `scripts/railway-init.ts` - Railway startup script (runs all migrations)
 - `scripts/add-slide-theme-settings.ts` - Theme settings migration
+- `scripts/add-slide-is-published.ts` - Publishing flag migration
+- `scripts/add-slide-scheduling.ts` - Dynamic scheduling migration
+- `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
 - `src/app/page.tsx` - Main page (Swiper navigation + background/video state)
@@ -328,7 +332,13 @@ npm run lint
 
 ## Recent Critical Updates
 
-**Latest Session Summary (Oct 18, 2025):**
+**Latest Session Summary (Oct 19, 2025):**
+- 📅 **Dynamic Slide Scheduling**: Time-of-day and day-of-week publishing controls per slide
+- ✅ **Slide Publishing Controls**: Individual checkboxes with bulk publish/unpublish actions
+- 🎯 **Client-Side Filtering**: Browser timezone-aware visibility filtering
+- 🚀 **Production Ready**: All migrations tested and Railway-safe
+
+**Previous Session (Oct 18, 2025):**
 - 🎵 **Audio Player Fixed**: Migrated from Essential Audio (broken with React) to native HTML5 audio player
 - ✅ **MP3s Now Playing**: Resolved `Cannot read properties of undefined (reading 'zo')` error
 - 🚀 **Deployment Ready**: Passed all pre-deployment validation checks (TypeScript, ESLint)
@@ -429,4 +439,113 @@ Icon borders conditionally transparent when background images present. `.no-grad
 
 ---
 
-**Lines**: ~420 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 18, 2025
+## Dynamic Slide Scheduling System (Oct 19, 2025)
+
+Implemented comprehensive time-based and day-of-week publishing controls for individual slides, allowing articles to be visible only during specific time windows and days.
+
+### Features
+1. **Time Window Publishing**
+   - `publish_time_start` (TIME) - Article visible after this time
+   - `publish_time_end` (TIME) - Article visible before this time
+   - Supports overnight ranges (e.g., 10 PM - 3 AM)
+   - Uses visitor's browser timezone automatically
+
+2. **Day-of-Week Publishing**
+   - `publish_days` (TEXT/JSON) - Array of allowed days [0=Sunday, 6=Saturday]
+   - "All days" option (empty array = visible every day)
+   - Individual day checkboxes (Mon-Sun)
+
+3. **Client-Side Filtering**
+   - `src/lib/utils/scheduleFilter.ts` - Filtering utility
+   - `isSlideVisibleNow(slide)` - Checks schedule rules
+   - `filterVisibleSlides(slides[])` - Bulk filtering
+   - Runs in MainContent before rendering slides
+
+4. **Admin UI**
+   - "PUBLISHING SETTINGS" section in SlideEditor (right column, above Live Preview)
+   - Time pickers for start/end times
+   - Checkbox interface for day selection
+   - Matches existing app's publishing UI pattern
+
+### Example Configurations
+- **Weekends Only**: Sat-Sun checked, no time restrictions
+- **Night Hours**: All days, 22:00 - 06:00
+- **Weekend Mornings**: Sat-Sun, 06:00 - 12:00
+- **Complex Schedule**: Fri-Mon, 17:00 - 03:00 (spans multiple days)
+
+### Files Created
+- `scripts/add-slide-scheduling.ts` - Database migration
+- `src/lib/utils/scheduleFilter.ts` - Client-side filtering logic
+
+### Files Modified
+- `src/lib/queries/slides.ts` - Added scheduling fields to interfaces
+- `src/components/admin/slides/SlideEditor.tsx` - Added Publishing Settings UI
+- `src/components/MainContent.tsx` - Applied schedule filtering
+- `scripts/railway-init.ts` - Added scheduling migration
+
+### Logic Flow
+```
+VISIBILITY CHECK (All conditions must be true):
+├─ is_published = true (base requirement)
+├─ publish_days: If set, current day must be in array
+├─ publish_time_start: If set, current time >= start
+└─ publish_time_end: If set, current time < end
+
+TIMEZONE: Uses visitor's Date() object (browser timezone)
+OVERNIGHT: Supported (e.g., start > end = spans midnight)
+```
+
+---
+
+## Slide Publishing Controls (Oct 19, 2025)
+
+Added individual slide publishing with bulk actions in the admin slide manager.
+
+### Features
+1. **Individual Checkboxes** - Select slides one by one
+2. **Select All** - Toggle all slides at once
+3. **Bulk Publish** - Publish multiple selected slides
+4. **Bulk Unpublish** - Unpublish multiple selected slides
+5. **Status Badge** - "Unpublished" badge on unpublished slides
+6. **Frontend Filtering** - Unpublished slides hidden from users (API filter with `?published=true`)
+
+### Database Schema
+- Added `is_published` (BOOLEAN) column to `slides` table
+- Defaults to `true` for new slides
+- Indexed for query performance
+
+### API Endpoints
+- `POST /api/slides/bulk-publish` - Bulk update publish status
+  - Body: `{ slide_ids: string[], is_published: boolean }`
+  - Returns: `{ success: true, updated_count: number }`
+
+### Files Created
+- `scripts/add-slide-is-published.ts` - Database migration
+- `src/app/api/slides/bulk-publish/route.ts` - Bulk publish API
+
+### Files Modified
+- `src/lib/queries/slides.ts` - Added is_published to interfaces, added bulkUpdatePublishStatus()
+- `src/components/admin/slides/SlideManager.tsx` - Added checkboxes and bulk actions UI
+- `src/app/api/slides/rows/[id]/slides/route.ts` - Added `?published=true` query param support
+- `src/components/MainContent.tsx` - Added `?published=true` to fetch calls
+- `scripts/railway-init.ts` - Added is_published migration
+
+### UI Flow
+```
+Admin: /admin/slides/[id]
+├─ Bulk Actions Bar
+│  ├─ [✓] Select All (2 of 5 selected)
+│  ├─ [Publish Selected] button (green)
+│  └─ [Unpublish Selected] button (red)
+├─ Slide Cards
+│  ├─ [✓] Checkbox per slide
+│  ├─ [Unpublished] badge (if not published)
+│  └─ Edit/Delete buttons
+
+Frontend: /
+└─ Only shows slides where is_published = true
+```
+
+---
+
+**Lines**: ~490 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
