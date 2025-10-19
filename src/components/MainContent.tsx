@@ -17,6 +17,7 @@ interface MainContentProps {
   setActiveSlideImageUrl: (imageUrl: string | null) => void;
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
   activeSlideVideoUrl: string | null;
+  isQuickSlideMode: boolean;
 }
 
 // TypeScript interfaces for API data
@@ -34,7 +35,7 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, isQuickSlideMode }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -45,6 +46,17 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Get global theme
   const { theme: globalTheme } = useTheme();
+
+  // Filter rows based on Quick Slide mode
+  const filteredSlideRows = useMemo(() => {
+    if (isQuickSlideMode) {
+      // Show only QUICKSLIDE rows
+      return slideRows.filter(row => row.row_type === 'QUICKSLIDE');
+    } else {
+      // Show all rows EXCEPT QUICKSLIDE
+      return slideRows.filter(row => row.row_type !== 'QUICKSLIDE');
+    }
+  }, [slideRows, isQuickSlideMode]);
 
   // Memoize parsed icon sets to avoid repeated JSON parsing
   const iconSetsCache = useMemo(() => {
@@ -459,7 +471,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   }
 
   // No content state
-  if (slideRows.length === 0) {
+  if (filteredSlideRows.length === 0) {
     return (
       <main className="absolute inset-0 overflow-hidden flex items-center justify-center" style={{padding: '50px', zIndex: 20, backgroundColor: 'transparent'}}>
         <div className="text-center">
@@ -488,7 +500,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               handleSlideChange(swiper);
 
               // Load slides for the active row and update active row ID
-              const activeRow = slideRows[swiper.activeIndex];
+              const activeRow = filteredSlideRows[swiper.activeIndex];
               if (activeRow) {
                 loadSlidesForRow(activeRow.id);
                 setActiveRow(activeRow.id);
@@ -503,16 +515,16 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 // Preload adjacent rows for smoother navigation
                 const nextIndex = swiper.activeIndex + 1;
                 const prevIndex = swiper.activeIndex - 1;
-                if (nextIndex < slideRows.length) {
-                  loadSlidesForRow(slideRows[nextIndex].id);
+                if (nextIndex < filteredSlideRows.length) {
+                  loadSlidesForRow(filteredSlideRows[nextIndex].id);
                 }
                 if (prevIndex >= 0) {
-                  loadSlidesForRow(slideRows[prevIndex].id);
+                  loadSlidesForRow(filteredSlideRows[prevIndex].id);
                 }
               }
             }}
           >
-            {slideRows.map((row) => {
+            {filteredSlideRows.map((row) => {
               const slides = getSlidesForRow(row.id);
 
               return (
@@ -544,7 +556,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             handleSlideChange(swiper);
 
             // Load slides for the active row and update active row ID
-            const activeRow = slideRows[swiper.activeIndex];
+            const activeRow = filteredSlideRows[swiper.activeIndex];
             if (activeRow) {
               loadSlidesForRow(activeRow.id);
               setActiveRow(activeRow.id);
@@ -559,16 +571,16 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               // Preload adjacent rows for smoother navigation
               const nextIndex = swiper.activeIndex + 1;
               const prevIndex = swiper.activeIndex - 1;
-              if (nextIndex < slideRows.length) {
-                loadSlidesForRow(slideRows[nextIndex].id);
+              if (nextIndex < filteredSlideRows.length) {
+                loadSlidesForRow(filteredSlideRows[nextIndex].id);
               }
               if (prevIndex >= 0) {
-                loadSlidesForRow(slideRows[prevIndex].id);
+                loadSlidesForRow(filteredSlideRows[prevIndex].id);
               }
             }
           }}
         >
-          {slideRows.map((row) => {
+          {filteredSlideRows.map((row) => {
             const slides = getSlidesForRow(row.id);
 
             return (

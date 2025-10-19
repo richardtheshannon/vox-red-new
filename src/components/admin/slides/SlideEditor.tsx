@@ -164,6 +164,36 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
     };
   };
 
+  // Reusable button group component
+  const ActionButtons = () => (
+    <div className="flex justify-end gap-3">
+      <button
+        onClick={onCancel}
+        disabled={saving}
+        className="px-6 py-3 rounded transition-opacity hover:opacity-80"
+        style={{
+          backgroundColor: 'var(--card-bg)',
+          color: 'var(--text-color)',
+          border: '1px solid var(--border-color)'
+        }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="px-6 py-3 rounded transition-opacity hover:opacity-80"
+        style={{
+          backgroundColor: '#dc2626',
+          color: 'white',
+          opacity: saving ? 0.5 : 1
+        }}
+      >
+        {saving ? 'Saving...' : isNewSlide ? 'Create Slide' : 'Save Changes'}
+      </button>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Error Message */}
@@ -180,6 +210,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
           <p className="text-sm">{error}</p>
         </div>
       )}
+
+      {/* Action Buttons - Top */}
+      <ActionButtons />
 
       {/* Two Column Layout: Form + Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -667,32 +700,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3 pb-[50px]">
-        <button
-          onClick={onCancel}
-          disabled={saving}
-          className="px-6 py-3 rounded transition-opacity hover:opacity-80"
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            color: 'var(--text-color)',
-            border: '1px solid var(--border-color)'
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-6 py-3 rounded transition-opacity hover:opacity-80"
-          style={{
-            backgroundColor: '#dc2626',
-            color: 'white',
-            opacity: saving ? 0.5 : 1
-          }}
-        >
-          {saving ? 'Saving...' : isNewSlide ? 'Create Slide' : 'Save Changes'}
-        </button>
+      {/* Action Buttons - Bottom */}
+      <div className="pb-[50px]">
+        <ActionButtons />
       </div>
     </div>
   );

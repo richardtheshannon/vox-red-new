@@ -1,5 +1,7 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
+Lets set the "home" icon in the top left front end to refresh the application, so maybe it loads "/" or however we do it. If its on local dev, it should hard refresh the application if its on the production environment, it should hard refresh the live application. 
+
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 

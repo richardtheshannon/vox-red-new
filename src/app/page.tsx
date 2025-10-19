@@ -28,6 +28,9 @@ export default function Home() {
   // Quick Slide Modal state
   const [isQuickSlideModalOpen, setIsQuickSlideModalOpen] = useState(false);
 
+  // Quick Slide Mode state (toggle between all rows and Quick Slide row only)
+  const [isQuickSlideMode, setIsQuickSlideMode] = useState(false);
+
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
   const slidePrev = () => {
@@ -99,6 +102,11 @@ export default function Home() {
     window.location.reload();
   };
 
+  // Toggle Quick Slide Mode
+  const toggleQuickSlideMode = () => {
+    setIsQuickSlideMode(prev => !prev);
+  };
+
   return (
     <ThemeProvider>
       <div
@@ -131,6 +139,8 @@ export default function Home() {
             onVideoToggle={toggleVideoMode}
             videoMode={videoDisplayMode}
             hasBackgroundImage={!!activeSlideImageUrl}
+            isQuickSlideMode={isQuickSlideMode}
+            onAtrClick={toggleQuickSlideMode}
           />
           <BottomIconBar
             hasBackgroundImage={!!activeSlideImageUrl}
@@ -143,6 +153,7 @@ export default function Home() {
             setActiveSlideImageUrl={setActiveSlideImageUrl}
             setActiveSlideVideoUrl={setActiveSlideVideoUrl}
             activeSlideVideoUrl={activeSlideVideoUrl}
+            isQuickSlideMode={isQuickSlideMode}
           />
         </SwiperProvider>
 
@@ -164,7 +175,8 @@ function MainContentWithRef({
   setActiveRow,
   setActiveSlideImageUrl,
   setActiveSlideVideoUrl,
-  activeSlideVideoUrl
+  activeSlideVideoUrl,
+  isQuickSlideMode
 }: {
   setSwiperRef: (swiper: SwiperType | null) => void;
   handleSlideChange: (swiper: SwiperType) => void;
@@ -172,6 +184,7 @@ function MainContentWithRef({
   setActiveSlideImageUrl: (imageUrl: string | null) => void;
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
   activeSlideVideoUrl: string | null;
+  isQuickSlideMode: boolean;
 }) {
   return (
     <MainContent
@@ -181,6 +194,7 @@ function MainContentWithRef({
       setActiveSlideImageUrl={setActiveSlideImageUrl}
       setActiveSlideVideoUrl={setActiveSlideVideoUrl}
       activeSlideVideoUrl={activeSlideVideoUrl}
+      isQuickSlideMode={isQuickSlideMode}
     />
   );
 }

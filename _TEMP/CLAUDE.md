@@ -132,8 +132,8 @@ npm run db:slides:seed   # Seed slide content
 - `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
-- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal)
-- `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching)
+- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + Quick Slide mode toggle)
+- `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching, row filtering)
 - `src/components/YouTubeEmbed.tsx` - YouTube player (cover/contained modes)
 - `src/components/QuickSlideModal.tsx` - Quick slide creation modal
 - `src/contexts/SwiperContext.tsx` - Multi-level navigation context
@@ -143,7 +143,7 @@ npm run db:slides:seed   # Seed slide content
 - `src/components/TopIconBar.tsx` - Header (z-20)
 - `src/components/BottomIconBar.tsx` - Footer (z-20, comment icon for Quick Slides)
 - `src/components/LeftIconBar.tsx` - Left sidebar (z-10)
-- `src/components/RightIconBar.tsx` - Right sidebar (z-10, videocam toggle)
+- `src/components/RightIconBar.tsx` - Right sidebar (z-10, atr toggle for Quick Slide mode, videocam toggle)
 
 ### Admin
 - `src/app/admin/page.tsx` - Admin dashboard main page
@@ -291,6 +291,7 @@ npm run build           # Production build test
 - **Home**: Navigate to /
 - **Settings**: Navigate to /admin
 - **Theme Toggle**: Light/dark mode
+- **ATR** (right sidebar): Toggle Quick Slide mode (isolate Quick Slide row)
 - **Comment** (bottom left): Open Quick Slide creation modal
 - **Videocam** (conditional): Toggle video cover/contained
 - **Footer Arrows**: Prev/next slide, up/down row
@@ -339,7 +340,14 @@ npm run lint
 
 ## Recent Critical Updates
 
-**Latest Session Summary (Oct 19, 2025):**
+**Latest Session (Oct 19, 2025 - Evening):**
+- 🎯 **Quick Slide Mode Toggle**: Click "atr" icon in right sidebar to isolate Quick Slide row
+  - Toggle between normal view (all rows except Quick Slides) and Quick Slide-only view
+  - Visual feedback: Icon opacity changes (60% inactive, 100% active)
+  - Zero database changes, purely frontend filtering
+  - Seamless row isolation with existing navigation system
+
+**Previous Session (Oct 19, 2025 - Morning):**
 - 🎨 **Per-Slide Icons**: Admin can set up to 3 Material Symbol icons per slide (displays above title)
 - 💬 **Quick Slide Feature**: Frontend modal for creating quick notes (title + body only)
 - 📅 **Dynamic Slide Scheduling**: Time-of-day and day-of-week publishing controls per slide
@@ -697,4 +705,65 @@ Frontend: /
 
 ---
 
-**Lines**: ~680 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
+## Quick Slide Mode Toggle (Oct 19, 2025 - Evening)
+
+Added interactive "atr" icon in right sidebar to toggle between normal view and Quick Slide-only view for focused note browsing.
+
+### Features
+1. **Toggle Mode** - Click "atr" icon to switch between two views:
+   - **Normal Mode**: Shows all rows EXCEPT Quick Slides (default)
+   - **Quick Slide Mode**: Shows ONLY Quick Slide row
+
+2. **Visual Feedback**
+   - Icon opacity: 60% when inactive, 100% when active
+   - Dynamic tooltip: "Quick Slide Mode" / "Exit Quick Slide Mode"
+   - Smooth 300ms transition on opacity change
+
+3. **Frontend Filtering**
+   - Client-side filtering using `useMemo` hook
+   - Filter logic: `row_type === 'QUICKSLIDE'` vs `row_type !== 'QUICKSLIDE'`
+   - No API changes, no database queries modified
+
+### User Flow
+```
+1. User clicks "atr" icon (right sidebar, top section)
+2. View switches to Quick Slide mode
+3. Only Quick Slide row visible, all other rows hidden
+4. Click "atr" again to return to normal view
+5. Quick Slide row hidden, all other rows visible
+```
+
+### Implementation Details
+- **State Management**: `isQuickSlideMode` boolean state in `page.tsx`
+- **Filtering Logic**: `filteredSlideRows = useMemo()` in `MainContent.tsx`
+- **Icon Control**: Clickable icon with conditional styling in `RightIconBar.tsx`
+
+### Files Modified
+- `src/app/page.tsx` - Added state and toggle handler, passed to components
+- `src/components/RightIconBar.tsx` - Made "atr" icon clickable with visual feedback
+- `src/components/MainContent.tsx` - Added filtering logic for row display
+
+### Design Decisions
+- **No Database Changes**: Purely frontend state management
+- **No API Changes**: Uses existing published rows data
+- **Memoized Filtering**: Performance-optimized with `useMemo` hook
+- **Consistent UX**: Matches existing icon interaction patterns (like videocam toggle)
+- **Bidirectional Toggle**: Same icon for both enter and exit actions
+
+### Benefits
+- ✅ Quick access to personal notes without scrolling through all content
+- ✅ Clean separation between Quick Slides and formal content
+- ✅ Zero backend overhead (client-side only)
+- ✅ Maintains existing navigation behavior (up/down, left/right)
+- ✅ No breaking changes to existing features
+
+### Validation
+- ✅ TypeScript: 0 errors
+- ✅ ESLint: 0 errors, 25 warnings (all pre-existing)
+- ✅ Toggle functionality: Tested on dev server
+- ✅ Navigation: Swiper navigation works in both modes
+- ✅ No database impact: Pure frontend feature
+
+---
+
+**Lines**: ~720 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
