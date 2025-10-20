@@ -31,7 +31,7 @@ interface SlideRow {
   is_published: boolean;
   display_order: number;
   slide_count: number;
-  icon_set: string;
+  icon_set: string[]; // Already parsed by API
   theme_color: string | null;
   created_at: string;
   updated_at: string;
@@ -54,26 +54,35 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Filter rows based on Quick Slide mode
   const filteredSlideRows = useMemo(() => {
+    console.log('[MainContent] Filtering rows. Quick Slide Mode:', isQuickSlideMode);
+    console.log('[MainContent] Total slide rows:', slideRows.length);
+
     if (isQuickSlideMode) {
       // Show only QUICKSLIDE rows
-      return slideRows.filter(row => row.row_type === 'QUICKSLIDE');
+      const quickslideRows = slideRows.filter(row => row.row_type === 'QUICKSLIDE');
+      console.log('[MainContent] QUICKSLIDE rows found:', quickslideRows.length);
+      quickslideRows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
+      return quickslideRows;
     } else {
       // Show all rows EXCEPT QUICKSLIDE
-      return slideRows.filter(row => row.row_type !== 'QUICKSLIDE');
+      const normalRows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE');
+      console.log('[MainContent] Normal rows (excluding QUICKSLIDE):', normalRows.length);
+      return normalRows;
     }
   }, [slideRows, isQuickSlideMode]);
 
-  // Memoize parsed icon sets to avoid repeated JSON parsing
+  // Memoize icon sets (already parsed by API, no need to parse again)
   const iconSetsCache = useMemo(() => {
+    console.log('[MainContent] Building icon cache from slideRows...');
     const cache: Record<string, string[]> = {};
     slideRows.forEach(row => {
-      try {
-        const parsed = JSON.parse(row.icon_set || '[]');
-        cache[row.id] = Array.isArray(parsed) ? parsed : [];
-      } catch {
-        cache[row.id] = [];
+      // icon_set is already an array from the API
+      cache[row.id] = Array.isArray(row.icon_set) ? row.icon_set : [];
+      if (cache[row.id].length > 0) {
+        console.log(`  - ${row.title}: ${JSON.stringify(cache[row.id])}`);
       }
     });
+    console.log('[MainContent] Icon cache built:', Object.keys(cache).length, 'rows');
     return cache;
   }, [slideRows]);
 
@@ -82,13 +91,19 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     const fetchSlideRows = async () => {
       try {
         setLoading(true);
+        console.log('[MainContent] Fetching slide rows...');
         const response = await fetch('/api/slides/rows?published=true', {
           // Enable caching for better performance
           next: { revalidate: 60 } // Revalidate every 60 seconds
         });
         const data = await response.json();
+        console.log('[MainContent] Fetched slide rows:', data);
 
         if (data.status === 'success' && data.rows) {
+          console.log('[MainContent] Total rows fetched:', data.rows.length);
+          data.rows.forEach((row: SlideRow) => {
+            console.log(`  - ${row.title} (${row.row_type}) - Published: ${row.is_published}`);
+          });
           setSlideRows(data.rows);
 
           // Preload slides for first 2 rows for better UX
@@ -100,6 +115,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             }
           }
         } else {
+          console.error('[MainContent] Failed to load rows:', data);
           setError('Failed to load slide rows');
         }
       } catch (err) {
@@ -127,31 +143,46 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Preload slides when Quick Slide mode changes
   useEffect(() => {
+    console.log('[MainContent] Quick Slide mode changed:', isQuickSlideMode);
+    console.log('[MainContent] Filtered slide rows:', filteredSlideRows.length);
+
     if (filteredSlideRows.length > 0) {
       const firstRow = filteredSlideRows[0];
+      console.log('[MainContent] First filtered row:', firstRow.title, firstRow.id);
+      console.log('[MainContent] Slides cached for this row:', !!slidesCache[firstRow.id]);
+
       // Load slides for the first filtered row if not already cached
       if (!slidesCache[firstRow.id]) {
+        console.log('[MainContent] Loading slides for row:', firstRow.id);
         loadSlidesForRow(firstRow.id);
       }
+    } else {
+      console.warn('[MainContent] No filtered slide rows available!');
     }
-  }, [isQuickSlideMode, filteredSlideRows]);
+  }, [isQuickSlideMode, filteredSlideRows, slidesCache]);
 
   // Load slides for a specific row
   const loadSlidesForRow = async (rowId: string) => {
     // Check if already cached
     if (slidesCache[rowId]) {
+      console.log(`[MainContent] Slides already cached for row ${rowId}`);
       return;
     }
 
     try {
+      console.log(`[MainContent] Loading slides for row ${rowId}...`);
       const response = await fetch(`/api/slides/rows/${rowId}/slides?published=true`);
       const data = await response.json();
+      console.log(`[MainContent] Slides response for row ${rowId}:`, data);
 
       if (data.status === 'success' && data.slides) {
+        console.log(`[MainContent] Found ${data.slides.length} slides for row ${rowId}`);
         setSlidesCache(prev => ({
           ...prev,
           [rowId]: data.slides
         }));
+      } else {
+        console.warn(`[MainContent] No slides or error for row ${rowId}:`, data);
       }
     } catch (err) {
       console.error(`Error fetching slides for row ${rowId}:`, err);
@@ -516,7 +547,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   // Render horizontal swiper for a row's slides
   const renderHorizontalSwiper = (row: SlideRow, slides: Slide[], isMobile: boolean = false) => {
     // Use memoized icon cache for better performance
-    const icons = iconSetsCache[row.id] || parseIconSet(row.icon_set);
+    // row.icon_set is already an array from the API, no need to parse
+    const icons = iconSetsCache[row.id] || row.icon_set || [];
+    console.log(`[MainContent] Rendering row ${row.title} (${row.id}) with icons:`, icons);
 
     if (slides.length === 0) {
       return (

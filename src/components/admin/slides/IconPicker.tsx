@@ -9,9 +9,9 @@ interface IconPickerProps {
 }
 
 const MATERIAL_ICONS = [
+  'select_check_box',
   'check_circle_unread',
   'clock_arrow_up',
-  'select_check_box',
   'self_improvement',
   'spa',
   'fitness_center',
@@ -117,25 +117,29 @@ export default function IconPicker({ selectedIcons, onChange, maxIcons = 3 }: Ic
           }}
         >
           <div className="grid grid-cols-6 gap-3">
-            {MATERIAL_ICONS.map((icon) => (
-              <button
-                key={icon}
-                type="button"
-                onClick={() => toggleIcon(icon)}
-                className="p-3 rounded transition-all hover:opacity-70"
-                style={{
-                  backgroundColor: selectedIcons.includes(icon) ? '#dc2626' : 'transparent',
-                  color: selectedIcons.includes(icon) ? 'white' : 'var(--icon-color)',
-                  border: '1px solid var(--border-color)',
-                  opacity: selectedIcons.includes(icon) ? 1 : 0.7
-                }}
-                title={icon}
-              >
-                <span className="material-symbols-rounded" style={{ fontSize: '24px' }}>
-                  {icon}
-                </span>
-              </button>
-            ))}
+            {MATERIAL_ICONS.map((icon) => {
+              const isSelectCheckBox = icon === 'select_check_box';
+              const isSelected = selectedIcons.includes(icon);
+              return (
+                <button
+                  key={icon}
+                  type="button"
+                  onClick={() => toggleIcon(icon)}
+                  className="p-3 rounded transition-all hover:opacity-70"
+                  style={{
+                    backgroundColor: isSelected ? '#dc2626' : 'transparent',
+                    color: isSelected ? 'white' : (isSelectCheckBox ? '#22c55e' : 'var(--icon-color)'),
+                    border: `1px solid ${isSelectCheckBox ? '#22c55e' : 'var(--border-color)'}`,
+                    opacity: isSelected ? 1 : 0.7
+                  }}
+                  title={icon}
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: '24px' }}>
+                    {icon}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

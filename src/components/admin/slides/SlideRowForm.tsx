@@ -125,22 +125,41 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
         <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
           Row Type *
         </label>
-        <select
-          value={formData.row_type}
-          onChange={(e) => setFormData({ ...formData, row_type: e.target.value })}
-          className="w-full px-4 py-2 rounded"
-          style={{
-            backgroundColor: 'var(--card-bg)',
-            color: 'var(--text-color)',
-            border: `1px solid ${errors.row_type ? '#dc2626' : 'var(--border-color)'}`
-          }}
-        >
-          {ROW_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+        {formData.row_type === 'QUICKSLIDE' ? (
+          <>
+            <div
+              className="w-full px-4 py-2 rounded"
+              style={{
+                backgroundColor: 'var(--card-bg)',
+                color: 'var(--text-color)',
+                border: '1px solid var(--border-color)',
+                opacity: 0.6
+              }}
+            >
+              QUICKSLIDE (System-managed)
+            </div>
+            <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+              Quick Slides row type cannot be changed
+            </p>
+          </>
+        ) : (
+          <select
+            value={formData.row_type}
+            onChange={(e) => setFormData({ ...formData, row_type: e.target.value })}
+            className="w-full px-4 py-2 rounded"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              color: 'var(--text-color)',
+              border: `1px solid ${errors.row_type ? '#dc2626' : 'var(--border-color)'}`
+            }}
+          >
+            {ROW_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        )}
         {errors.row_type && (
           <p className="text-red-600 text-sm mt-1">{errors.row_type}</p>
         )}

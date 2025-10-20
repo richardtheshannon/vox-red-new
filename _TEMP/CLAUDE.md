@@ -1,16 +1,17 @@
 # Claude Development Reference
 
-**Project**: Icon Border Template - Spiritual Content Platform
+**Project**: Spiritual Content Platform with Slide-Based Navigation
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
 **Last Updated**: October 19, 2025
 
-Imortant: DO NOT CREATE A NUL FILE
+**Important**: DO NOT CREATE A NUL FILE
+
 ---
 
 ## Quick Start
 
 ```bash
-npm run dev              # Start dev server (http://localhost:3000)
+npm run dev              # Dev server (http://localhost:3000)
 npm run build            # Production build
 npm run db:init          # Initialize PostgreSQL schema
 npm run db:seed          # Seed sample data
@@ -21,7 +22,6 @@ npm run db:slides:seed   # Seed slide content
 **URLs**:
 - Frontend: http://localhost:3000/
 - Admin: http://localhost:3000/admin
-- Slides: http://localhost:3000/admin/slides
 - Health: http://localhost:3000/api/test-db
 
 ---
@@ -36,29 +36,28 @@ npm run db:slides:seed   # Seed slide content
 
 ---
 
-## Architecture Overview
+## Architecture
 
 ### Frontend (/)
 - **50px Icon Border Layout**: Fixed header/footer/sidebars with gradient backgrounds
 - **Multi-Level Navigation**: Vertical Swiper (slide rows) + Horizontal Swiper (slides)
 - **Dynamic Content**: Background images, YouTube videos (cover/contained modes)
 - **Per-Slide Themes**: Light/dark text with semi-transparent backgrounds (0-1 opacity)
-- **Global Theme**: Light/dark mode with session persistence
 - **Audio**: Native HTML5 audio player on all slides
+- **Quick Slides**: Modal-based quick note creation
 
 ### Admin (/admin)
 - **Slide Management**: Full CRUD interface for slide rows and slides
 - **Rich Text Editor**: Tiptap WYSIWYG with live preview
 - **Drag-and-Drop**: Slide reordering with position auto-calculation
 - **File Upload**: Audio (MP3/WAV/OGG), Images (JPG/PNG/WebP)
-- **Media Integration**: YouTube videos + background images per slide
 - **Theme Settings**: Per-slide light/dark override + text background opacity
 
 ---
 
 ## Database Schema
 
-### Core Tables (8)
+### Core Tables
 1. **users**: Role-based access (Admin, Moderator, User)
 2. **audio_files**: MP3 metadata
 3. **playlists** + **playlist_items**: Playlist management
@@ -66,7 +65,7 @@ npm run db:slides:seed   # Seed slide content
 5. **service_commitments**: Daily prompts
 6. **bug_reports** + **documentation**: Admin tools
 
-### Slide System (3 tables)
+### Slide System
 1. **slide_rows**: Collections of slides
    - `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set`, `theme_color`, `slide_count`
    - **row_type**: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
@@ -75,20 +74,16 @@ npm run db:slides:seed   # Seed slide content
    - Core: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type`
    - Media: `audio_url`, `image_url`, `video_url`
    - Display: `content_theme` ('light'|'dark'), `title_bg_opacity` (0-1), `body_bg_opacity` (0-1), `icon_set` (TEXT/JSON)
-   - Publishing: `is_published` (BOOLEAN), `publish_time_start` (TIME), `publish_time_end` (TIME), `publish_days` (TEXT/JSON)
+   - Publishing: `is_published`, `publish_time_start`, `publish_time_end`, `publish_days` (TEXT/JSON)
    - Meta: `view_count`, `completion_count`, `created_at`, `updated_at`
 
 3. **slide_icons**: Optional custom icons per slide
 
-**Features**:
-- Auto-updating `slide_count` trigger
-- Cascading deletes (row deletion removes all slides)
-- Unique position constraint per row
-- Server-side position auto-calculation
+**Features**: Auto-updating `slide_count` trigger, cascading deletes, unique position constraint, server-side position auto-calculation
 
 ---
 
-## API Endpoints (15)
+## API Endpoints
 
 ### Slide Rows
 - `GET /api/slides/rows` (query: `?published=true`)
@@ -109,9 +104,8 @@ npm run db:slides:seed   # Seed slide content
 - `GET /api/slides/upload`
 - `POST /api/slides/upload`
 - `POST /api/slides/quick-slide` - Create quick slide (title + body only)
+- `POST /api/slides/bulk-publish` - Bulk update publish status
 - `GET /api/test-db`
-
-**Validation**: All routes validate content_theme ('light'|'dark'), opacity values (0-1), and layout types.
 
 ---
 
@@ -124,19 +118,14 @@ npm run db:slides:seed   # Seed slide content
 - `scripts/init-db.ts` - Schema initialization
 - `scripts/init-slide-tables.ts` - Slide table creation
 - `scripts/railway-init.ts` - Railway startup script (runs all migrations)
-- `scripts/add-slide-theme-settings.ts` - Theme settings migration
-- `scripts/add-slide-is-published.ts` - Publishing flag migration
-- `scripts/add-slide-scheduling.ts` - Dynamic scheduling migration
-- `scripts/add-quickslide-row-type.ts` - Quick Slide row type migration
-- `scripts/add-slide-icon-set.ts` - Per-slide icon_set column migration
 - `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
-- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + Quick Slide mode toggle + unpublish dialog)
+- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + unpublish dialog)
 - `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching, row filtering, unpublish icon detection)
 - `src/components/YouTubeEmbed.tsx` - YouTube player (cover/contained modes)
 - `src/components/QuickSlideModal.tsx` - Quick slide creation modal
-- `src/components/ConfirmDialog.tsx` - Reusable confirmation dialog (unpublish, etc.)
+- `src/components/ConfirmDialog.tsx` - Reusable confirmation dialog
 - `src/contexts/SwiperContext.tsx` - Multi-level navigation context
 - `src/contexts/ThemeContext.tsx` - Global theme state
 
@@ -147,28 +136,15 @@ npm run db:slides:seed   # Seed slide content
 - `src/components/RightIconBar.tsx` - Right sidebar (z-10, atr toggle for Quick Slide mode, videocam toggle)
 
 ### Admin
-- `src/app/admin/page.tsx` - Admin dashboard main page
-- `src/app/admin/slides/page.tsx` - Slide row list
-- `src/app/admin/slides/new/page.tsx` - Create row
-- `src/app/admin/slides/[id]/edit/page.tsx` - Edit row metadata
-- `src/app/admin/slides/[id]/page.tsx` - Slide manager (reorder slides)
 - `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
-- `src/components/admin/AdminQuickActions.tsx` - Reusable quick actions sidebar (all admin pages)
-- `src/components/admin/AdminMainContent.tsx` - Admin dashboard content
-- `src/components/admin/AdminTopIconBar.tsx` - Admin header (z-10, theme-based background)
-- `src/components/admin/AdminBottomIconBar.tsx` - Admin footer (z-10, theme-based background)
-- `src/components/admin/AdminLeftIconBar.tsx` - Admin left sidebar (z-10, theme-based background)
-- `src/components/admin/AdminRightIconBar.tsx` - Admin right sidebar (z-10, expandable)
 - `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI + icon picker
 - `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
 - `src/components/admin/slides/IconPicker.tsx` - Material Symbol icon selection (up to 3 icons)
-
-### Styling
-- `src/app/globals.css` - Theme system, gradients, YouTube styling
+- `src/components/admin/AdminQuickActions.tsx` - Reusable quick actions sidebar
 
 ---
 
-## Key Features & Behavior
+## Key Features
 
 ### Media Layering (Z-Index)
 - Background image: z-0
@@ -183,33 +159,42 @@ npm run db:slides:seed   # Seed slide content
 - **Preloading**: First 2 rows on mount, adjacent rows on navigation
 - **Memoization**: Icon sets cached with `useMemo`
 
-### Per-Slide Theme Settings (Oct 15, 2025)
+### Per-Slide Theme Settings
 - **content_theme**: Override global theme ('light' = white text, 'dark' = black text)
 - **title_bg_opacity**: Semi-transparent background behind title (0-1)
 - **body_bg_opacity**: Semi-transparent background behind body (0-1)
 - **Logic**: Light theme uses dark backgrounds (rgba(0,0,0,opacity)), dark theme uses light backgrounds (rgba(255,255,255,opacity))
-- **Rendering**: Only applies when opacity > 0, uses inline styles
 
-### Icon Border Gradients
-- Conditional display: Transparent when background image present, gradients when absent
-- `.no-gradient` class applied via `hasBackgroundImage` prop
-- Smooth 500ms transitions between slides
+### Dynamic Slide Scheduling
+- **publish_time_start/end**: Time window publishing (supports overnight ranges)
+- **publish_days**: Day-of-week publishing (0=Sunday, 6=Saturday)
+- **Client-Side Filtering**: Uses visitor's browser timezone
+- **Logic**: All conditions must be true for visibility
+
+### Quick Slide Feature
+- **Modal Interface**: Click "comment" icon (bottom left) to open
+- **Immediate Publishing**: All quick slides published automatically
+- **Dedicated Row**: Stored in "Quick Slides" row (row_type: 'QUICKSLIDE')
+- **Quick Slide Mode Toggle**: Click "atr" icon (right sidebar) to isolate Quick Slide row
+  - Normal Mode: Shows all rows EXCEPT Quick Slides
+  - Quick Slide Mode: Shows ONLY Quick Slide row
+  - Visual feedback: Icon opacity 60% inactive, 100% active
+
+### Frontend Slide Unpublish
+- **Icon-Based**: Admin sets `select_check_box` icon → users can click to unpublish
+- **Visual Indicator**: Red color (#ef4444) signals destructive action
+- **Confirmation Dialog**: "Hide This Slide?" prevents accidental clicks
+- **Smart Navigation**: Smooth navigation to next available slide (no page reload)
+  - If slides remain: Navigate to next slide (or previous if last)
+  - If no slides remain: Navigate to first row (app start)
+  - Maintains context in Quick Slide mode
 
 ### YouTube Videos
 - Supports: `youtube.com/watch?v=`, `youtu.be/`, raw video IDs
 - **Cover Mode**: Full-screen like `background-size: cover` (default)
 - **Contained Mode**: 60px padding, 16:9 aspect ratio, fits viewport
 - Toggle via videocam icon in right sidebar (only visible when video present)
-- **Interactivity Fix**: MainContent passes `activeSlideVideoUrl` prop for conditional pointer-events handling
-- When video present: Swiper containers use `pointer-events: none` to allow video interaction
-- YouTube iframe at z-10 receives clicks through MainContent at z-20
-
-### Admin Interface
-- **50px Icon Border Layout**: All admin pages maintain consistent border layout
-- **Solid Theme Backgrounds**: All admin icon bars use `var(--bg-color)` (light/dark adaptive)
-- **Admin Quick Actions Sidebar**: Consistent left column (12.5% width, 150-200px range) on all pages
-  - Links: "Admin Dashboard" → `/admin`, "View Live Site" → `/`, "Manage Articles" → `/admin/slides`
-  - Component: `AdminQuickActions.tsx` (reusable across all admin pages)
+- **Interactivity**: MainContent uses `pointer-events: none` when video present to allow clicks through to iframe
 
 ---
 
@@ -244,18 +229,13 @@ npm run build           # Production build test
 1. Git push triggers deployment
 2. Nixpacks v1.38.0 detects Node.js 18
 3. Build: `npm ci` → `npm run build` → `npm run start`
-4. `railway-init.ts` runs automatically:
-   - Initializes database schema
-   - Initializes slide tables
-   - Runs theme settings migration (IF NOT EXISTS)
-   - Seeds initial data
+4. `railway-init.ts` runs automatically (initializes schema, runs migrations, seeds data)
 5. Database health check at `/api/test-db`
 
 ### Migration Safety
 - All migrations use `IF NOT EXISTS` (idempotent)
-- Theme settings migration wrapped in try/catch (non-critical)
+- Theme settings migration wrapped in try/catch
 - Seed scripts check for existing data (no duplicates)
-- Railway auto-seeding disabled for slide data
 
 ---
 
@@ -263,11 +243,8 @@ npm run build           # Production build test
 
 ### Audio Player Not Showing/Playing
 **Status**: FIXED (Oct 18, 2025)
-**Solution**: Now using native HTML5 `<audio>` element instead of Essential Audio Player
-**Note**: If audio still doesn't play, check:
-- Browser console for CORS errors
-- Audio URL is accessible (try opening in new tab)
-- File format is supported (MP3, WAV, OGG)
+**Solution**: Now using native HTML5 `<audio>` element
+**Check**: Browser console for CORS errors, audio URL accessibility, file format support (MP3, WAV, OGG)
 
 ### Tiptap SSR Hydration
 **Fix**: Add `immediatelyRender: false` to `useEditor()` config
@@ -275,14 +252,8 @@ npm run build           # Production build test
 ### Background Images Not Showing
 **Fix**: Ensure `.no-gradient` class applied to icon bars when `hasBackgroundImage={true}`
 
-### Material Icons Not Loading
-**Fix**: Icons load via `@import` in `globals.css`, requires font-weight: 100
-
 ### Position Constraint Violation
 **Fix**: Don't send position for new slides (server auto-calculates)
-
-### Seed Script Duplicates
-**Fix**: Scripts check for existing data, Railway auto-seeding disabled
 
 ---
 
@@ -292,7 +263,7 @@ npm run build           # Production build test
 - **Home**: Navigate to /
 - **Settings**: Navigate to /admin
 - **Theme Toggle**: Light/dark mode
-- **ATR** (right sidebar): Toggle Quick Slide mode (isolate Quick Slide row)
+- **ATR** (right sidebar): Toggle Quick Slide mode
 - **Comment** (bottom left): Open Quick Slide creation modal
 - **Videocam** (conditional): Toggle video cover/contained
 - **Footer Arrows**: Prev/next slide, up/down row
@@ -339,509 +310,59 @@ npm run lint
 
 ---
 
-## Recent Critical Updates
+## Recent Critical Updates (October 2025)
 
-**Latest Session (Oct 19, 2025 - Late Night):**
-- 🎯 **Smart Unpublish Navigation**: Improved UX when unpublishing slides - no more page reloads!
-  - Click unpublish icon → Slide removed → Smooth navigation to next available slide
-  - **Stays in current row**: If slides remain, navigates to next (or previous if last slide)
-  - **Jumps to app start**: Only if all slides in row are removed
-  - **Works in Quick Slide mode**: Maintains context when unpublishing Quick Slides
-  - **Zero page reload**: Pure client-side navigation using existing Swiper system
-  - **Auto-updates**: Background images/videos update automatically after navigation
-  - Architecture: Callback ref pattern between page.tsx and MainContent.tsx
-  - Files modified: [page.tsx:122-168](src/app/page.tsx#L122-L168), [MainContent.tsx:172-258](src/components/MainContent.tsx#L172-L258)
+### Smart Unpublish Navigation (Oct 19 - Late Night)
+- Click unpublish icon → Slide removed → Smooth navigation to next available slide
+- Stays in current row if slides remain, jumps to app start only if all slides removed
+- Works in Quick Slide mode, maintains context
+- Zero page reload, pure client-side navigation using Swiper
+- Architecture: Callback ref pattern between page.tsx and MainContent.tsx
 
-**Previous Session (Oct 19, 2025 - Night):**
-- 🔴 **Frontend Slide Unpublish**: Users can unpublish slides by clicking `select_check_box` icon
-  - Admin sets `select_check_box` icon in IconPicker → appears red on frontend
-  - Click icon → Confirmation dialog: "Hide This Slide?"
-  - On confirm → Slide unpublished via API → Slide disappears with smart navigation
-  - Safety: Confirmation dialog prevents accidental clicks, red color signals destructive action
-  - Architecture: Dialog rendered at page.tsx level (z-50) to avoid pointer-events blocking
-- 🐛 **Quick Slide Loading Fix**: Added useEffect to preload slides when toggling Quick Slide mode
-  - Fixed "Loading slides..." hang when clicking "atr" icon
-  - Automatically loads Quick Slide row slides when entering Quick Slide mode
+### Frontend Slide Unpublish (Oct 19 - Night)
+- Admin sets `select_check_box` icon → appears red on frontend
+- Click icon → Confirmation dialog: "Hide This Slide?"
+- On confirm → Slide unpublished via API → Slide disappears with smart navigation
+- Safety: Confirmation dialog prevents accidental clicks
 
-**Previous Session (Oct 19, 2025 - Evening):**
-- 🎯 **Quick Slide Mode Toggle**: Click "atr" icon in right sidebar to isolate Quick Slide row
-  - Toggle between normal view (all rows except Quick Slides) and Quick Slide-only view
-  - Visual feedback: Icon opacity changes (60% inactive, 100% active)
-  - Zero database changes, purely frontend filtering
-  - Seamless row isolation with existing navigation system
+### Quick Slide Mode Toggle (Oct 19 - Evening)
+- Click "atr" icon in right sidebar to isolate Quick Slide row
+- Toggle between normal view (all rows except Quick Slides) and Quick Slide-only view
+- Visual feedback: Icon opacity changes (60% inactive, 100% active)
+- Zero database changes, purely frontend filtering
 
-**Previous Session (Oct 19, 2025 - Morning):**
-- 🎨 **Per-Slide Icons**: Admin can set up to 3 Material Symbol icons per slide (displays above title)
-- 💬 **Quick Slide Feature**: Frontend modal for creating quick notes (title + body only)
-- 📅 **Dynamic Slide Scheduling**: Time-of-day and day-of-week publishing controls per slide
-- ✅ **Slide Publishing Controls**: Individual checkboxes with bulk publish/unpublish actions
-- 🎯 **Client-Side Filtering**: Browser timezone-aware visibility filtering
-- 🚀 **Production Ready**: All migrations tested and Railway-safe
+### Quick Slide Feature (Oct 19 - Morning)
+- Frontend modal for creating quick notes (title + body only)
+- Click "comment" icon in bottom left to open modal
+- All quick slides published automatically to "Quick Slides" row (row_type: 'QUICKSLIDE')
+- Page reloads after creation to show new slide immediately
 
-**Previous Session (Oct 18, 2025):**
-- 🎵 **Audio Player Fixed**: Migrated from Essential Audio (broken with React) to native HTML5 audio player
-- ✅ **MP3s Now Playing**: Resolved `Cannot read properties of undefined (reading 'zo')` error
-- 🚀 **Deployment Ready**: Passed all pre-deployment validation checks (TypeScript, ESLint)
-- 📝 **Documentation Updated**: Updated all references from Essential Audio to HTML5 audio
-- 🔧 **TypeScript Fix**: Fixed `any` type error in check-audio-paths.ts
+### Per-Slide Icons (Oct 19 - Morning)
+- Admin can set up to 3 Material Symbol icons per slide
+- Icons display above title on frontend
+- Stored as JSON array in `icon_set` column (e.g., `["home", "star", "favorite"]`)
+- Falls back to row-level icons if not set
 
-### HTML5 Audio Player Migration (Oct 18, 2025)
-Replaced Essential Audio Player library with native HTML5 audio player to resolve initialization issues and improve React compatibility.
+### Dynamic Slide Scheduling (Oct 19 - Morning)
+- Time-of-day and day-of-week publishing controls per slide
+- `publish_time_start`, `publish_time_end` (TIME) - Time window visibility
+- `publish_days` (TEXT/JSON) - Day-of-week array [0=Sunday, 6=Saturday]
+- Client-side filtering using visitor's browser timezone
+- Supports overnight ranges (e.g., 22:00 - 06:00)
 
-**Problem:**
-- Essential Audio Player designed for static HTML, incompatible with React's dynamic rendering
-- Destructive `init()` method caused race conditions and registry wipes
-- Window resize handler errors: `Cannot read properties of undefined (reading 'zo')`
-- Players added after DOMContentLoaded were never detected by the library
+### Slide Publishing Controls (Oct 19 - Morning)
+- Individual slide publishing with bulk actions
+- Checkboxes for selecting multiple slides
+- Bulk publish/unpublish actions
+- "Unpublished" badge on unpublished slides
+- Frontend filtering with `?published=true` query param
 
-**Solution:**
-- Migrated to native HTML5 `<audio>` element with built-in controls
-- Removed all Essential Audio initialization code
-- Simplified component to 87 lines (vs 123 lines previously)
-
-**Benefits:**
-- ✅ Zero initialization required - works immediately
-- ✅ No race conditions or registry management issues
-- ✅ Better accessibility (screen reader compatible)
-- ✅ Mobile-optimized native controls
-- ✅ Universal browser support
-- ✅ Simpler codebase and easier maintenance
-
-**Files Modified:**
-- `src/components/EssentialAudioPlayer.tsx` - Complete rewrite using HTML5 audio
-
-**Note:** Essential Audio library files remain in `/public/essential-audio-player/` but are no longer loaded or used. Can be safely removed if desired.
-
-**Deployment Validation (Oct 18, 2025):**
-- ✅ TypeScript validation: 0 errors (`npx tsc --noEmit`)
-- ✅ ESLint validation: 0 errors, 29 warnings (acceptable for production)
-- ✅ Fixed TypeScript error in `scripts/check-audio-paths.ts` (replaced `any` type with proper `string | Buffer`)
-- ✅ All database migrations idempotent and Railway-safe
-- ✅ Ready for Railway deployment
-
-### Subtitle and Row Type Pills (Oct 17, 2025)
-Redesigned subtitle display as compact pill badges alongside row type indicators beneath the MP3 player.
-
-**Changes**:
-- **Subtitle Display**: Removed large h2 subtitle heading, now displays as first pill in horizontal row
-- **Row Type Badge**: Added row type (ROUTINE/COURSE/TEACHING/CUSTOM) as second pill
-- **Styling**: Theme-aware semi-transparent pills (30% opacity), 12px font, 8px gap between pills
-- **Layout**: Flexbox row with wrap support, appears 8px below audio player
-- **Conditional**: Only displays when audio player exists (maintains existing logic)
-- **Formatting**: Row type capitalized (e.g., "Course"), subtitle displays as-is
-
-**Files Modified**:
-- `src/components/MainContent.tsx` - Updated `renderSlideContent()` signature, removed subtitle h2 section, added pill row for both video and non-video slides
-
-**Benefits**:
-- Cleaner, more compact slide layout
-- Consistent metadata display pattern
-- Better visual hierarchy (title remains prominent, subtitle becomes supporting detail)
-- Theme-aware styling matches existing per-slide theme system
-
-### YouTube Video Interactivity Fix (Oct 16, 2025)
-Fixed YouTube video click-through issue. Added `activeSlideVideoUrl` prop to MainContent component, passed from page.tsx. When video present, Swiper containers apply `pointer-events: none` to allow clicks to reach YouTube iframe at z-10. Audio player remains interactive with explicit `pointer-events: auto`. Icon bars at z-20 remain visible and functional.
-
-**Files Modified**:
-- `src/components/MainContent.tsx` - Added prop, conditional pointer-events on desktop/mobile wrappers
-- `src/app/page.tsx` - Pass activeSlideVideoUrl to MainContentWithRef
-
-### Admin Interface Consistency Updates (Oct 16, 2025)
-Standardized admin interface with theme-aware backgrounds and consistent quick actions sidebar across all pages.
-
-**Changes**:
-1. **Solid Theme Backgrounds**: All admin icon bars now use `var(--bg-color)` for light/dark theme adaptation
-   - Files: `AdminTopIconBar.tsx`, `AdminBottomIconBar.tsx`, `AdminLeftIconBar.tsx`, `AdminRightIconBar.tsx`
-2. **Admin Quick Actions Component**: Created reusable sidebar component with consistent width (12.5%, 150-200px)
-   - Component: `src/components/admin/AdminQuickActions.tsx`
-   - Links: "Admin Dashboard", "View Live Site", "Manage Articles"
-   - Applied to all 6 admin pages for consistent navigation
-
-**Admin Pages Updated**:
-- `/admin` (main dashboard)
-- `/admin/slides` (slide list)
-- `/admin/slides/new` (create row)
-- `/admin/slides/[id]` (slide manager)
-- `/admin/slides/[id]/edit` (edit row)
-- `/admin/slides/[id]/slide/[slideId]` (slide editor)
-
-### Per-Slide Theme Settings (Oct 15, 2025)
-Added `content_theme`, `title_bg_opacity`, `body_bg_opacity` columns to slides table. Admin UI includes dropdown + sliders. Frontend applies theme-aware semi-transparent backgrounds. Migration runs automatically on Railway via `railway-init.ts`.
-
-### Position Constraint Fix (Oct 15, 2025)
-Fixed slide creation errors. Server now auto-calculates position. SlideEditor no longer sends position for new slides.
-
-### Seed Script Duplicate Prevention (Oct 15, 2025)
-Added existence checks to seed scripts. Disabled Railway auto-seeding for slides. Prevents deleted rows from resurrecting.
-
-### Background Image Gradient Fix (Oct 15, 2025)
-Icon borders conditionally transparent when background images present. `.no-gradient` class applied via `hasBackgroundImage` prop.
+### Audio Player Fixed (Oct 18)
+- Migrated from Essential Audio Player to native HTML5 `<audio>` element
+- Resolved initialization issues and React compatibility
+- Zero initialization required, works immediately
+- Better accessibility and mobile support
 
 ---
 
-## Dynamic Slide Scheduling System (Oct 19, 2025)
-
-Implemented comprehensive time-based and day-of-week publishing controls for individual slides, allowing articles to be visible only during specific time windows and days.
-
-### Features
-1. **Time Window Publishing**
-   - `publish_time_start` (TIME) - Article visible after this time
-   - `publish_time_end` (TIME) - Article visible before this time
-   - Supports overnight ranges (e.g., 10 PM - 3 AM)
-   - Uses visitor's browser timezone automatically
-
-2. **Day-of-Week Publishing**
-   - `publish_days` (TEXT/JSON) - Array of allowed days [0=Sunday, 6=Saturday]
-   - "All days" option (empty array = visible every day)
-   - Individual day checkboxes (Mon-Sun)
-
-3. **Client-Side Filtering**
-   - `src/lib/utils/scheduleFilter.ts` - Filtering utility
-   - `isSlideVisibleNow(slide)` - Checks schedule rules
-   - `filterVisibleSlides(slides[])` - Bulk filtering
-   - Runs in MainContent before rendering slides
-
-4. **Admin UI**
-   - "PUBLISHING SETTINGS" section in SlideEditor (right column, above Live Preview)
-   - Time pickers for start/end times
-   - Checkbox interface for day selection
-   - Matches existing app's publishing UI pattern
-
-### Example Configurations
-- **Weekends Only**: Sat-Sun checked, no time restrictions
-- **Night Hours**: All days, 22:00 - 06:00
-- **Weekend Mornings**: Sat-Sun, 06:00 - 12:00
-- **Complex Schedule**: Fri-Mon, 17:00 - 03:00 (spans multiple days)
-
-### Files Created
-- `scripts/add-slide-scheduling.ts` - Database migration
-- `src/lib/utils/scheduleFilter.ts` - Client-side filtering logic
-
-### Files Modified
-- `src/lib/queries/slides.ts` - Added scheduling fields to interfaces
-- `src/components/admin/slides/SlideEditor.tsx` - Added Publishing Settings UI
-- `src/components/MainContent.tsx` - Applied schedule filtering
-- `scripts/railway-init.ts` - Added scheduling migration
-
-### Logic Flow
-```
-VISIBILITY CHECK (All conditions must be true):
-├─ is_published = true (base requirement)
-├─ publish_days: If set, current day must be in array
-├─ publish_time_start: If set, current time >= start
-└─ publish_time_end: If set, current time < end
-
-TIMEZONE: Uses visitor's Date() object (browser timezone)
-OVERNIGHT: Supported (e.g., start > end = spans midnight)
-```
-
----
-
-## Slide Publishing Controls (Oct 19, 2025)
-
-Added individual slide publishing with bulk actions in the admin slide manager.
-
-### Features
-1. **Individual Checkboxes** - Select slides one by one
-2. **Select All** - Toggle all slides at once
-3. **Bulk Publish** - Publish multiple selected slides
-4. **Bulk Unpublish** - Unpublish multiple selected slides
-5. **Status Badge** - "Unpublished" badge on unpublished slides
-6. **Frontend Filtering** - Unpublished slides hidden from users (API filter with `?published=true`)
-
-### Database Schema
-- Added `is_published` (BOOLEAN) column to `slides` table
-- Defaults to `true` for new slides
-- Indexed for query performance
-
-### API Endpoints
-- `POST /api/slides/bulk-publish` - Bulk update publish status
-  - Body: `{ slide_ids: string[], is_published: boolean }`
-  - Returns: `{ success: true, updated_count: number }`
-
-### Files Created
-- `scripts/add-slide-is-published.ts` - Database migration
-- `src/app/api/slides/bulk-publish/route.ts` - Bulk publish API
-
-### Files Modified
-- `src/lib/queries/slides.ts` - Added is_published to interfaces, added bulkUpdatePublishStatus()
-- `src/components/admin/slides/SlideManager.tsx` - Added checkboxes and bulk actions UI
-- `src/app/api/slides/rows/[id]/slides/route.ts` - Added `?published=true` query param support
-- `src/components/MainContent.tsx` - Added `?published=true` to fetch calls
-- `scripts/railway-init.ts` - Added is_published migration
-
-### UI Flow
-```
-Admin: /admin/slides/[id]
-├─ Bulk Actions Bar
-│  ├─ [✓] Select All (2 of 5 selected)
-│  ├─ [Publish Selected] button (green)
-│  └─ [Unpublish Selected] button (red)
-├─ Slide Cards
-│  ├─ [✓] Checkbox per slide
-│  ├─ [Unpublished] badge (if not published)
-│  └─ Edit/Delete buttons
-
-Frontend: /
-└─ Only shows slides where is_published = true
-```
-
----
-
-## Quick Slide Feature (Oct 19, 2025)
-
-Added frontend modal for creating quick notes and thoughts directly from the main application without admin access.
-
-### Features
-1. **Modal Interface** - Clean, theme-aware modal with title (H1) and body content fields
-2. **Comment Icon Trigger** - Click "comment" icon in bottom left icon bar to open modal
-3. **Immediate Publishing** - All quick slides are published automatically (`is_published: true`)
-4. **Dedicated Row** - Quick slides stored in "Quick Slides" row (row_type: 'QUICKSLIDE')
-5. **Auto-Refresh** - Page reloads after creation to show new slide immediately
-6. **Theme Consistent** - Modal uses CSS variables (`var(--bg-color)`, `var(--card-bg)`, etc.)
-
-### User Flow
-```
-1. User clicks "comment" icon (bottom left icon bar)
-2. Modal opens with title and body content fields
-3. User enters text and clicks "Create Quick Slide"
-4. Success message shown: "Quick slide created successfully! Refreshing..."
-5. After 500ms, page reloads
-6. New quick slide appears in "Quick Slides" row
-```
-
-### Database Schema
-- **row_type**: Added 'QUICKSLIDE' to slide_rows CHECK constraint
-- **Quick Slides Row**: Auto-created if not exists
-  - Title: "Quick Slides"
-  - Description: "Quick thoughts and notes"
-  - Display Order: 999 (appears at end)
-  - Published: true
-  - Icon Set: ["chat", "note", "edit"]
-
-### API Endpoint
-- `POST /api/slides/quick-slide`
-  - Body: `{ title: string, body_content: string }`
-  - Finds or creates "Quick Slides" row
-  - Creates slide with auto-calculated position
-  - Always sets `is_published: true`
-  - Returns: `{ status: 'success', slide: {...}, row_id: string }`
-
-### Files Created
-- `scripts/add-quickslide-row-type.ts` - Database migration for QUICKSLIDE type
-- `src/components/QuickSlideModal.tsx` - Modal component (theme-aware, greyscale)
-- `src/app/api/slides/quick-slide/route.ts` - Quick slide creation API
-
-### Files Modified
-- `src/lib/queries/slideRows.ts` - Added 'QUICKSLIDE' to row_type interfaces
-- `src/components/BottomIconBar.tsx` - Added onQuickSlideClick handler to comment icon
-- `src/app/page.tsx` - Added modal state and window.location.reload() on success
-- `scripts/railway-init.ts` - Added QUICKSLIDE migration to deployment pipeline
-
-### Design Decisions
-- **No Admin Required**: Users can create quick notes without admin access
-- **Simple Form**: Only title and body content (no media, no advanced settings)
-- **Immediate Publish**: Quick slides skip draft state for rapid note-taking
-- **Full Page Reload**: Ensures fresh content and avoids state management complexity
-- **Greyscale Theme**: Modal uses CSS variables for consistent light/dark mode styling
-- **Minimal Impact**: Reuses existing slide system, no new tables required
-
-### Theme Integration
-Modal uses application's CSS variables:
-- Background: `var(--bg-color)` (white in light, #1a1a1a in dark)
-- Input Fields: `var(--card-bg)` (light grey in light, #232323 in dark)
-- Borders: `var(--border-color)` (adaptive greyscale)
-- Text: `var(--text-color)` (black in light, white in dark)
-- Buttons: `var(--card-bg)` and `var(--secondary-text)` (greyscale only)
-
-### Validation
-- ✅ TypeScript: 0 errors
-- ✅ ESLint: 0 errors, 28 warnings
-- ✅ Database: Migration tested, Quick Slides row created
-- ✅ API: Endpoint tested with 2 quick slides created
-- ✅ Railway-Safe: Idempotent migration with IF NOT EXISTS
-
----
-
-## Per-Slide Icon Display (Oct 19, 2025)
-
-Added ability to set custom Material Symbol icons for individual slides that display above the main heading title.
-
-### Features
-1. **IconPicker Component** - Select up to 3 Material Symbol icons per slide
-2. **Database Storage** - Icons stored as JSON array in `icon_set` column (e.g., `["home", "star", "favorite"]`)
-3. **Fallback Behavior** - Uses per-slide icons if set, otherwise displays row-level icons
-4. **Admin Integration** - IconPicker appears in SlideEditor after body content editor
-5. **Frontend Display** - Icons render above slide title in same style as row icons
-
-### User Flow
-```
-Admin: /admin/slides/[id]/slide/[slideId]
-├─ Body Content Editor (Tiptap WYSIWYG)
-├─ Icon Picker Section
-│  ├─ Search box (filter by icon name)
-│  ├─ Grid of Material Symbol icons
-│  ├─ Selected icons displayed as pills
-│  └─ Limit: 3 icons maximum
-└─ Save button updates slide.icon_set
-
-Frontend: /
-├─ MainContent checks slide.icon_set
-├─ If icons exist: Parse JSON and display
-└─ If empty/null: Fall back to row-level icons
-```
-
-### Database Schema
-- **slides.icon_set** (TEXT) - JSON array of icon names
-  - Example: `["home", "star", "favorite"]` or `null`
-  - Stored as TEXT, parsed as JSON in frontend/admin
-  - Optional field (defaults to null)
-
-### Implementation Details
-- **Parse Logic**: `const slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons;`
-- **Save Logic**: `icon_set: selectedIcons.length > 0 ? JSON.stringify(selectedIcons) : null`
-- **Load Logic**: `JSON.parse(slide.icon_set)` with try/catch in SlideEditor useState
-- **Display Priority**: Per-slide icons → Row icons → No icons
-
-### Files Created
-- `scripts/add-slide-icon-set.ts` - Database migration adding icon_set column
-
-### Files Modified
-- `src/lib/queries/slides.ts` - Added icon_set to Slide, CreateSlideData, UpdateSlideData interfaces
-- `src/components/admin/slides/SlideEditor.tsx` - Integrated IconPicker component, load/save icon_set
-- `src/components/MainContent.tsx` - Updated renderSlideContent to use per-slide icons with fallback
-- `scripts/railway-init.ts` - Added icon_set migration to deployment pipeline
-
-### Design Decisions
-- **Column vs Join Table**: Chose TEXT column over slide_icons join table for simplicity
-- **JSON Storage**: Reuses existing pattern from publish_days and row icon_set
-- **Fallback Logic**: Maintains backward compatibility with row-level icons
-- **Admin UX**: IconPicker integrated directly into SlideEditor (no separate page)
-- **Limit**: 3 icons maximum matches row-level icon limit
-
-### Validation
-- ✅ TypeScript: 0 errors
-- ✅ Database: Migration tested, icon_set column added
-- ✅ Admin: IconPicker loads/saves correctly
-- ✅ Frontend: Icons display with proper fallback behavior
-- ✅ Railway-Safe: Idempotent migration with IF NOT EXISTS
-
----
-
-## Quick Slide Mode Toggle (Oct 19, 2025 - Evening)
-
-Added interactive "atr" icon in right sidebar to toggle between normal view and Quick Slide-only view for focused note browsing.
-
-### Features
-1. **Toggle Mode** - Click "atr" icon to switch between two views:
-   - **Normal Mode**: Shows all rows EXCEPT Quick Slides (default)
-   - **Quick Slide Mode**: Shows ONLY Quick Slide row
-
-2. **Visual Feedback**
-   - Icon opacity: 60% when inactive, 100% when active
-   - Dynamic tooltip: "Quick Slide Mode" / "Exit Quick Slide Mode"
-   - Smooth 300ms transition on opacity change
-
-3. **Frontend Filtering**
-   - Client-side filtering using `useMemo` hook
-   - Filter logic: `row_type === 'QUICKSLIDE'` vs `row_type !== 'QUICKSLIDE'`
-   - No API changes, no database queries modified
-
-### User Flow
-```
-1. User clicks "atr" icon (right sidebar, top section)
-2. View switches to Quick Slide mode
-3. Only Quick Slide row visible, all other rows hidden
-4. Click "atr" again to return to normal view
-5. Quick Slide row hidden, all other rows visible
-```
-
-### Implementation Details
-- **State Management**: `isQuickSlideMode` boolean state in `page.tsx`
-- **Filtering Logic**: `filteredSlideRows = useMemo()` in `MainContent.tsx`
-- **Icon Control**: Clickable icon with conditional styling in `RightIconBar.tsx`
-
-### Files Modified
-- `src/app/page.tsx` - Added state and toggle handler, passed to components
-- `src/components/RightIconBar.tsx` - Made "atr" icon clickable with visual feedback
-- `src/components/MainContent.tsx` - Added filtering logic for row display
-
-### Design Decisions
-- **No Database Changes**: Purely frontend state management
-- **No API Changes**: Uses existing published rows data
-- **Memoized Filtering**: Performance-optimized with `useMemo` hook
-- **Consistent UX**: Matches existing icon interaction patterns (like videocam toggle)
-- **Bidirectional Toggle**: Same icon for both enter and exit actions
-
-### Benefits
-- ✅ Quick access to personal notes without scrolling through all content
-- ✅ Clean separation between Quick Slides and formal content
-- ✅ Zero backend overhead (client-side only)
-- ✅ Maintains existing navigation behavior (up/down, left/right)
-- ✅ No breaking changes to existing features
-
-### Validation
-- ✅ TypeScript: 0 errors
-- ✅ ESLint: 0 errors, 25 warnings (all pre-existing)
-- ✅ Toggle functionality: Tested on dev server
-- ✅ Navigation: Swiper navigation works in both modes
-- ✅ No database impact: Pure frontend feature
-
----
-
-## Frontend Slide Unpublish Feature (Oct 19, 2025 - Night)
-
-Added ability for users to unpublish slides directly from the frontend by clicking a designated icon.
-
-### Features
-1. **Icon-Based Unpublish** - Admin sets `select_check_box` icon → users can click to unpublish
-2. **Visual Indicator** - Red color (#ef4444) signals destructive action
-3. **Confirmation Dialog** - "Hide This Slide?" prevents accidental unpublishing
-4. **Immediate Effect** - Page reloads after unpublish to show updated content
-5. **Hover Feedback** - Icon opacity: 70% → 100% on hover
-
-### User Flow
-```
-Admin: /admin/slides/[id]/slide/[slideId]
-└─ Set icon_set to include "select_check_box"
-
-Frontend: /
-1. User sees red select_check_box icon on slide
-2. Clicks icon → ConfirmDialog appears (z-50)
-3. "Hide This Slide?" confirmation message
-4. Clicks "Hide Slide" → API PATCH call
-5. Page reloads → Slide no longer visible
-```
-
-### Implementation Details
-- **Icon Detection**: `icon === 'select_check_box'` in MainContent renderSlideContent
-- **Styling**: Red color, pointer cursor, hover opacity transition (150ms)
-- **Dialog Architecture**: Rendered at page.tsx level (not inside MainContent) to avoid pointer-events blocking
-- **API Call**: `PATCH /api/slides/rows/[rowId]/slides/[slideId]` with `{ is_published: false }`
-- **State Management**: Page-level dialog state, full page reload ensures fresh data
-- **Pointer Events**: Icon has `pointerEvents: 'auto'` to remain clickable despite parent container settings
-
-### Files Created
-- `src/components/ConfirmDialog.tsx` - Reusable confirmation dialog component (theme-aware, greyscale)
-
-### Files Modified
-- `src/components/MainContent.tsx` - Icon rendering with click handler, red styling for unpublish icon
-- `src/app/page.tsx` - Dialog state management, API call handler, ConfirmDialog rendering
-
-### Design Decisions
-- **Page Reload vs State Update**: Chose full reload for simplicity and guaranteed data freshness
-- **Dialog Placement**: Rendered at page.tsx level (z-50) to avoid CSS pointer-events blocking from MainContent
-- **Icon Choice**: `select_check_box` is intuitive for "remove/hide" action
-- **Color Signal**: Red (#ef4444) universally signals caution/destructive action
-- **Confirmation Required**: Prevents accidental unpublishing from errant clicks
-
-### Validation
-- ✅ TypeScript: 0 errors
-- ✅ ESLint: 0 errors, 27 warnings (all pre-existing)
-- ✅ No Database Changes: Reuses existing `is_published` column
-- ✅ No API Changes: Reuses existing PATCH endpoint
-- ✅ Production Ready: Minimal, surgical changes to existing codebase
-
----
-
-**Lines**: ~790 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
+**Lines**: ~350 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
