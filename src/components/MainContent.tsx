@@ -207,9 +207,102 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     return filterVisibleSlides(allSlides);
   }, [slidesCache]);
 
-  // Handle unpublish icon click - delegate to parent
+  // Handle unpublish icon click - delegate to parent (permanent unpublish)
   const handleUnpublishClick = (slideId: string, rowId: string) => {
     onUnpublishDialogOpen(slideId, rowId);
+  };
+
+  // Handle temporary unpublish icon click (no dialog needed)
+  const handleTempUnpublishClick = async (slideId: string, rowId: string) => {
+    try {
+      console.log('[MainContent] Temp unpublishing slide:', slideId);
+
+      // Call the temp-unpublish API
+      const response = await fetch(`/api/slides/rows/${rowId}/slides/${slideId}/temp-unpublish`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        console.log('[MainContent] Slide temporarily unpublished until:', data.unpublishUntil);
+
+        // Get the horizontal swiper for this row
+        const horizontalSwiper = getHorizontalSwiper(rowId);
+        if (!horizontalSwiper) {
+          console.warn('[MainContent] No horizontal swiper found for row:', rowId);
+          return;
+        }
+
+        // Get current slides for the row
+        const currentSlides = getSlidesForRow(rowId);
+        const currentSlideIndex = currentSlides.findIndex(s => s.id === slideId);
+
+        console.log('[MainContent] Current slides count:', currentSlides.length);
+        console.log('[MainContent] Current slide index:', currentSlideIndex);
+
+        // Remove the slide from cache
+        setSlidesCache(prev => {
+          const updatedSlides = (prev[rowId] || []).map(s => {
+            if (s.id === slideId) {
+              // Update the slide with temp_unpublish_until timestamp
+              return { ...s, temp_unpublish_until: data.unpublishUntil };
+            }
+            return s;
+          });
+          return {
+            ...prev,
+            [rowId]: updatedSlides
+          };
+        });
+
+        // Determine navigation strategy
+        setTimeout(() => {
+          const updatedSlides = getSlidesForRow(rowId);
+          console.log('[MainContent] Updated slides count after temp unpublish:', updatedSlides.length);
+
+          if (updatedSlides.length === 0) {
+            // No slides remain in this row - navigate to first row
+            console.log('[MainContent] No slides left, navigating to first row');
+            if (verticalSwiperRef.current) {
+              verticalSwiperRef.current.slideTo(0);
+              // Update active row and background
+              if (filteredSlideRows.length > 0) {
+                const firstRow = filteredSlideRows[0];
+                setActiveRow(firstRow.id);
+                const firstRowSlides = getSlidesForRow(firstRow.id);
+                if (firstRowSlides.length > 0) {
+                  setActiveSlideImageUrl(firstRowSlides[0].image_url || null);
+                  setActiveSlideVideoUrl(firstRowSlides[0].video_url || null);
+                }
+              }
+            }
+          } else {
+            // Slides remain - navigate to next or previous slide
+            let targetIndex = currentSlideIndex;
+
+            // If we removed the last slide, go to the new last slide
+            if (currentSlideIndex >= updatedSlides.length) {
+              targetIndex = updatedSlides.length - 1;
+            }
+
+            console.log('[MainContent] Navigating to slide index:', targetIndex);
+            horizontalSwiper.slideTo(targetIndex);
+
+            // Update background image/video
+            const targetSlide = updatedSlides[targetIndex];
+            if (targetSlide) {
+              setActiveSlideImageUrl(targetSlide.image_url || null);
+              setActiveSlideVideoUrl(targetSlide.video_url || null);
+            }
+          }
+        }, 100); // Small delay to ensure state updates
+      } else {
+        console.error('[MainContent] Failed to temp unpublish slide:', data.message);
+      }
+    } catch (err) {
+      console.error('[MainContent] Error temp unpublishing slide:', err);
+    }
   };
 
   // Set up the unpublish callback for parent to call after API success
@@ -422,28 +515,41 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           <div className={`flex justify-start gap-4 mb-4 ${isMobile ? 'w-full' : ''}`}>
             {slideIcons.map((icon, idx) => {
               const isUnpublishIcon = icon === 'select_check_box';
+              const isTempUnpublishIcon = icon === 'check_circle_unread';
+              const isClickable = isUnpublishIcon || isTempUnpublishIcon;
+
               return (
                 <span
                   key={idx}
                   className="material-symbols-rounded"
-                  onClick={isUnpublishIcon ? () => handleUnpublishClick(slide.id, slide.slide_row_id) : undefined}
+                  onClick={
+                    isUnpublishIcon
+                      ? () => handleUnpublishClick(slide.id, slide.slide_row_id)
+                      : isTempUnpublishIcon
+                      ? () => handleTempUnpublishClick(slide.id, slide.slide_row_id)
+                      : undefined
+                  }
                   style={{
                     fontSize: '24px',
                     fontWeight: '100',
                     fontVariationSettings: "'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24",
-                    color: isUnpublishIcon ? '#ef4444' : (textColor || 'var(--icon-color)'),
-                    cursor: isUnpublishIcon ? 'pointer' : 'default',
-                    opacity: isUnpublishIcon ? 0.7 : 1,
+                    color: isUnpublishIcon
+                      ? '#ef4444'
+                      : isTempUnpublishIcon
+                      ? '#22c55e'
+                      : (textColor || 'var(--icon-color)'),
+                    cursor: isClickable ? 'pointer' : 'default',
+                    opacity: isClickable ? 0.7 : 1,
                     transition: 'opacity 150ms ease',
                     pointerEvents: 'auto',
                   }}
                   onMouseEnter={(e) => {
-                    if (isUnpublishIcon) {
+                    if (isClickable) {
                       e.currentTarget.style.opacity = '1';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (isUnpublishIcon) {
+                    if (isClickable) {
                       e.currentTarget.style.opacity = '0.7';
                     }
                   }}

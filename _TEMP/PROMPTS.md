@@ -1,8 +1,5 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
-When editing settings for an entire row, I would like to be able to add icons (just like we do on the individual slides) when an icon is selected for the entire row, it should show for every slide in the row and maintain its functionality and behavior for individual slides. 
-
-
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 

@@ -21,6 +21,7 @@ export interface Slide {
   publish_time_end?: string | null
   publish_days?: string | null // JSON array of day numbers [0-6]
   icon_set?: string | null // JSON array of Material Symbol icon names
+  temp_unpublish_until?: string | null // ISO timestamp for temporary unpublish
   view_count: number
   completion_count: number
   created_at: Date

@@ -12,6 +12,7 @@ import { addSlideIsPublishedColumn } from './add-slide-is-published'
 import { addSlideSchedulingColumns } from './add-slide-scheduling'
 import { addQuickslideType } from './add-quickslide-row-type'
 import { addSlideIconSet } from './add-slide-icon-set'
+import { addTempUnpublishColumn } from './add-temp-unpublish'
 
 async function railwayInit() {
   try {
@@ -110,6 +111,20 @@ async function railwayInit() {
         console.error('❌ Slide icon_set migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without icon_set column')
+      }
+    }
+
+    // Add temp_unpublish_until column to slides (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addTempUnpublishColumn()
+      console.log('✅ Slide temp_unpublish_until column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide temp_unpublish_until column already exists, skipping')
+      } else {
+        console.error('❌ Slide temp_unpublish_until migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without temp_unpublish_until column')
       }
     }
 

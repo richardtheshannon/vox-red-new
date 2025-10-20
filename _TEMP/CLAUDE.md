@@ -74,7 +74,7 @@ npm run db:slides:seed   # Seed slide content
    - Core: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type`
    - Media: `audio_url`, `image_url`, `video_url`
    - Display: `content_theme` ('light'|'dark'), `title_bg_opacity` (0-1), `body_bg_opacity` (0-1), `icon_set` (TEXT/JSON)
-   - Publishing: `is_published`, `publish_time_start`, `publish_time_end`, `publish_days` (TEXT/JSON)
+   - Publishing: `is_published`, `publish_time_start`, `publish_time_end`, `publish_days` (TEXT/JSON), `temp_unpublish_until` (TIMESTAMP)
    - Meta: `view_count`, `completion_count`, `created_at`, `updated_at`
 
 3. **slide_icons**: Optional custom icons per slide
@@ -105,6 +105,9 @@ npm run db:slides:seed   # Seed slide content
 - `POST /api/slides/upload`
 - `POST /api/slides/quick-slide` - Create quick slide (title + body only)
 - `POST /api/slides/bulk-publish` - Bulk update publish status
+- `POST /api/slides/rows/[id]/slides/[slideId]/temp-unpublish` - Temporarily unpublish slide until 1am
+- `POST /api/slides/fix-quickslides` - Fix Quick Slides row_type to QUICKSLIDE (utility)
+- `GET /api/slides/debug` - Debug endpoint for Quick Slides status
 - `GET /api/test-db`
 
 ---
@@ -180,8 +183,8 @@ npm run db:slides:seed   # Seed slide content
   - Quick Slide Mode: Shows ONLY Quick Slide row
   - Visual feedback: Icon opacity 60% inactive, 100% active
 
-### Frontend Slide Unpublish
-- **Icon-Based**: Admin sets `select_check_box` icon → users can click to unpublish
+### Frontend Slide Unpublish (Permanent)
+- **Icon-Based**: Admin sets `select_check_box` icon → users can click to unpublish permanently
 - **Visual Indicator**: Red color (#ef4444) signals destructive action
 - **Confirmation Dialog**: "Hide This Slide?" prevents accidental clicks
 - **Smart Navigation**: Smooth navigation to next available slide (no page reload)
@@ -189,12 +192,35 @@ npm run db:slides:seed   # Seed slide content
   - If no slides remain: Navigate to first row (app start)
   - Maintains context in Quick Slide mode
 
+### Temporary Slide Unpublish (Until 1am)
+- **Icon-Based**: Admin sets `check_circle_unread` icon → users can click to temporarily unpublish
+- **Visual Indicator**: Green color (#22c55e) signals temporary action
+- **No Confirmation**: Instant unpublish, different UX from permanent unpublish
+- **Auto-Republish**: Slide automatically reappears at 1am (next occurrence)
+  - If before 1am today → republishes at 1am today
+  - If after 1am today → republishes at 1am tomorrow
+- **Client-Side Filtering**: Uses visitor's browser timezone, same as schedule filtering
+- **Smart Navigation**: Same navigation behavior as permanent unpublish
+- **Database Column**: `temp_unpublish_until` TIMESTAMP stores republish time
+
 ### YouTube Videos
 - Supports: `youtube.com/watch?v=`, `youtu.be/`, raw video IDs
 - **Cover Mode**: Full-screen like `background-size: cover` (default)
 - **Contained Mode**: 60px padding, 16:9 aspect ratio, fits viewport
 - Toggle via videocam icon in right sidebar (only visible when video present)
 - **Interactivity**: MainContent uses `pointer-events: none` when video present to allow clicks through to iframe
+
+### Row-Level and Slide-Level Icons
+- **Row Icons**: Set in slide row settings, apply to ALL slides in that row by default
+- **Slide Icons**: Set on individual slides, override row icons when present
+- **Fallback Logic**: `slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons`
+- **Storage**: Both stored as JSON arrays in `icon_set` column, returned as arrays by API
+- **Icon Picker**: Material Symbols component allows up to 3 icons per row/slide
+- **Special Icons**:
+  - `select_check_box` - Red colored (#ef4444), enables permanent frontend unpublish (with confirmation dialog)
+  - `check_circle_unread` - Green colored (#22c55e), enables temporary unpublish until 1am (no dialog)
+  - All others display normally with theme colors
+- **Performance**: Row icons cached with `useMemo` to avoid repeated parsing
 
 ---
 
@@ -240,6 +266,18 @@ npm run build           # Production build test
 ---
 
 ## Common Issues
+
+### Row-Level Icons Not Displaying
+**Status**: FIXED (Oct 20, 2025)
+**Solution**: Fixed type mismatch - API returns `icon_set` as array, not string
+**Prevention**: Interface updated to `icon_set: string[]`, removed JSON parsing
+**Note**: Refresh page after editing row settings to see updated icons
+
+### Quick Slides Row Type Reverting to ROUTINE
+**Status**: FIXED (Oct 20, 2025)
+**Solution**: Made QUICKSLIDE row_type read-only in edit form
+**Recovery**: Use `POST /api/slides/fix-quickslides` to repair if needed
+**Prevention**: QUICKSLIDE rows now show "(System-managed)" label and cannot be changed
 
 ### Audio Player Not Showing/Playing
 **Status**: FIXED (Oct 18, 2025)
@@ -312,6 +350,33 @@ npm run lint
 
 ## Recent Critical Updates (October 2025)
 
+### Temporary Unpublish Feature (Oct 20 - Morning)
+- **Feature**: New temporary unpublish functionality using `check_circle_unread` icon
+- **Icon Color**: Green (#22c55e) in both admin and frontend to indicate temporary action
+- **Behavior**: Click icon → slide unpublished until 1am (next occurrence) → auto-republishes
+- **Database**: New `temp_unpublish_until` TIMESTAMP column added to slides table
+- **Filtering**: Client-side filtering via `scheduleFilter.ts` (same pattern as schedule filtering)
+- **Navigation**: Smooth navigation to next slide after unpublish (no page reload)
+- **UX**: No confirmation dialog (instant action, different from permanent unpublish)
+- **API**: New endpoint `POST /api/slides/rows/[id]/slides/[slideId]/temp-unpublish`
+- **Files**: `scripts/add-temp-unpublish.ts`, `scripts/railway-init.ts`, `src/lib/queries/slides.ts`, `src/lib/utils/scheduleFilter.ts`, `src/components/MainContent.tsx`, `src/components/admin/slides/IconPicker.tsx`, `src/app/api/slides/rows/[id]/slides/[slideId]/temp-unpublish/route.ts`
+- **Migration**: Idempotent, Railway-safe, TypeScript validated
+
+### Row-Level Icons Fix (Oct 20 - Early Morning)
+- **Issue**: Row-level icons not displaying on slides despite being set in admin
+- **Root Cause**: Type mismatch - API returns `icon_set` as array, but code expected string and tried to JSON.parse()
+- **Fix**: Updated `SlideRow` interface to `icon_set: string[]` and removed unnecessary parsing
+- **Impact**: Row-level icons now properly display on all slides in that row, with individual slide overrides working
+- **Files**: `src/components/MainContent.tsx`
+
+### Quick Slides Row Type Protection (Oct 20 - Early Morning)
+- **Issue**: Editing Quick Slides row settings would overwrite `row_type` from QUICKSLIDE to ROUTINE
+- **Root Cause**: SlideRowForm dropdown only included ['ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM'], missing QUICKSLIDE
+- **Fix**: Made QUICKSLIDE row_type read-only in edit form with explanatory text
+- **Protection**: Prevents accidental modification of system-managed Quick Slides row type
+- **Files**: `src/components/admin/slides/SlideRowForm.tsx`
+- **Utility**: Created `/api/slides/fix-quickslides` endpoint to repair row_type if needed
+
 ### Smart Unpublish Navigation (Oct 19 - Late Night)
 - Click unpublish icon → Slide removed → Smooth navigation to next available slide
 - Stays in current row if slides remain, jumps to app start only if all slides removed
@@ -365,4 +430,4 @@ npm run lint
 
 ---
 
-**Lines**: ~350 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 19, 2025
+**Lines**: ~430 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 20, 2025

@@ -119,7 +119,21 @@ export default function IconPicker({ selectedIcons, onChange, maxIcons = 3 }: Ic
           <div className="grid grid-cols-6 gap-3">
             {MATERIAL_ICONS.map((icon) => {
               const isSelectCheckBox = icon === 'select_check_box';
+              const isCheckCircleUnread = icon === 'check_circle_unread';
+              const isFunctionalIcon = isSelectCheckBox || isCheckCircleUnread;
               const isSelected = selectedIcons.includes(icon);
+
+              // Determine color based on icon type
+              const iconColor = isSelected
+                ? 'white'
+                : isCheckCircleUnread
+                ? '#22c55e' // Green for temp unpublish
+                : isSelectCheckBox
+                ? '#ef4444' // Red for permanent unpublish (matching frontend)
+                : 'var(--icon-color)';
+
+              const borderColor = isFunctionalIcon ? (isCheckCircleUnread ? '#22c55e' : '#ef4444') : 'var(--border-color)';
+
               return (
                 <button
                   key={icon}
@@ -128,8 +142,8 @@ export default function IconPicker({ selectedIcons, onChange, maxIcons = 3 }: Ic
                   className="p-3 rounded transition-all hover:opacity-70"
                   style={{
                     backgroundColor: isSelected ? '#dc2626' : 'transparent',
-                    color: isSelected ? 'white' : (isSelectCheckBox ? '#22c55e' : 'var(--icon-color)'),
-                    border: `1px solid ${isSelectCheckBox ? '#22c55e' : 'var(--border-color)'}`,
+                    color: iconColor,
+                    border: `1px solid ${borderColor}`,
                     opacity: isSelected ? 1 : 0.7
                   }}
                   title={icon}

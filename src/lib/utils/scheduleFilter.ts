@@ -13,6 +13,17 @@ export function isSlideVisibleNow(slide: Slide): boolean {
     return false;
   }
 
+  // Check if slide is temporarily unpublished
+  if (slide.temp_unpublish_until) {
+    const now = new Date();
+    const unpublishUntil = new Date(slide.temp_unpublish_until);
+
+    // If current time is before the unpublish deadline, hide the slide
+    if (now < unpublishUntil) {
+      return false;
+    }
+  }
+
   const now = new Date();
   const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
   const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight

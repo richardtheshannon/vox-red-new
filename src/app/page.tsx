@@ -237,9 +237,9 @@ export default function Home() {
           isOpen={showUnpublishDialog}
           onConfirm={handleConfirmUnpublish}
           onCancel={handleCancelUnpublish}
-          title="Hide This Slide?"
-          message="Are you sure you want to hide this slide? It will no longer be visible to you or other users."
-          confirmText="Hide Slide"
+          title="Have you completed this slide?"
+          message="Are you sure you want to complete this slide? It will no longer be visible to you."
+          confirmText="Complete Slide"
           cancelText="Cancel"
           isProcessing={isUnpublishing}
         />
