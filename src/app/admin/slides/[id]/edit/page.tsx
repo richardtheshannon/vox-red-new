@@ -61,12 +61,18 @@ export default function EditSlideRowPage({ params }: PageProps) {
 
     try {
       setError(null);
+
+      // Don't send row_type for QUICKSLIDE rows (it's system-managed and read-only)
+      const submitData = formData.row_type === 'QUICKSLIDE'
+        ? { ...formData, row_type: undefined }
+        : formData;
+
       const response = await fetch(`/api/slides/rows/${rowId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (!response.ok) {
