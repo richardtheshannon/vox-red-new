@@ -110,13 +110,13 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         subtitle: subtitle.trim() || undefined,
         body_content: bodyContent,
         audio_url: audioUrl || undefined,
-        image_url: imageUrl || undefined,
+        image_url: imageUrl || null,
         video_url: videoUrl.trim() || undefined,
         layout_type: layoutType,
         content_theme: contentTheme || undefined,
-        // Apply unified opacity to both title and body
-        title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
-        body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
+        // Apply unified opacity to both title and body (always include, even when 0)
+        title_bg_opacity: textBgOpacity,
+        body_bg_opacity: textBgOpacity,
         // Scheduling fields
         publish_time_start: publishTimeStart || null,
         publish_time_end: publishTimeEnd || null,

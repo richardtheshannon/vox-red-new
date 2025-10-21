@@ -74,6 +74,7 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
 
   // Move row up (decrease display_order number)
   const handleMoveUp = async (rowId: string) => {
+    // Find current index in the full unfiltered localRows array
     const currentIndex = localRows.findIndex(r => r.id === rowId);
     if (currentIndex <= 0) return; // Already at top
 
@@ -81,10 +82,15 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
     // Swap with previous item
     [newRows[currentIndex - 1], newRows[currentIndex]] = [newRows[currentIndex], newRows[currentIndex - 1]];
 
+    // Update display_order values to match new array positions for immediate UI update
+    newRows.forEach((row, index) => {
+      row.display_order = index + 1;
+    });
+
     setLocalRows(newRows);
     onReorderRows(newRows);
 
-    // Call API to persist reorder
+    // Call API to persist reorder - send ALL row IDs
     try {
       const response = await fetch('/api/slides/rows/reorder', {
         method: 'POST',
@@ -109,6 +115,7 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
 
   // Move row down (increase display_order number)
   const handleMoveDown = async (rowId: string) => {
+    // Find current index in the full unfiltered localRows array
     const currentIndex = localRows.findIndex(r => r.id === rowId);
     if (currentIndex >= localRows.length - 1) return; // Already at bottom
 
@@ -116,10 +123,15 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
     // Swap with next item
     [newRows[currentIndex], newRows[currentIndex + 1]] = [newRows[currentIndex + 1], newRows[currentIndex]];
 
+    // Update display_order values to match new array positions for immediate UI update
+    newRows.forEach((row, index) => {
+      row.display_order = index + 1;
+    });
+
     setLocalRows(newRows);
     onReorderRows(newRows);
 
-    // Call API to persist reorder
+    // Call API to persist reorder - send ALL row IDs
     try {
       const response = await fetch('/api/slides/rows/reorder', {
         method: 'POST',
@@ -249,7 +261,7 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
                   <div className="flex-shrink-0 flex flex-col gap-1">
                     <button
                       onClick={() => handleMoveUp(row.id)}
-                      disabled={index === 0}
+                      disabled={sortBy !== 'order' || localRows.findIndex(r => r.id === row.id) === 0}
                       className="transition-opacity hover:opacity-80 disabled:opacity-30 disabled:cursor-not-allowed"
                       style={{
                         backgroundColor: 'var(--card-bg)',
@@ -259,7 +271,7 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}
-                      title="Move up"
+                      title={sortBy !== 'order' ? 'Switch to Display Order sort to reorder' : 'Move up'}
                     >
                       <span className="material-symbols-rounded" style={{ fontSize: '18px', color: 'var(--icon-color)' }}>
                         expand_less
@@ -267,7 +279,7 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
                     </button>
                     <button
                       onClick={() => handleMoveDown(row.id)}
-                      disabled={index === sortedRows.length - 1}
+                      disabled={sortBy !== 'order' || localRows.findIndex(r => r.id === row.id) === localRows.length - 1}
                       className="transition-opacity hover:opacity-80 disabled:opacity-30 disabled:cursor-not-allowed"
                       style={{
                         backgroundColor: 'var(--card-bg)',
@@ -277,7 +289,7 @@ export default function SlideRowList({ rows, onDelete, onRefresh, onImportClick,
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}
-                      title="Move down"
+                      title={sortBy !== 'order' ? 'Switch to Display Order sort to reorder' : 'Move down'}
                     >
                       <span className="material-symbols-rounded" style={{ fontSize: '18px', color: 'var(--icon-color)' }}>
                         expand_more

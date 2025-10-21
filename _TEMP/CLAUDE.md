@@ -108,7 +108,8 @@ npm run db:slides:seed   # Seed slide content
 - `GET /api/slides/rows/[id]/slides/[slideId]`
 - `PATCH /api/slides/rows/[id]/slides/[slideId]`
 - `DELETE /api/slides/rows/[id]/slides/[slideId]`
-- `POST /api/slides/rows/[id]/slides/reorder`
+- `POST /api/slides/rows/[id]/slides/reorder` - Reorder slides within a row
+- `POST /api/slides/rows/reorder` - Reorder slide rows
 
 ### Utilities
 - `GET /api/slides/upload`
@@ -163,7 +164,8 @@ npm run db:slides:seed   # Seed slide content
 - `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
 - `src/app/admin/spa/page.tsx` - Spa Mode management page
 - `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI + icon picker
-- `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
+- `src/components/admin/slides/SlideManager.tsx` - Slide reordering within rows (chevron buttons)
+- `src/components/admin/slides/SlideRowList.tsx` - Row management with reordering (chevron buttons)
 - `src/components/admin/slides/IconPicker.tsx` - Material Symbol icon selection (up to 3 icons)
 - `src/components/admin/spa/SpaTrackForm.tsx` - Spa track add/edit form
 - `src/components/admin/spa/SpaTrackList.tsx` - Spa track table with scheduling display
@@ -393,6 +395,60 @@ npm run lint
 
 ## Recent Critical Updates (October 2025)
 
+### Slide Editor Bug Fixes (Oct 21 - Night)
+- **Bug Fix #1**: Background image removal and opacity changes not saving in slide editor
+  - **Issue**: When clearing background image URL or setting opacity to 0, changes didn't persist to database
+  - **Root Cause**: Frontend sent `undefined` for empty/zero values, backend/query layer skipped undefined fields
+  - **Solution**:
+    - Frontend: Changed `image_url: imageUrl || undefined` → `image_url: imageUrl || null`
+    - Frontend: Changed opacity from conditional to always include value (even when 0)
+    - Backend: Added explicit null handling for `image_url` (matching existing `video_url` pattern)
+  - **Files Modified**: `SlideEditor.tsx` (3 lines), `route.ts` (4 lines added)
+  - **Impact**: Admins can now clear background images and set fully transparent text backgrounds (opacity = 0)
+- **Bug Fix #2**: Row reordering chevron buttons not working
+  - **Issue**: Clicking chevron buttons to reorder rows had no effect
+  - **Root Cause**: Component swapped rows in filtered/sorted array instead of full dataset
+  - **Solution**:
+    - Disabled chevron buttons when not in "Display Order" sort mode
+    - Fixed button disabled logic to check position in `localRows` (full dataset) not `sortedRows` (filtered view)
+    - Always send complete list of ALL row IDs to API for reordering
+  - **Files Modified**: `SlideRowList.tsx` (disabled conditions, tooltips)
+  - **Impact**: Row reordering now works correctly, prevented incorrect reordering in filtered/sorted views
+- **Bug Fix #3**: Row reordering required hard refresh to see changes
+  - **Issue**: Rows reordered in database but UI didn't update until hard refresh
+  - **Root Cause**: Array positions swapped but `display_order` field values unchanged → sort re-ordered back to original
+  - **Solution**: After swapping array positions, update each row's `display_order` field to match new index
+  - **Files Modified**: `SlideRowList.tsx` (added `forEach` loop in both `handleMoveUp` and `handleMoveDown`)
+  - **Impact**: Live immediate UI updates when reordering rows, no refresh needed
+- **Pattern**: All fixes followed "minimal and surgical" approach, reused existing patterns
+- **TypeScript**: 0 errors, fully validated
+- **Testing**: All three issues verified fixed, changes persist correctly
+
+### Row Reordering Feature (Oct 21 - Late Evening)
+- **Feature**: Complete row reordering functionality with chevron up/down buttons
+- **UI**: Chevron buttons (expand_less/expand_more) on left side of each row card in admin
+  - First row: up button disabled
+  - Last row: down button disabled
+  - Smooth reordering without page reload
+- **Backend**: New `reorderSlideRows()` query function using transaction pattern
+  - Atomic updates to `display_order` field
+  - Two-step update (negative temp values → positive final values) prevents constraint violations
+- **API Route**: `POST /api/slides/rows/reorder` accepts `{ row_ids: string[] }`
+- **Frontend Persistence**: Rows now sorted by `display_order` field (ascending)
+  - Default sort: "Sort by Display Order" (respects manual arrangement)
+  - Alternative sorts: Date, Title, Slide Count (still available)
+  - Dynamic help text: "Use chevron buttons to reorder" (Display Order mode)
+- **Bug Fix**: Fixed critical display issue where rows sorted by `created_at` instead of `display_order`
+  - Added missing `display_order` field to `SlideRow` interface
+  - Changed default sort from `'created'` to `'order'`
+  - Reordering now persists on page refresh
+- **Database**: Uses existing `display_order` INTEGER column on `slide_rows` table
+- **Pattern**: Mirrors existing slide reordering UX (same chevron buttons, same swap logic)
+- **Files Modified**: 2 files (SlideRowList.tsx, page.tsx - added display_order field)
+- **Files Created**: 2 files (route.ts for API, reorderSlideRows in slideRows.ts)
+- **TypeScript**: 0 errors, fully validated
+- **Testing**: Verified row reordering persists on refresh, frontend respects backend order
+
 ### Spa Mode Volume Control + Schedule Bug Fix (Oct 21 - Evening)
 - **Feature**: Per-track volume control for spa background music
 - **Admin Interface**: Volume slider (0-100%) in spa track form between audio URL and publish toggle
@@ -547,4 +603,4 @@ npm run lint
 
 ---
 
-**Lines**: ~550 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 21, 2025
+**Lines**: ~580 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 21, 2025

@@ -138,6 +138,11 @@ export async function PATCH(
     // Remove fields that shouldn't be updated directly
     const { id, slide_row_id, created_at, view_count, completion_count, ...updateData } = body;
 
+    // Allow image_url to be set to null or empty string to remove it
+    if (body.image_url !== undefined) {
+      updateData.image_url = body.image_url || null;
+    }
+
     // Allow video_url to be set to null or empty string to remove it
     if (body.video_url !== undefined) {
       updateData.video_url = body.video_url || null;
