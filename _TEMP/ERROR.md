@@ -66,10 +66,10 @@ History
 
 vox-red-new
 /
-8435f6e1
+cc432f1a
 Failed
 
-Oct 21, 2025, 11:10 AM
+Oct 21, 2025, 11:31 AM
 app.lilde.com
 Get Help
 Details
@@ -79,14 +79,14 @@ HTTP Logs
 Search build logs
 
 You reached the start of the range
-Oct 21, 2025, 11:10 AM
+Oct 21, 2025, 11:31 AM
  
 [Region: us-west1]
 ==============
 Using Nixpacks
 ==============
 
-context: 5mnm-4Nql
+context: x0ft-2deE
 ╔════════ Nixpacks v1.38.0 ═══════╗
 ║ setup      │ nodejs_18, npm-9_x ║
 ║─────────────────────────────────║
@@ -99,11 +99,11 @@ context: 5mnm-4Nql
 
 internal
 load build definition from Dockerfile
-1ms
+0ms
 
 internal
 load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-255ms
+270ms
 
 internal
 load .dockerignore
@@ -114,35 +114,43 @@ load build context
 0ms
 
 stage-0
+FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
+7ms
+
+stage-0
+RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d cached
+0ms
+
+stage-0
 COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
 0ms
 
 stage-0
-RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d cached
-1ms
+WORKDIR /app/ cached
+0ms
 
 stage-0
 COPY . /app/.
-375ms
+27ms
 
 stage-0
 RUN npm ci
-11s
+7s
 found 0 vulnerabilities
 
 stage-0
 COPY . /app/.
-204ms
+132ms
 
 stage-0
 RUN npm run build
-17s
+11s
 npm warn config production Use `--omit=dev` instead.
 > nextjs-app@0.1.0 build
 > next build
    ▲ Next.js 15.5.4
    Creating an optimized production build ...
- ✓ Compiled successfully in 6.1s
+ ✓ Compiled successfully in 4.0s
    Linting and checking validity of types ...
 ./src/app/admin/slides/[id]/page.tsx
 68:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
@@ -204,7 +212,7 @@ Dockerfile:24
 ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
 Error: Docker build failed
 You reached the end of the range
-Oct 21, 2025, 11:11 AM
+Oct 21, 2025, 11:32 AM
 
 
 vox-red-new | Railway
