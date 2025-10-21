@@ -8,6 +8,7 @@ export interface SpaTrack {
   is_published: boolean
   display_order: number
   is_random: boolean
+  volume?: number // Volume level 0-100 (percentage)
   publish_time_start?: string | null
   publish_time_end?: string | null
   publish_days?: string | null // JSON array of day numbers [0-6]
@@ -21,6 +22,7 @@ export interface CreateSpaTrackData {
   is_published?: boolean
   display_order?: number
   is_random?: boolean
+  volume?: number
   publish_time_start?: string | null
   publish_time_end?: string | null
   publish_days?: string | null
@@ -32,6 +34,7 @@ export interface UpdateSpaTrackData {
   is_published?: boolean
   display_order?: number
   is_random?: boolean
+  volume?: number
   publish_time_start?: string | null
   publish_time_end?: string | null
   publish_days?: string | null
@@ -54,8 +57,8 @@ export async function getSpaTrackById(trackId: string): Promise<SpaTrack | null>
 // Create new spa track
 export async function createSpaTrack(data: CreateSpaTrackData): Promise<SpaTrack> {
   const sql = `
-    INSERT INTO spa_tracks (title, audio_url, is_published, display_order, is_random, publish_time_start, publish_time_end, publish_days)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO spa_tracks (title, audio_url, is_published, display_order, is_random, volume, publish_time_start, publish_time_end, publish_days)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
   `
 
@@ -65,6 +68,7 @@ export async function createSpaTrack(data: CreateSpaTrackData): Promise<SpaTrack
     data.is_published !== undefined ? data.is_published : true,
     data.display_order || 0,
     data.is_random || false,
+    data.volume !== undefined ? data.volume : 50,
     data.publish_time_start || null,
     data.publish_time_end || null,
     data.publish_days || null,
@@ -101,6 +105,10 @@ export async function updateSpaTrack(trackId: string, data: UpdateSpaTrackData):
   if (data.is_random !== undefined) {
     fields.push(`is_random = $${paramCount++}`)
     values.push(data.is_random)
+  }
+  if (data.volume !== undefined) {
+    fields.push(`volume = $${paramCount++}`)
+    values.push(data.volume)
   }
   if (data.publish_time_start !== undefined) {
     fields.push(`publish_time_start = $${paramCount++}`)

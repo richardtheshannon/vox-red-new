@@ -20,6 +20,7 @@ interface SlideRow {
   is_published: boolean;
   icon_set: string[];
   theme_color: string;
+  display_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -84,6 +85,11 @@ export default function AdminSlidesPage() {
       console.error('Error deleting slide row:', err);
       alert('Failed to delete slide row. Please try again.');
     }
+  };
+
+  const handleReorderRows = (reorderedRows: SlideRow[]) => {
+    // Update local state optimistically
+    setRows(reorderedRows);
   };
 
   const toggleSidebar = () => {
@@ -295,6 +301,7 @@ export default function AdminSlidesPage() {
                   onDelete={handleDelete}
                   onRefresh={fetchRows}
                   onImportClick={handleImportClick}
+                  onReorderRows={handleReorderRows}
                 />
               )}
 

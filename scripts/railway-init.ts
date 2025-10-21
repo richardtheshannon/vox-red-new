@@ -14,6 +14,7 @@ import { addQuickslideType } from './add-quickslide-row-type'
 import { addSlideIconSet } from './add-slide-icon-set'
 import { addTempUnpublishColumn } from './add-temp-unpublish'
 import { initializeSpaTracksTables } from './init-spa-tables'
+import { addSpaVolume } from './add-spa-volume'
 
 async function railwayInit() {
   try {
@@ -140,6 +141,20 @@ async function railwayInit() {
         console.error('❌ Spa tracks table initialization failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without spa tracks tables')
+      }
+    }
+
+    // Add volume column to spa_tracks (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addSpaVolume()
+      console.log('✅ Spa volume column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Spa volume column already exists, skipping')
+      } else {
+        console.error('❌ Spa volume migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without spa volume column')
       }
     }
 

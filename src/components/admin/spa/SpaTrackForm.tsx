@@ -15,6 +15,7 @@ export default function SpaTrackForm({ track, onSave, onCancel }: SpaTrackFormPr
   const [isPublished, setIsPublished] = useState(track?.is_published ?? true);
   const [displayOrder, setDisplayOrder] = useState(track?.display_order || 0);
   const [isRandom, setIsRandom] = useState(track?.is_random || false);
+  const [volume, setVolume] = useState(track?.volume ?? 50);
   const [publishTimeStart, setPublishTimeStart] = useState<string>(track?.publish_time_start || '');
   const [publishTimeEnd, setPublishTimeEnd] = useState<string>(track?.publish_time_end || '');
   const [publishDays, setPublishDays] = useState<number[]>(() => {
@@ -52,6 +53,7 @@ export default function SpaTrackForm({ track, onSave, onCancel }: SpaTrackFormPr
         is_published: isPublished,
         display_order: displayOrder,
         is_random: isRandom,
+        volume: volume,
         publish_time_start: publishTimeStart || null,
         publish_time_end: publishTimeEnd || null,
         publish_days: publishDays.length > 0 ? JSON.stringify(publishDays) : null,
@@ -133,6 +135,27 @@ export default function SpaTrackForm({ track, onSave, onCancel }: SpaTrackFormPr
           <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
             Paste a link to an MP3 file (external URL or local path)
           </p>
+        </div>
+
+        {/* Volume Slider */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
+            Volume: {volume}%
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={(e) => setVolume(parseInt(e.target.value))}
+            className="w-full h-2"
+            style={{ accentColor: '#dc2626' }}
+          />
+          <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
         </div>
 
         {/* Published Toggle */}

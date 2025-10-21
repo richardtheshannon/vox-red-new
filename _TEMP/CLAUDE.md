@@ -85,11 +85,11 @@ npm run db:slides:seed   # Seed slide content
 
 ### Spa Mode System
 1. **spa_tracks**: Background music tracks
-   - `id`, `title`, `audio_url`, `is_published`, `display_order`, `is_random`
+   - `id`, `title`, `audio_url`, `is_published`, `display_order`, `is_random`, `volume` (INTEGER 0-100)
    - Scheduling: `publish_time_start`, `publish_time_end`, `publish_days` (TEXT/JSON)
    - Meta: `created_at`, `updated_at`
 
-**Features**: Dynamic scheduling (time/day filtering), randomization support, sequential playback order
+**Features**: Dynamic scheduling (time/day filtering), randomization support, sequential playback order, per-track volume control
 
 ---
 
@@ -251,12 +251,13 @@ npm run db:slides:seed   # Seed slide content
 - **Icon-Based Toggle**: Click "spa" icon (top left, between home and play_circle) to start/stop
 - **Visual Feedback**: Icon opacity changes (60% inactive, 100% active when playing)
 - **Dynamic Scheduling**: Time-of-day and day-of-week filters (same pattern as slides)
-- **Client-Side Filtering**: Uses visitor's browser timezone for all schedule checks
+- **Server-Side + Client-Side Filtering**: Server filters before random selection, client validates in timezone
 - **Randomization**: Supports random shuffle or sequential playback by display order
+- **Volume Control**: Per-track volume setting (0-100%), applied before playback
 - **Auto-Looping**: Tracks loop continuously while spa mode is active
-- **Admin Management**: Full CRUD at `/admin/spa` with scheduling controls
-- **Database Table**: `spa_tracks` with `is_random`, `display_order`, `publish_time_start/end`, `publish_days`
-- **API Endpoint**: `GET /api/spa/tracks/active` returns currently active track
+- **Admin Management**: Full CRUD at `/admin/spa` with scheduling controls and volume slider
+- **Database Table**: `spa_tracks` with `is_random`, `display_order`, `volume`, `publish_time_start/end`, `publish_days`
+- **API Endpoint**: `GET /api/spa/tracks/active` returns currently active track (with server-side schedule filtering)
 - **Audio Player**: Native HTML5 `<audio>` element, hidden, auto-plays when enabled
 
 ---
@@ -392,7 +393,28 @@ npm run lint
 
 ## Recent Critical Updates (October 2025)
 
-### Spa Mode - Background Music System (Oct 21)
+### Spa Mode Volume Control + Schedule Bug Fix (Oct 21 - Evening)
+- **Feature**: Per-track volume control for spa background music
+- **Admin Interface**: Volume slider (0-100%) in spa track form between audio URL and publish toggle
+  - Display: "Volume: 50%" with range input and 0%/50%/100% labels
+  - Default value: 50% for existing tracks
+- **Database**: New `volume` INTEGER column (0-100 with CHECK constraint)
+- **Frontend**: Volume applied before playback in `SpaAudioPlayer.tsx` (converts percentage to 0.0-1.0 decimal)
+- **Migration**: `scripts/add-spa-volume.ts` added to `railway-init.ts` for deployment
+- **Bug Fix**: Server-side schedule filtering missing from `/api/spa/tracks/active`
+  - **Issue**: API randomly selected from ALL tracks without checking schedule restrictions
+  - **Impact**: Client rejected tracks not scheduled for current day → no audio played
+  - **Fix**: Added `isTrackVisibleNow()` server-side filtering BEFORE random selection
+  - **Result**: Spa mode now only returns tracks valid for current day/time
+- **Bug Fix**: Volume application timing race condition
+  - **Issue**: Volume set in separate `useEffect`, potentially AFTER play command
+  - **Fix**: Merged volume setting INTO play/pause effect, applied BEFORE `.play()`
+- **Files Modified**: 3 files (spaTracks.ts, SpaTrackForm.tsx, SpaAudioPlayer.tsx, spa/tracks/active/route.ts)
+- **Files Created**: 1 migration (add-spa-volume.ts)
+- **TypeScript**: 0 errors, fully validated
+- **Testing**: Volume control working, schedule filtering now server-side + client-side
+
+### Spa Mode - Background Music System (Oct 21 - Morning)
 - **Feature**: Complete background ambient music system with dynamic scheduling
 - **Frontend**: "spa" icon in TopIconBar (between home and play_circle) toggles playback
 - **Visual Feedback**: Icon opacity 60% inactive, 100% active (same pattern as Quick Slide mode)
@@ -406,10 +428,10 @@ npm run lint
 - **API Routes**:
   - `GET/POST /api/spa/tracks` - List/create tracks
   - `GET/PATCH/DELETE /api/spa/tracks/[id]` - Individual track operations
-  - `GET /api/spa/tracks/active` - Returns currently active track (handles randomization)
+  - `GET /api/spa/tracks/active` - Returns currently active track (handles randomization + server-side schedule filtering)
 - **Query Layer**: `src/lib/queries/spaTracks.ts` with full CRUD operations
 - **Components**:
-  - `SpaAudioPlayer.tsx` - Frontend audio player with schedule filtering
+  - `SpaAudioPlayer.tsx` - Frontend audio player with client-side schedule filtering
   - `SpaTrackForm.tsx` - Admin form with scheduling UI (time/day pickers)
   - `SpaTrackList.tsx` - Admin table with status/schedule display
 - **Migration**: `scripts/init-spa-tables.ts` added to `railway-init.ts` for deployment
@@ -525,4 +547,4 @@ npm run lint
 
 ---
 
-**Lines**: ~525 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 21, 2025
+**Lines**: ~550 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 21, 2025

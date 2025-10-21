@@ -1,4 +1,5 @@
-import { query, queryOne } from '@/lib/db'
+import { query, queryOne, transaction } from '@/lib/db'
+import { PoolClient } from 'pg'
 
 // TypeScript interfaces
 export interface SlideRow {
@@ -165,4 +166,25 @@ export async function getSlideRowsByType(rowType: string, publishedOnly = false)
     ...row,
     icon_set: row.icon_set ? JSON.parse(row.icon_set as unknown as string) : []
   }))
+}
+
+// Reorder slide rows (update display_order atomically)
+export async function reorderSlideRows(rowIds: string[]): Promise<void> {
+  await transaction(async (client: PoolClient) => {
+    // Step 1: Set all rows to temporary negative display_order to avoid unique constraint violations
+    for (let i = 0; i < rowIds.length; i++) {
+      await client.query(
+        'UPDATE slide_rows SET display_order = $1 WHERE id = $2',
+        [-(i + 1), rowIds[i]]
+      )
+    }
+
+    // Step 2: Update to final positive display_order
+    for (let i = 0; i < rowIds.length; i++) {
+      await client.query(
+        'UPDATE slide_rows SET display_order = $1 WHERE id = $2',
+        [i + 1, rowIds[i]]
+      )
+    }
+  })
 }

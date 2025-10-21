@@ -23,9 +23,13 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
     loadActiveTrack();
   }, []);
 
-  // Handle play/pause based on isPlaying prop
+  // Handle play/pause based on isPlaying prop and apply volume
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;
+
+    // Set volume BEFORE playing (convert percentage 0-100 to decimal 0.0-1.0)
+    const volumeDecimal = (currentTrack.volume ?? 50) / 100;
+    audioRef.current.volume = Math.max(0, Math.min(1, volumeDecimal)); // Clamp to 0.0-1.0
 
     if (isPlaying) {
       audioRef.current.play().catch((err) => {
