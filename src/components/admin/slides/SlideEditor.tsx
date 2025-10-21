@@ -110,7 +110,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         subtitle: subtitle.trim() || undefined,
         body_content: bodyContent,
         audio_url: audioUrl || undefined,
-        image_url: imageUrl || null,
+        image_url: imageUrl || undefined,
         video_url: videoUrl.trim() || undefined,
         layout_type: layoutType,
         content_theme: contentTheme || undefined,
