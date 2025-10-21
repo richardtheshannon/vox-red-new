@@ -266,7 +266,7 @@ export default function AdminSlidesPage() {
               {/* Error State */}
               {error && (
                 <div
-                  className="p-4 rounded mb-6"
+                  className="p-4 mb-6"
                   style={{
                     backgroundColor: '#fee2e2',
                     color: '#991b1b',
@@ -277,7 +277,7 @@ export default function AdminSlidesPage() {
                   <p className="text-sm">{error}</p>
                   <button
                     onClick={fetchRows}
-                    className="mt-2 px-4 py-2 rounded text-sm"
+                    className="mt-2 px-4 py-2 text-sm"
                     style={{
                       backgroundColor: '#991b1b',
                       color: 'white'
@@ -320,7 +320,7 @@ export default function AdminSlidesPage() {
         {showImportModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
-              className="rounded max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+              className="max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col"
               style={{
                 backgroundColor: 'var(--bg-color)',
                 border: '1px solid var(--border-color)'
@@ -344,7 +344,7 @@ export default function AdminSlidesPage() {
                 {/* Parse Error */}
                 {parseError && (
                   <div
-                    className="p-4 rounded mb-4"
+                    className="p-4 mb-4"
                     style={{
                       backgroundColor: '#fee2e2',
                       color: '#991b1b',
@@ -370,7 +370,7 @@ export default function AdminSlidesPage() {
                       value={audioBaseUrl}
                       onChange={handleAudioBaseUrlChange}
                       placeholder="https://example.com/media/mp3s/course-name"
-                      className="w-full px-3 py-2 rounded transition-colors"
+                      className="w-full px-3 py-2 transition-colors"
                       style={{
                         backgroundColor: 'var(--card-bg)',
                         color: 'var(--text-color)',
@@ -393,7 +393,7 @@ export default function AdminSlidesPage() {
                   <div className="space-y-6">
                     {/* Course Info */}
                     <div
-                      className="p-4 rounded"
+                      className="p-4"
                       style={{
                         backgroundColor: 'var(--card-bg)',
                         border: '1px solid var(--border-color)'
@@ -404,7 +404,7 @@ export default function AdminSlidesPage() {
                           Course Title: {courseTitle}
                         </h3>
                         <span
-                          className="text-sm px-3 py-1 rounded"
+                          className="text-sm px-3 py-1"
                           style={{
                             backgroundColor: '#16a34a',
                             color: 'white'
@@ -432,7 +432,7 @@ export default function AdminSlidesPage() {
                           return (
                             <div
                               key={index}
-                              className="p-4 rounded"
+                              className="p-4"
                               style={{
                                 backgroundColor: 'var(--card-bg)',
                                 border: '1px solid var(--border-color)'
@@ -440,7 +440,7 @@ export default function AdminSlidesPage() {
                             >
                               <div className="flex items-start gap-3">
                                 <span
-                                  className="text-sm font-bold px-2 py-1 rounded"
+                                  className="text-sm font-bold px-2 py-1"
                                   style={{
                                     backgroundColor: '#dc2626',
                                     color: 'white',
@@ -502,7 +502,7 @@ export default function AdminSlidesPage() {
                 <div className="flex-1">
                   {importProgress && (
                     <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-b-transparent" style={{ borderColor: '#dc2626' }}></div>
+                      <div className="animate-spin h-4 w-4 border-2 border-b-transparent" style={{ borderColor: '#dc2626' }}></div>
                       <p className="text-sm" style={{ color: 'var(--text-color)' }}>
                         {importProgress}
                       </p>
@@ -527,7 +527,7 @@ export default function AdminSlidesPage() {
                       <button
                         onClick={handleCloseImportModal}
                         disabled={importing}
-                        className="px-4 py-2 rounded transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
                           backgroundColor: 'var(--card-bg)',
                           color: 'var(--text-color)',
@@ -540,7 +540,7 @@ export default function AdminSlidesPage() {
                         <button
                           onClick={() => fileInputRef.current?.click()}
                           disabled={importing}
-                          className="px-4 py-2 rounded transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{
                             backgroundColor: '#16a34a',
                             color: 'white'
@@ -553,7 +553,7 @@ export default function AdminSlidesPage() {
                         <button
                           onClick={handleConfirmImport}
                           disabled={importing || !!audioUrlError}
-                          className="px-4 py-2 rounded transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{
                             backgroundColor: '#dc2626',
                             color: 'white'
@@ -567,7 +567,7 @@ export default function AdminSlidesPage() {
                     <>
                       <button
                         onClick={handleCloseImportModal}
-                        className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+                        className="px-4 py-2 transition-opacity hover:opacity-80"
                         style={{
                           backgroundColor: 'var(--card-bg)',
                           color: 'var(--text-color)',
@@ -582,7 +582,7 @@ export default function AdminSlidesPage() {
                             router.push(`/admin/slides/${importedSlideRowId}`);
                           }
                         }}
-                        className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+                        className="px-4 py-2 transition-opacity hover:opacity-80"
                         style={{
                           backgroundColor: '#dc2626',
                           color: 'white'

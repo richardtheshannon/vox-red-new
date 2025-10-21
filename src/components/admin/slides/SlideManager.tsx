@@ -60,7 +60,6 @@ function SlideItem({
             backgroundColor: 'var(--card-bg)',
             border: '1px solid var(--border-color)',
             padding: '1rem',
-            borderRadius: '0.5rem',
           }}
         >
           {/* Condensed Header with Controls, Title, and Buttons */}
@@ -83,7 +82,6 @@ function SlideItem({
                 style={{
                   backgroundColor: 'var(--card-bg)',
                   border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
                   padding: '2px',
                   display: 'flex',
                   alignItems: 'center',
@@ -102,7 +100,6 @@ function SlideItem({
                 style={{
                   backgroundColor: 'var(--card-bg)',
                   border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
                   padding: '2px',
                   display: 'flex',
                   alignItems: 'center',
@@ -118,7 +115,7 @@ function SlideItem({
 
             {/* Position Badge */}
             <div
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-bold text-sm"
               style={{
                 backgroundColor: '#dc2626',
                 color: 'white'
@@ -135,7 +132,7 @@ function SlideItem({
                 </h3>
                 {!slide.is_published && (
                   <span
-                    className="px-2 py-0.5 text-xs rounded"
+                    className="px-2 py-0.5 text-xs"
                     style={{
                       backgroundColor: 'rgba(220, 38, 38, 0.2)',
                       color: '#dc2626',
@@ -156,7 +153,7 @@ function SlideItem({
             <div className="flex gap-2 flex-shrink-0">
               <Link
                 href={`/admin/slides/${rowId}/slide/${slide.id}`}
-                className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                className="px-3 py-1.5 text-sm transition-opacity hover:opacity-80"
                 style={{
                   backgroundColor: '#dc2626',
                   color: 'white'
@@ -169,7 +166,7 @@ function SlideItem({
                   e.stopPropagation();
                   setDeleteConfirm(true);
                 }}
-                className="px-3 py-1.5 rounded text-sm transition-opacity hover:opacity-80"
+                className="px-3 py-1.5 text-sm transition-opacity hover:opacity-80"
                 style={{
                   backgroundColor: '#991b1b',
                   color: 'white'
@@ -209,7 +206,7 @@ function SlideItem({
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div
-            className="p-6 rounded max-w-md w-full mx-4"
+            className="p-6 max-w-md w-full mx-4"
             style={{
               backgroundColor: 'var(--bg-color)',
               border: '1px solid var(--border-color)'
@@ -224,7 +221,7 @@ function SlideItem({
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(false)}
-                className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+                className="px-4 py-2 transition-opacity hover:opacity-80"
                 style={{
                   backgroundColor: 'var(--card-bg)',
                   color: 'var(--text-color)',
@@ -238,7 +235,7 @@ function SlideItem({
                   onDelete(slide.id);
                   setDeleteConfirm(false);
                 }}
-                className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+                className="px-4 py-2 transition-opacity hover:opacity-80"
                 style={{
                   backgroundColor: '#991b1b',
                   color: 'white'
@@ -380,7 +377,7 @@ export default function SlideManager({
 
           <Link
             href={`/admin/slides/${row.id}/slide/new`}
-            className="px-4 py-2 rounded transition-opacity hover:opacity-80"
+            className="px-4 py-2 transition-opacity hover:opacity-80"
             style={{
               backgroundColor: '#dc2626',
               color: 'white'
@@ -393,7 +390,7 @@ export default function SlideManager({
         {/* Bulk Actions Bar */}
         {localSlides.length > 0 && (
           <div
-            className="flex flex-wrap items-center gap-3 p-4 rounded"
+            className="flex flex-wrap items-center gap-3 p-4"
             style={{
               backgroundColor: 'var(--card-bg)',
               border: '1px solid var(--border-color)',
@@ -418,7 +415,7 @@ export default function SlideManager({
                 <button
                   onClick={() => handleBulkPublish(true)}
                   disabled={bulkActionLoading}
-                  className="px-4 py-1.5 rounded text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: '#16a34a',
                     color: 'white',
@@ -429,7 +426,7 @@ export default function SlideManager({
                 <button
                   onClick={() => handleBulkPublish(false)}
                   disabled={bulkActionLoading}
-                  className="px-4 py-1.5 rounded text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: '#dc2626',
                     color: 'white',
@@ -446,7 +443,7 @@ export default function SlideManager({
       {/* Slide List */}
       {localSlides.length === 0 ? (
         <div
-          className="p-8 rounded text-center"
+          className="p-8 text-center"
           style={{
             backgroundColor: 'var(--card-bg)',
             border: '1px solid var(--border-color)'
@@ -457,7 +454,7 @@ export default function SlideManager({
           </p>
           <Link
             href={`/admin/slides/${row.id}/slide/new`}
-            className="inline-block px-4 py-2 rounded transition-opacity hover:opacity-80"
+            className="inline-block px-4 py-2 transition-opacity hover:opacity-80"
             style={{
               backgroundColor: '#dc2626',
               color: 'white'

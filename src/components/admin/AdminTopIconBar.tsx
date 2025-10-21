@@ -13,6 +13,9 @@ export default function AdminTopIconBar() {
         <Link href="/admin/slides">
           <span className="material-symbols-outlined" title="Documentation">description</span>
         </Link>
+        <Link href="/admin/spa">
+          <span className="material-symbols-outlined" title="Spa Mode">spa</span>
+        </Link>
         <a href="https://media.lilde.com" target="_blank" rel="noopener noreferrer">
           <span className="material-symbols-outlined" title="Media">perm_media</span>
         </a>

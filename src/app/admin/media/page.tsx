@@ -50,8 +50,7 @@ export default function AdminMediaPage() {
               style={{
                 width: '100%',
                 height: '100%',
-                border: 'none',
-                borderRadius: '8px'
+                border: 'none'
               }}
               title="Media Management"
             />

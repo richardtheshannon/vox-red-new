@@ -13,6 +13,7 @@ import { addSlideSchedulingColumns } from './add-slide-scheduling'
 import { addQuickslideType } from './add-quickslide-row-type'
 import { addSlideIconSet } from './add-slide-icon-set'
 import { addTempUnpublishColumn } from './add-temp-unpublish'
+import { initializeSpaTracksTables } from './init-spa-tables'
 
 async function railwayInit() {
   try {
@@ -125,6 +126,20 @@ async function railwayInit() {
         console.error('❌ Slide temp_unpublish_until migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without temp_unpublish_until column')
+      }
+    }
+
+    // Initialize spa tracks tables (safe to run multiple times)
+    try {
+      await initializeSpaTracksTables()
+      console.log('✅ Spa tracks tables initialized')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Spa tracks tables already exist, skipping initialization')
+      } else {
+        console.error('❌ Spa tracks table initialization failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without spa tracks tables')
       }
     }
 

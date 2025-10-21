@@ -2,7 +2,7 @@
 
 **Project**: Spiritual Content Platform with Slide-Based Navigation
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: October 19, 2025
+**Last Updated**: October 21, 2025
 
 **Important**: DO NOT CREATE A NUL FILE
 
@@ -45,6 +45,7 @@ npm run db:slides:seed   # Seed slide content
 - **Per-Slide Themes**: Light/dark text with semi-transparent backgrounds (0-1 opacity)
 - **Audio**: Native HTML5 audio player on all slides
 - **Quick Slides**: Modal-based quick note creation
+- **Spa Mode**: Background ambient music with dynamic scheduling and randomization
 
 ### Admin (/admin)
 - **Slide Management**: Full CRUD interface for slide rows and slides
@@ -52,6 +53,7 @@ npm run db:slides:seed   # Seed slide content
 - **Drag-and-Drop**: Slide reordering with position auto-calculation
 - **File Upload**: Audio (MP3/WAV/OGG), Images (JPG/PNG/WebP)
 - **Theme Settings**: Per-slide light/dark override + text background opacity
+- **Spa Mode Management**: CRUD interface for background music tracks with scheduling
 
 ---
 
@@ -80,6 +82,14 @@ npm run db:slides:seed   # Seed slide content
 3. **slide_icons**: Optional custom icons per slide
 
 **Features**: Auto-updating `slide_count` trigger, cascading deletes, unique position constraint, server-side position auto-calculation
+
+### Spa Mode System
+1. **spa_tracks**: Background music tracks
+   - `id`, `title`, `audio_url`, `is_published`, `display_order`, `is_random`
+   - Scheduling: `publish_time_start`, `publish_time_end`, `publish_days` (TEXT/JSON)
+   - Meta: `created_at`, `updated_at`
+
+**Features**: Dynamic scheduling (time/day filtering), randomization support, sequential playback order
 
 ---
 
@@ -110,6 +120,14 @@ npm run db:slides:seed   # Seed slide content
 - `GET /api/slides/debug` - Debug endpoint for Quick Slides status
 - `GET /api/test-db`
 
+### Spa Mode Tracks
+- `GET /api/spa/tracks` (query: `?published=true`)
+- `POST /api/spa/tracks`
+- `GET /api/spa/tracks/[id]`
+- `PATCH /api/spa/tracks/[id]`
+- `DELETE /api/spa/tracks/[id]`
+- `GET /api/spa/tracks/active` - Get currently active track based on schedule/randomization
+
 ---
 
 ## Critical Files
@@ -118,32 +136,39 @@ npm run db:slides:seed   # Seed slide content
 - `src/lib/db.ts` - Connection utility (lazy pool initialization)
 - `src/lib/queries/slideRows.ts` - Row queries
 - `src/lib/queries/slides.ts` - Slide queries
+- `src/lib/queries/spaTracks.ts` - Spa track queries
 - `scripts/init-db.ts` - Schema initialization
 - `scripts/init-slide-tables.ts` - Slide table creation
+- `scripts/init-spa-tables.ts` - Spa tracks table creation
 - `scripts/railway-init.ts` - Railway startup script (runs all migrations)
 - `src/lib/utils/scheduleFilter.ts` - Client-side schedule filtering logic
 
 ### Frontend Core
-- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + unpublish dialog)
+- `src/app/page.tsx` - Main page (Swiper navigation + background/video state + Quick Slide modal + unpublish dialog + Spa Mode)
 - `src/components/MainContent.tsx` - Dynamic slide rendering (lazy loading, caching, row filtering, unpublish icon detection)
 - `src/components/YouTubeEmbed.tsx` - YouTube player (cover/contained modes)
 - `src/components/QuickSlideModal.tsx` - Quick slide creation modal
 - `src/components/ConfirmDialog.tsx` - Reusable confirmation dialog
+- `src/components/SpaAudioPlayer.tsx` - Background music player with scheduling
 - `src/contexts/SwiperContext.tsx` - Multi-level navigation context
 - `src/contexts/ThemeContext.tsx` - Global theme state
 
 ### Icon Borders
-- `src/components/TopIconBar.tsx` - Header (z-20)
+- `src/components/TopIconBar.tsx` - Header (z-20, spa icon for background music)
 - `src/components/BottomIconBar.tsx` - Footer (z-20, comment icon for Quick Slides)
 - `src/components/LeftIconBar.tsx` - Left sidebar (z-10)
 - `src/components/RightIconBar.tsx` - Right sidebar (z-10, atr toggle for Quick Slide mode, videocam toggle)
 
 ### Admin
 - `src/app/admin/slides/[id]/slide/[slideId]/page.tsx` - Slide editor
+- `src/app/admin/spa/page.tsx` - Spa Mode management page
 - `src/components/admin/slides/SlideEditor.tsx` - Tiptap editor + theme settings UI + icon picker
 - `src/components/admin/slides/SlideManager.tsx` - Drag-drop reordering
 - `src/components/admin/slides/IconPicker.tsx` - Material Symbol icon selection (up to 3 icons)
+- `src/components/admin/spa/SpaTrackForm.tsx` - Spa track add/edit form
+- `src/components/admin/spa/SpaTrackList.tsx` - Spa track table with scheduling display
 - `src/components/admin/AdminQuickActions.tsx` - Reusable quick actions sidebar
+- `src/components/admin/AdminTopIconBar.tsx` - Admin header with spa navigation link
 
 ---
 
@@ -222,6 +247,18 @@ npm run db:slides:seed   # Seed slide content
   - All others display normally with theme colors
 - **Performance**: Row icons cached with `useMemo` to avoid repeated parsing
 
+### Spa Mode (Background Music)
+- **Icon-Based Toggle**: Click "spa" icon (top left, between home and play_circle) to start/stop
+- **Visual Feedback**: Icon opacity changes (60% inactive, 100% active when playing)
+- **Dynamic Scheduling**: Time-of-day and day-of-week filters (same pattern as slides)
+- **Client-Side Filtering**: Uses visitor's browser timezone for all schedule checks
+- **Randomization**: Supports random shuffle or sequential playback by display order
+- **Auto-Looping**: Tracks loop continuously while spa mode is active
+- **Admin Management**: Full CRUD at `/admin/spa` with scheduling controls
+- **Database Table**: `spa_tracks` with `is_random`, `display_order`, `publish_time_start/end`, `publish_days`
+- **API Endpoint**: `GET /api/spa/tracks/active` returns currently active track
+- **Audio Player**: Native HTML5 `<audio>` element, hidden, auto-plays when enabled
+
 ---
 
 ## Environment Variables
@@ -299,6 +336,9 @@ npm run build           # Production build test
 
 ### Main App Icons (/)
 - **Home**: Navigate to /
+- **Spa**: Toggle background music playback
+- **Play Circle**: (Placeholder)
+- **Playlist Play**: (Placeholder)
 - **Settings**: Navigate to /admin
 - **Theme Toggle**: Light/dark mode
 - **ATR** (right sidebar): Toggle Quick Slide mode
@@ -309,6 +349,8 @@ npm run build           # Production build test
 ### Admin Icons (/admin)
 - **Dashboard**: Navigate to /admin
 - **Description**: Navigate to /admin/slides
+- **Spa**: Navigate to /admin/spa (Spa Mode management)
+- **Media**: External link to media.lilde.com
 - **Exit**: Navigate to /
 - **Theme Toggle**: Same as main app
 
@@ -349,6 +391,32 @@ npm run lint
 ---
 
 ## Recent Critical Updates (October 2025)
+
+### Spa Mode - Background Music System (Oct 21)
+- **Feature**: Complete background ambient music system with dynamic scheduling
+- **Frontend**: "spa" icon in TopIconBar (between home and play_circle) toggles playback
+- **Visual Feedback**: Icon opacity 60% inactive, 100% active (same pattern as Quick Slide mode)
+- **Audio Player**: Native HTML5 `<audio>` with loop, hidden from view, auto-plays when enabled
+- **Scheduling**: Time-of-day and day-of-week filters using client-side timezone (same logic as slides)
+- **Randomization**: Toggle per-track for shuffle mode vs sequential playback by display_order
+- **Admin Page**: New `/admin/spa` page with full CRUD interface
+  - Form: Title, audio URL, publish status, display order, random toggle, time/day scheduling
+  - Table: Lists all tracks with schedule summary, status badges, edit/delete actions
+- **Database**: New `spa_tracks` table with scheduling columns matching slides pattern
+- **API Routes**:
+  - `GET/POST /api/spa/tracks` - List/create tracks
+  - `GET/PATCH/DELETE /api/spa/tracks/[id]` - Individual track operations
+  - `GET /api/spa/tracks/active` - Returns currently active track (handles randomization)
+- **Query Layer**: `src/lib/queries/spaTracks.ts` with full CRUD operations
+- **Components**:
+  - `SpaAudioPlayer.tsx` - Frontend audio player with schedule filtering
+  - `SpaTrackForm.tsx` - Admin form with scheduling UI (time/day pickers)
+  - `SpaTrackList.tsx` - Admin table with status/schedule display
+- **Migration**: `scripts/init-spa-tables.ts` added to `railway-init.ts` for deployment
+- **Files Created**: 13 new files (1 migration, 1 query layer, 3 API routes, 3 admin components, 1 page, 1 player)
+- **Files Modified**: 4 files (TopIconBar, page.tsx, railway-init.ts, AdminTopIconBar)
+- **TypeScript**: 0 errors, fully type-safe with Next.js 15 async params
+- **Testing**: Database initialized successfully, ready for production use
 
 ### Temporary Unpublish Feature (Oct 20 - Morning)
 - **Feature**: New temporary unpublish functionality using `check_circle_unread` icon
@@ -430,4 +498,31 @@ npm run lint
 
 ---
 
-**Lines**: ~430 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 20, 2025
+## Recent Critical Updates (October 2025) - Continued
+
+### UI Border Radius Removal (Oct 20 - Afternoon)
+- **Change**: Removed all rounded borders (`border-radius`) from entire application
+- **Scope**: 80+ instances across 11 files removed
+- **Files Modified**:
+  - Frontend components: ConfirmDialog, QuickSlideModal, MainContent (6 pill badges)
+  - Admin components: SlideEditor (30+ instances), SlideManager (15+ instances), SlideRowForm
+  - Admin pages: slides/page.tsx (15+ instances, including spinner), media/page.tsx
+  - Utilities: SlidePreview, AdminQuickActions, AdminMainContent
+  - Styles: globals.css (4 audio player styles)
+- **Impact**: All UI elements now display with square/sharp corners instead of rounded edges
+- **Visual Changes**:
+  - Modals: Square corners instead of rounded
+  - Buttons: Square edges throughout
+  - Input fields: No rounded corners
+  - Cards/containers: Sharp rectangular edges
+  - Pills/badges: Square inline badges (row descriptions, subtitles, row types)
+  - Audio player: Square play button and progress elements
+  - Position badges: Square instead of circular
+- **Classes Removed**: `rounded`, `rounded-lg`, `rounded-full`, `rounded-t`
+- **Inline Styles Removed**: `borderRadius`, `border-radius` CSS properties
+- **Third-party**: Essential Audio Player library files unchanged (external dependency)
+- **Testing**: Visual inspection recommended to verify sharp edges across all pages
+
+---
+
+**Lines**: ~525 | **Status**: Production Ready | **Railway**: Deployment Safe | **Last Validated**: Oct 21, 2025

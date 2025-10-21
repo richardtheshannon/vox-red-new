@@ -17,40 +17,40 @@ export default function AdminMainContent() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="p-6 bg-red-50 rounded-lg border border-red-200">
+            <div className="p-6 bg-red-50 border border-red-200">
               <h2 className="text-xl font-semibold text-red-800 mb-2">Bug Reports</h2>
               <p className="text-red-600 text-sm">Track and manage system issues, user-reported bugs, and feature requests.</p>
             </div>
 
-            <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="p-6 bg-blue-50 border border-blue-200">
               <h2 className="text-xl font-semibold text-blue-800 mb-2">Documentation</h2>
               <p className="text-blue-600 text-sm">Manage help articles, user guides, and system documentation.</p>
             </div>
           </div>
 
-          <div className="mt-6 p-6 bg-gray-100 rounded-lg border border-gray-300">
+          <div className="mt-6 p-6 bg-gray-100 border border-gray-300">
             <h2 className="text-2xl font-semibold text-black mb-4">Content Library Management</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="text-center p-3 bg-white rounded border">
+              <div className="text-center p-3 bg-white border">
                 <p className="font-medium">Meditation</p>
                 <p className="text-gray-600">125 items</p>
               </div>
-              <div className="text-center p-3 bg-white rounded border">
+              <div className="text-center p-3 bg-white border">
                 <p className="font-medium">Yoga</p>
                 <p className="text-gray-600">89 items</p>
               </div>
-              <div className="text-center p-3 bg-white rounded border">
+              <div className="text-center p-3 bg-white border">
                 <p className="font-medium">Courses</p>
                 <p className="text-gray-600">45 items</p>
               </div>
-              <div className="text-center p-3 bg-white rounded border">
+              <div className="text-center p-3 bg-white border">
                 <p className="font-medium">Mantras</p>
                 <p className="text-gray-600">67 items</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 p-6 bg-green-50 rounded-lg border border-green-200">
+          <div className="mt-6 p-6 bg-green-50 border border-green-200">
             <h2 className="text-xl font-semibold text-green-800 mb-2">Service Commitments Repository</h2>
             <p className="text-green-600 text-sm">Manage the collection of 50-100 service prompts that publish daily.</p>
             <div className="mt-3 text-sm text-green-700">
@@ -61,7 +61,7 @@ export default function AdminMainContent() {
 
         {/* Right Column - 1/8 width */}
         <div className="col-span-1">
-          <div className="h-full bg-gray-50 rounded-lg p-4">
+          <div className="h-full bg-gray-50 p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">System Status</h3>
             <div className="space-y-3 text-xs">
               <div>
@@ -91,7 +91,7 @@ export default function AdminMainContent() {
         <p className="text-black mb-4">
           Administrative interface for managing bug reports, documentation, and system operations.
         </p>
-        <div className="mt-6 p-6 bg-gray-100 rounded-lg border border-gray-300">
+        <div className="mt-6 p-6 bg-gray-100 border border-gray-300">
           <h2 className="text-2xl font-semibold text-black mb-2">Mobile Admin Panel</h2>
           <p className="text-gray-600">Simplified admin interface for mobile devices.</p>
         </div>

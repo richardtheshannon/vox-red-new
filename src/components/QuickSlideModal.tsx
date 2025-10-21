@@ -81,7 +81,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-2xl mx-4 rounded-lg shadow-2xl"
+        className="relative w-full max-w-2xl mx-4 shadow-2xl"
         style={{
           backgroundColor: 'var(--bg-color)',
           color: 'var(--text-color)',
@@ -127,7 +127,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="Enter your slide title..."
-                className="w-full px-4 py-3 text-xl font-bold rounded-lg border-2 transition-colors"
+                className="w-full px-4 py-3 text-xl font-bold border-2 transition-colors"
                 style={{
                   backgroundColor: 'var(--card-bg)',
                   borderColor: 'var(--border-color)',
@@ -148,7 +148,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
                 disabled={isSubmitting}
                 placeholder="Enter your slide content..."
                 rows={10}
-                className="w-full px-4 py-3 rounded-lg border-2 transition-colors resize-none"
+                className="w-full px-4 py-3 border-2 transition-colors resize-none"
                 style={{
                   backgroundColor: 'var(--card-bg)',
                   borderColor: 'var(--border-color)',
@@ -160,7 +160,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
             {/* Success Message */}
             {showSuccess && (
               <div
-                className="p-4 rounded-lg"
+                className="p-4"
                 style={{
                   backgroundColor: 'rgba(34, 197, 94, 0.1)',
                   color: '#22c55e',
@@ -174,7 +174,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
             {/* Error Message */}
             {error && !showSuccess && (
               <div
-                className="p-4 rounded-lg"
+                className="p-4"
                 style={{
                   backgroundColor: 'rgba(239, 68, 68, 0.1)',
                   color: '#ef4444',
@@ -197,7 +197,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
               type="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-6 py-2 rounded-lg font-semibold transition-colors"
+              className="px-6 py-2 font-semibold transition-colors"
               style={{
                 backgroundColor: 'var(--card-bg)',
                 color: 'var(--text-color)',
@@ -210,7 +210,7 @@ export default function QuickSlideModal({ isOpen, onClose, onSuccess }: QuickSli
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 rounded-lg font-semibold transition-colors"
+              className="px-6 py-2 font-semibold transition-colors"
               style={{
                 backgroundColor: isSubmitting ? 'var(--card-bg)' : 'var(--secondary-text)',
                 color: 'var(--text-color)',

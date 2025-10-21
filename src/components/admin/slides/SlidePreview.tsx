@@ -45,7 +45,6 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
     return {
       backgroundColor: bgColor,
       padding: '8px',
-      borderRadius: '4px',
       display: 'inline-block',
       width: 'fit-content',
       maxWidth: '100%'

@@ -32,7 +32,7 @@ export default function ConfirmDialog({
       onClick={onCancel}
     >
       <div
-        className="relative w-full max-w-md mx-4 rounded-lg shadow-2xl"
+        className="relative w-full max-w-md mx-4 shadow-2xl"
         style={{
           backgroundColor: 'var(--bg-color)',
           color: 'var(--text-color)',
@@ -78,7 +78,7 @@ export default function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={isProcessing}
-            className="px-6 py-2 rounded-lg font-semibold transition-colors hover:opacity-80"
+            className="px-6 py-2 font-semibold transition-colors hover:opacity-80"
             style={{
               backgroundColor: 'var(--card-bg)',
               color: 'var(--text-color)',
@@ -92,7 +92,7 @@ export default function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={isProcessing}
-            className="px-6 py-2 rounded-lg font-semibold transition-colors hover:opacity-90"
+            className="px-6 py-2 font-semibold transition-colors hover:opacity-90"
             style={{
               backgroundColor: '#ef4444',
               color: '#ffffff',

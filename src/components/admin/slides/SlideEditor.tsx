@@ -78,7 +78,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
-        style: 'min-height: 200px; padding: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; background-color: var(--bg-color); color: var(--text-color);',
+        style: 'min-height: 200px; padding: 1rem; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color);',
       },
     },
   });
@@ -170,7 +170,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       <button
         onClick={onCancel}
         disabled={saving}
-        className="px-6 py-3 rounded transition-opacity hover:opacity-80"
+        className="px-6 py-3 transition-opacity hover:opacity-80"
         style={{
           backgroundColor: 'var(--card-bg)',
           color: 'var(--text-color)',
@@ -182,7 +182,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       <button
         onClick={handleSave}
         disabled={saving}
-        className="px-6 py-3 rounded transition-opacity hover:opacity-80"
+        className="px-6 py-3 transition-opacity hover:opacity-80"
         style={{
           backgroundColor: '#dc2626',
           color: 'white',
@@ -199,7 +199,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       {/* Error Message */}
       {error && (
         <div
-          className="p-4 rounded"
+          className="p-4"
           style={{
             backgroundColor: '#fee2e2',
             color: '#991b1b',
@@ -219,7 +219,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         {/* Left Column: Form */}
         <div className="space-y-6">
           <div
-            className="p-6 rounded"
+            className="p-6"
             style={{
               backgroundColor: 'var(--card-bg)',
               border: '1px solid var(--border-color)'
@@ -239,7 +239,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter slide title..."
-                className="w-full px-4 py-2 rounded"
+                className="w-full px-4 py-2"
                 style={{
                   backgroundColor: 'var(--bg-color)',
                   color: 'var(--text-color)',
@@ -258,7 +258,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
                 placeholder="Enter slide subtitle..."
-                className="w-full px-4 py-2 rounded"
+                className="w-full px-4 py-2"
                 style={{
                   backgroundColor: 'var(--bg-color)',
                   color: 'var(--text-color)',
@@ -276,7 +276,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
               {/* Editor Toolbar */}
               {editor && (
                 <div
-                  className="flex flex-wrap gap-2 p-2 rounded-t"
+                  className="flex flex-wrap gap-2 p-2"
                   style={{
                     backgroundColor: 'var(--card-bg)',
                     border: '1px solid var(--border-color)',
@@ -285,7 +285,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 >
                   <button
                     onClick={() => editor.chain().focus().toggleBold().run()}
-                    className={`px-3 py-1 rounded text-sm ${editor.isActive('bold') ? 'bg-red-600 text-white' : ''}`}
+                    className={`px-3 py-1 text-sm ${editor.isActive('bold') ? 'bg-red-600 text-white' : ''}`}
                     style={{
                       backgroundColor: editor.isActive('bold') ? '#dc2626' : 'var(--bg-color)',
                       color: editor.isActive('bold') ? 'white' : 'var(--text-color)',
@@ -296,7 +296,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   </button>
                   <button
                     onClick={() => editor.chain().focus().toggleItalic().run()}
-                    className={`px-3 py-1 rounded text-sm ${editor.isActive('italic') ? 'bg-red-600 text-white' : ''}`}
+                    className={`px-3 py-1 text-sm ${editor.isActive('italic') ? 'bg-red-600 text-white' : ''}`}
                     style={{
                       backgroundColor: editor.isActive('italic') ? '#dc2626' : 'var(--bg-color)',
                       color: editor.isActive('italic') ? 'white' : 'var(--text-color)',
@@ -307,7 +307,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   </button>
                   <button
                     onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                    className={`px-3 py-1 rounded text-sm ${editor.isActive('heading', { level: 2 }) ? 'bg-red-600 text-white' : ''}`}
+                    className={`px-3 py-1 text-sm ${editor.isActive('heading', { level: 2 }) ? 'bg-red-600 text-white' : ''}`}
                     style={{
                       backgroundColor: editor.isActive('heading', { level: 2 }) ? '#dc2626' : 'var(--bg-color)',
                       color: editor.isActive('heading', { level: 2 }) ? 'white' : 'var(--text-color)',
@@ -318,7 +318,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   </button>
                   <button
                     onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                    className={`px-3 py-1 rounded text-sm ${editor.isActive('heading', { level: 3 }) ? 'bg-red-600 text-white' : ''}`}
+                    className={`px-3 py-1 text-sm ${editor.isActive('heading', { level: 3 }) ? 'bg-red-600 text-white' : ''}`}
                     style={{
                       backgroundColor: editor.isActive('heading', { level: 3 }) ? '#dc2626' : 'var(--bg-color)',
                       color: editor.isActive('heading', { level: 3 }) ? 'white' : 'var(--text-color)',
@@ -329,7 +329,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   </button>
                   <button
                     onClick={() => editor.chain().focus().toggleBulletList().run()}
-                    className={`px-3 py-1 rounded text-sm ${editor.isActive('bulletList') ? 'bg-red-600 text-white' : ''}`}
+                    className={`px-3 py-1 text-sm ${editor.isActive('bulletList') ? 'bg-red-600 text-white' : ''}`}
                     style={{
                       backgroundColor: editor.isActive('bulletList') ? '#dc2626' : 'var(--bg-color)',
                       color: editor.isActive('bulletList') ? 'white' : 'var(--text-color)',
@@ -345,7 +345,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                         editor.chain().focus().setLink({ href: url }).run();
                       }
                     }}
-                    className="px-3 py-1 rounded text-sm"
+                    className="px-3 py-1 text-sm"
                     style={{
                       backgroundColor: 'var(--bg-color)',
                       color: 'var(--text-color)',
@@ -378,7 +378,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
               <select
                 value={layoutType}
                 onChange={(e) => setLayoutType(e.target.value as 'STANDARD' | 'OVERFLOW' | 'MINIMAL')}
-                className="w-full px-4 py-2 rounded"
+                className="w-full px-4 py-2"
                 style={{
                   backgroundColor: 'var(--bg-color)',
                   color: 'var(--text-color)',
@@ -402,7 +402,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   min="1"
                   value={position}
                   onChange={(e) => setPosition(parseInt(e.target.value) || 1)}
-                  className="w-full px-4 py-2 rounded"
+                  className="w-full px-4 py-2"
                   style={{
                     backgroundColor: 'var(--bg-color)',
                     color: 'var(--text-color)',
@@ -418,7 +418,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
 
           {/* Media Upload Section */}
           <div
-            className="p-6 rounded"
+            className="p-6"
             style={{
               backgroundColor: 'var(--card-bg)',
               border: '1px solid var(--border-color)'
@@ -438,7 +438,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 value={audioUrl}
                 onChange={(e) => setAudioUrl(e.target.value)}
                 placeholder="https://example.com/audio.mp3 or /media/audio.mp3"
-                className="w-full px-4 py-2 rounded"
+                className="w-full px-4 py-2"
                 style={{
                   backgroundColor: 'var(--bg-color)',
                   color: 'var(--text-color)',
@@ -449,7 +449,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 Paste a link to an MP3 file (external URL or local path like /media/audio.mp3)
               </p>
               {audioUrl && (
-                <div className="mt-2 p-2 rounded" style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
+                <div className="mt-2 p-2" style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-color)' }}>Current Audio:</p>
                   <a
                     href={audioUrl}
@@ -474,7 +474,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
                 placeholder="/media/slides/background.jpg"
-                className="w-full px-4 py-2 rounded"
+                className="w-full px-4 py-2"
                 style={{
                   backgroundColor: 'var(--bg-color)',
                   color: 'var(--text-color)',
@@ -497,7 +497,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 <select
                   value={contentTheme}
                   onChange={(e) => setContentTheme(e.target.value as 'light' | 'dark' | '')}
-                  className="w-full px-4 py-2 rounded"
+                  className="w-full px-4 py-2"
                   style={{
                     backgroundColor: 'var(--bg-color)',
                     color: 'var(--text-color)',
@@ -544,7 +544,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 placeholder="https://www.youtube.com/watch?v=..."
-                className="w-full px-4 py-2 rounded"
+                className="w-full px-4 py-2"
                 style={{
                   backgroundColor: 'var(--bg-color)',
                   color: 'var(--text-color)',
@@ -562,7 +562,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         <div className="space-y-6">
           {/* Publishing Settings Section */}
           <div
-            className="p-6 rounded"
+            className="p-6"
             style={{
               backgroundColor: 'var(--card-bg)',
               border: '1px solid var(--border-color)'
@@ -587,7 +587,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   type="time"
                   value={publishTimeStart}
                   onChange={(e) => setPublishTimeStart(e.target.value)}
-                  className="w-full px-3 py-2 rounded"
+                  className="w-full px-3 py-2"
                   style={{
                     backgroundColor: 'var(--bg-color)',
                     color: 'var(--text-color)',
@@ -608,7 +608,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   type="time"
                   value={publishTimeEnd}
                   onChange={(e) => setPublishTimeEnd(e.target.value)}
-                  className="w-full px-3 py-2 rounded"
+                  className="w-full px-3 py-2"
                   style={{
                     backgroundColor: 'var(--bg-color)',
                     color: 'var(--text-color)',
@@ -686,7 +686,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
 
           {/* Live Preview */}
           <div
-            className="p-6 rounded"
+            className="p-6"
             style={{
               backgroundColor: 'var(--card-bg)',
               border: '1px solid var(--border-color)'

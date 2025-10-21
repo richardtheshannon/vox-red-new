@@ -3,9 +3,11 @@ import { useTheme } from '../contexts/ThemeContext';
 
 interface TopIconBarProps {
   hasBackgroundImage?: boolean;
+  isSpaPlaying?: boolean;
+  onSpaToggle?: () => void;
 }
 
-export default function TopIconBar({ hasBackgroundImage = false }: TopIconBarProps) {
+export default function TopIconBar({ hasBackgroundImage = false, isSpaPlaying = false, onSpaToggle }: TopIconBarProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -17,6 +19,14 @@ export default function TopIconBar({ hasBackgroundImage = false }: TopIconBarPro
           title="Home (Refresh)"
         >
           home
+        </span>
+        <span
+          className="material-symbols-outlined cursor-pointer hover:opacity-70"
+          onClick={onSpaToggle}
+          title={isSpaPlaying ? "Stop Spa Mode" : "Play Spa Mode"}
+          style={{ opacity: isSpaPlaying ? 1 : 0.6 }}
+        >
+          spa
         </span>
         <span className="material-symbols-outlined" title="Play Circle">play_circle</span>
         <span className="material-symbols-outlined" title="Playlist Play">playlist_play</span>

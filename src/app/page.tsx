@@ -12,6 +12,7 @@ import { SwiperProvider } from '@/contexts/SwiperContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import SpaAudioPlayer from '@/components/SpaAudioPlayer';
 
 export default function Home() {
   // Vertical swiper (for rows)
@@ -36,6 +37,9 @@ export default function Home() {
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [slideToUnpublish, setSlideToUnpublish] = useState<{ slideId: string; rowId: string } | null>(null);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
+
+  // Spa Mode state
+  const [isSpaPlaying, setIsSpaPlaying] = useState(false);
 
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
@@ -173,6 +177,11 @@ export default function Home() {
     setSlideToUnpublish(null);
   };
 
+  // Toggle Spa Mode
+  const toggleSpaMode = () => {
+    setIsSpaPlaying(prev => !prev);
+  };
+
   return (
     <ThemeProvider>
       <div
@@ -198,7 +207,11 @@ export default function Home() {
           getHorizontalSwiper={getHorizontalSwiper}
           activeRowId={activeRowId}
         >
-          <TopIconBar hasBackgroundImage={!!activeSlideImageUrl} />
+          <TopIconBar
+            hasBackgroundImage={!!activeSlideImageUrl}
+            isSpaPlaying={isSpaPlaying}
+            onSpaToggle={toggleSpaMode}
+          />
           <LeftIconBar hasBackgroundImage={!!activeSlideImageUrl} />
           <RightIconBar
             hasVideo={!!activeSlideVideoUrl}
@@ -243,6 +256,9 @@ export default function Home() {
           cancelText="Cancel"
           isProcessing={isUnpublishing}
         />
+
+        {/* Spa Audio Player */}
+        <SpaAudioPlayer isPlaying={isSpaPlaying} />
       </div>
     </ThemeProvider>
   );

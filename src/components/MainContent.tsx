@@ -419,7 +419,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                     style={{
                       display: 'inline-block',
                       padding: '4px 12px',
-                      borderRadius: '12px',
                       fontSize: '12px',
                       fontWeight: '500',
                       backgroundColor: textColor === '#ffffff'
@@ -436,7 +435,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                     style={{
                       display: 'inline-block',
                       padding: '4px 12px',
-                      borderRadius: '12px',
                       fontSize: '12px',
                       fontWeight: '500',
                       backgroundColor: textColor === '#ffffff'
@@ -452,7 +450,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                   style={{
                     display: 'inline-block',
                     padding: '4px 12px',
-                    borderRadius: '12px',
                     fontSize: '12px',
                     fontWeight: '500',
                     backgroundColor: textColor === '#ffffff'
@@ -590,7 +587,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                   style={{
                     display: 'inline-block',
                     padding: '4px 12px',
-                    borderRadius: '12px',
                     fontSize: '12px',
                     fontWeight: '500',
                     backgroundColor: textColor === '#ffffff'
@@ -607,7 +603,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                   style={{
                     display: 'inline-block',
                     padding: '4px 12px',
-                    borderRadius: '12px',
                     fontSize: '12px',
                     fontWeight: '500',
                     backgroundColor: textColor === '#ffffff'
@@ -623,7 +618,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 style={{
                   display: 'inline-block',
                   padding: '4px 12px',
-                  borderRadius: '12px',
                   fontSize: '12px',
                   fontWeight: '500',
                   backgroundColor: textColor === '#ffffff'
