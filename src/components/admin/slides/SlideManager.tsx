@@ -23,6 +23,78 @@ interface SlideManagerProps {
   onRefresh: () => void;
 }
 
+// Helper function to format time from "HH:MM:SS" to "H:MM AM/PM"
+function formatTime(timeStr: string | null | undefined): string {
+  if (!timeStr) return '';
+  const parts = timeStr.split(':');
+  let hours = parseInt(parts[0], 10);
+  const minutes = parts[1];
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+// Helper function to get day names from day numbers [0-6]
+function getDayNames(dayNumbers: number[]): string {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // If all 7 days are selected, show "All Days"
+  if (dayNumbers.length === 7) {
+    return 'All Days';
+  }
+
+  // If weekdays only (1-5), show "Weekdays"
+  const isWeekdays = dayNumbers.length === 5 &&
+    dayNumbers.includes(1) && dayNumbers.includes(2) &&
+    dayNumbers.includes(3) && dayNumbers.includes(4) &&
+    dayNumbers.includes(5);
+  if (isWeekdays) {
+    return 'Weekdays';
+  }
+
+  // If weekend only (0, 6), show "Weekend"
+  const isWeekend = dayNumbers.length === 2 &&
+    dayNumbers.includes(0) && dayNumbers.includes(6);
+  if (isWeekend) {
+    return 'Weekend';
+  }
+
+  // Otherwise, show individual day names
+  return dayNumbers.sort((a, b) => a - b).map(num => dayNames[num] || '?').join(', ');
+}
+
+// Helper function to format complete schedule string
+function formatSchedule(slide: Slide): string {
+  const publishDays = slide.publish_days ? JSON.parse(slide.publish_days) : [];
+  const hasSchedule = slide.publish_time_start || slide.publish_time_end || publishDays.length > 0;
+
+  if (!hasSchedule) return '';
+
+  const parts: string[] = [];
+
+  // Add day names if present
+  if (publishDays.length > 0) {
+    parts.push(getDayNames(publishDays));
+  }
+
+  // Add time range if present
+  if (slide.publish_time_start || slide.publish_time_end) {
+    const startTime = formatTime(slide.publish_time_start);
+    const endTime = formatTime(slide.publish_time_end);
+
+    if (startTime && endTime) {
+      parts.push(`${startTime} - ${endTime}`);
+    } else if (startTime) {
+      parts.push(`from ${startTime}`);
+    } else if (endTime) {
+      parts.push(`until ${endTime}`);
+    }
+  }
+
+  return parts.length > 0 ? parts.join(' - ') : '';
+}
+
 function SlideItem({
   slide,
   rowId,
@@ -129,6 +201,11 @@ function SlideItem({
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold truncate" style={{ color: 'var(--text-color)' }}>
                   {slide.title}
+                  {formatSchedule(slide) && (
+                    <span style={{ color: 'var(--secondary-text)', fontWeight: 'normal' }}>
+                      {' | '}{formatSchedule(slide)}
+                    </span>
+                  )}
                 </h3>
                 {!slide.is_published && (
                   <span

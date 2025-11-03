@@ -392,7 +392,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     const slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons;
 
     const containerClass = slide.layout_type === 'OVERFLOW'
-      ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center')
+      ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-start')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
 
     // If video exists, only show audio player (if present) and allow clicks to pass through
