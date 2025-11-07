@@ -12,6 +12,7 @@ export interface SlideRow {
   icon_set?: string[] // Parsed from JSON
   theme_color?: string
   slide_count: number
+  playlist_delay_seconds: number
   created_by?: string
   created_at: Date
   updated_at: Date
@@ -25,6 +26,7 @@ export interface CreateSlideRowData {
   theme_color?: string
   display_order?: number
   is_published?: boolean
+  playlist_delay_seconds?: number
   created_by?: string
 }
 
@@ -36,6 +38,7 @@ export interface UpdateSlideRowData {
   theme_color?: string
   display_order?: number
   is_published?: boolean
+  playlist_delay_seconds?: number
 }
 
 // Get all slide rows
@@ -69,8 +72,8 @@ export async function getSlideRowById(id: string): Promise<SlideRow | null> {
 // Create new slide row
 export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow> {
   const sql = `
-    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, created_by)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
   `
 
@@ -82,6 +85,7 @@ export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow
     data.theme_color || null,
     data.display_order ?? 0,
     data.is_published ?? false,
+    data.playlist_delay_seconds ?? 0,
     data.created_by || null,
   ])
 
@@ -128,6 +132,10 @@ export async function updateSlideRow(id: string, data: UpdateSlideRowData): Prom
   if (data.is_published !== undefined) {
     fields.push(`is_published = $${paramCount++}`)
     values.push(data.is_published)
+  }
+  if (data.playlist_delay_seconds !== undefined) {
+    fields.push(`playlist_delay_seconds = $${paramCount++}`)
+    values.push(data.playlist_delay_seconds)
   }
 
   if (fields.length === 0) {

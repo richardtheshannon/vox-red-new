@@ -10,6 +10,7 @@ import MainContent from '@/components/MainContent';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 import { SwiperProvider } from '@/contexts/SwiperContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { PlaylistProvider } from '@/contexts/PlaylistContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import SpaAudioPlayer from '@/components/SpaAudioPlayer';
@@ -40,6 +41,15 @@ export default function Home() {
 
   // Spa Mode state
   const [isSpaPlaying, setIsSpaPlaying] = useState(false);
+
+  // Playlist state - tracks current row data and slides for playlist feature
+  const playlistDataRef = useRef<{
+    rowId: string | null;
+    delaySeconds: number;
+    slides: any[];
+    swiper: SwiperType | null;
+  }>({ rowId: null, delaySeconds: 0, slides: [], swiper: null });
+  const [hasAudioSlides, setHasAudioSlides] = useState(false);
 
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
@@ -182,35 +192,49 @@ export default function Home() {
     setIsSpaPlaying(prev => !prev);
   };
 
+  // Callback to receive playlist data from MainContent
+  const updatePlaylistData = (rowId: string, delaySeconds: number, slides: any[], swiper: SwiperType | null, hasAudio: boolean) => {
+    playlistDataRef.current = { rowId, delaySeconds, slides, swiper };
+    setHasAudioSlides(hasAudio);
+  };
+
+  // Get playlist data for toggle
+  const getPlaylistData = () => {
+    return playlistDataRef.current;
+  };
+
   return (
     <ThemeProvider>
-      <div
-        className="fixed inset-0 transition-all duration-500"
-        style={activeSlideImageUrl ? {
-          backgroundImage: `url(${activeSlideImageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        } : {
-          backgroundColor: 'var(--content-bg)'
-        }}
-      >
-        {/* YouTube video layer (behind content, above background image) */}
-        <YouTubeEmbed videoUrl={activeSlideVideoUrl} displayMode={videoDisplayMode} />
-
-        <SwiperProvider
-          slidePrev={slidePrev}
-          slideNext={slideNext}
-          scrollUp={scrollUp}
-          scrollDown={scrollDown}
-          setHorizontalSwiper={setHorizontalSwiper}
-          getHorizontalSwiper={getHorizontalSwiper}
-          activeRowId={activeRowId}
+      <PlaylistProvider>
+        <div
+          className="fixed inset-0 transition-all duration-500"
+          style={activeSlideImageUrl ? {
+            backgroundImage: `url(${activeSlideImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          } : {
+            backgroundColor: 'var(--content-bg)'
+          }}
         >
+          {/* YouTube video layer (behind content, above background image) */}
+          <YouTubeEmbed videoUrl={activeSlideVideoUrl} displayMode={videoDisplayMode} />
+
+          <SwiperProvider
+            slidePrev={slidePrev}
+            slideNext={slideNext}
+            scrollUp={scrollUp}
+            scrollDown={scrollDown}
+            setHorizontalSwiper={setHorizontalSwiper}
+            getHorizontalSwiper={getHorizontalSwiper}
+            activeRowId={activeRowId}
+          >
           <TopIconBar
             hasBackgroundImage={!!activeSlideImageUrl}
             isSpaPlaying={isSpaPlaying}
             onSpaToggle={toggleSpaMode}
+            hasAudioSlides={hasAudioSlides}
+            getPlaylistData={getPlaylistData}
           />
           <LeftIconBar hasBackgroundImage={!!activeSlideImageUrl} />
           <RightIconBar
@@ -235,6 +259,7 @@ export default function Home() {
             isQuickSlideMode={isQuickSlideMode}
             onUnpublishDialogOpen={handleUnpublishDialogOpen}
             unpublishCallbackRef={mainContentUnpublishCallbackRef}
+            updatePlaylistData={updatePlaylistData}
           />
         </SwiperProvider>
 
@@ -257,9 +282,10 @@ export default function Home() {
           isProcessing={isUnpublishing}
         />
 
-        {/* Spa Audio Player */}
-        <SpaAudioPlayer isPlaying={isSpaPlaying} />
-      </div>
+          {/* Spa Audio Player */}
+          <SpaAudioPlayer isPlaying={isSpaPlaying} />
+        </div>
+      </PlaylistProvider>
     </ThemeProvider>
   );
 }
@@ -274,7 +300,8 @@ function MainContentWithRef({
   activeSlideVideoUrl,
   isQuickSlideMode,
   onUnpublishDialogOpen,
-  unpublishCallbackRef
+  unpublishCallbackRef,
+  updatePlaylistData
 }: {
   setSwiperRef: (swiper: SwiperType | null) => void;
   handleSlideChange: (swiper: SwiperType) => void;
@@ -285,6 +312,7 @@ function MainContentWithRef({
   isQuickSlideMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
+  updatePlaylistData: (rowId: string, delaySeconds: number, slides: any[], swiper: SwiperType | null, hasAudio: boolean) => void;
 }) {
   return (
     <MainContent
@@ -297,6 +325,7 @@ function MainContentWithRef({
       isQuickSlideMode={isQuickSlideMode}
       onUnpublishDialogOpen={onUnpublishDialogOpen}
       unpublishCallbackRef={unpublishCallbackRef}
+      updatePlaylistData={updatePlaylistData}
     />
   );
 }

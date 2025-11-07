@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       theme_color: body.theme_color,
       display_order: body.display_order,
       is_published: body.is_published,
+      playlist_delay_seconds: body.playlist_delay_seconds,
       created_by: body.created_by,
     });
 

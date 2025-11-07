@@ -42,7 +42,8 @@
       "Bash(powershell:*)",
       "Bash(if exist \".next\" rmdir /s /q .next)",
       "Bash(python:*)",
-      "Bash(if not exist \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\slides\\rows\\[id]\\slides\\[slideId]\\temp-unpublish\" mkdir \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\slides\\rows\\[id]\\slides\\[slideId]\\temp-unpublish\")"
+      "Bash(if not exist \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\slides\\rows\\[id]\\slides\\[slideId]\\temp-unpublish\" mkdir \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\slides\\rows\\[id]\\slides\\[slideId]\\temp-unpublish\")",
+      "Bash(set PGPASSWORD=Superculture1@)"
     ],
     "deny": [],
     "ask": []

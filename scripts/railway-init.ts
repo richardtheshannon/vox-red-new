@@ -15,6 +15,7 @@ import { addSlideIconSet } from './add-slide-icon-set'
 import { addTempUnpublishColumn } from './add-temp-unpublish'
 import { initializeSpaTracksTables } from './init-spa-tables'
 import { addSpaVolume } from './add-spa-volume'
+import { addPlaylistDelay } from './add-playlist-delay'
 
 async function railwayInit() {
   try {
@@ -155,6 +156,20 @@ async function railwayInit() {
         console.error('❌ Spa volume migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without spa volume column')
+      }
+    }
+
+    // Add playlist_delay_seconds column to slide_rows (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addPlaylistDelay()
+      console.log('✅ Playlist delay column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Playlist delay column already exists, skipping')
+      } else {
+        console.error('❌ Playlist delay migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without playlist delay column')
       }
     }
 

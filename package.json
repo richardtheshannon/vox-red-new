@@ -11,6 +11,7 @@
     "db:seed": "tsx scripts/seed-db.ts",
     "db:slides:init": "tsx scripts/init-slide-tables.ts",
     "db:slides:seed": "tsx scripts/seed-slide-data.ts",
+    "db:validate": "tsx scripts/validate-migrations.ts",
     "railway:init": "tsx scripts/railway-init.ts"
   },
   "dependencies": {

@@ -7,6 +7,7 @@ import 'swiper/css';
 import EssentialAudioPlayer from './EssentialAudioPlayer';
 import { useSwiperContext } from '@/contexts/SwiperContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { usePlaylist } from '@/contexts/PlaylistContext';
 import { Slide } from '@/lib/queries/slides';
 import { filterVisibleSlides } from '@/lib/utils/scheduleFilter';
 
@@ -20,6 +21,7 @@ interface MainContentProps {
   isQuickSlideMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
+  updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
 }
 
 // TypeScript interfaces for API data
@@ -33,11 +35,12 @@ interface SlideRow {
   slide_count: number;
   icon_set: string[]; // Already parsed by API
   theme_color: string | null;
+  playlist_delay_seconds: number;
   created_at: string;
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -51,6 +54,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Get global theme
   const { theme: globalTheme } = useTheme();
+
+  // Get playlist context for audio playback management
+  const { stopPlaylist } = usePlaylist();
 
   // Filter rows based on Quick Slide mode
   const filteredSlideRows = useMemo(() => {
@@ -131,15 +137,24 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Set initial background image and video when first row's slides are loaded
   useEffect(() => {
-    if (slideRows.length > 0) {
-      const firstRowId = slideRows[0].id;
-      const slides = slidesCache[firstRowId];
+    if (filteredSlideRows.length > 0) {
+      const firstRow = filteredSlideRows[0];
+      const slides = slidesCache[firstRow.id];
       if (slides && slides.length > 0) {
         setActiveSlideImageUrl(slides[0].image_url || null);
         setActiveSlideVideoUrl(slides[0].video_url || null);
+
+        // Update playlist data for initial row (with small delay to ensure swiper is registered)
+        setTimeout(() => {
+          const visibleSlides = filterVisibleSlides(slides);
+          const hasAudio = visibleSlides.some(slide => slide.audio_url);
+          const horizontalSwiper = getHorizontalSwiper(firstRow.id);
+          console.log('[MainContent] Initial playlist data update - hasAudio:', hasAudio, 'visibleSlides:', visibleSlides.length, 'horizontalSwiper:', !!horizontalSwiper);
+          updatePlaylistData(firstRow.id, firstRow.playlist_delay_seconds, visibleSlides, horizontalSwiper, hasAudio);
+        }, 200);
       }
     }
-  }, [slidesCache, slideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl]);
+  }, [slidesCache, filteredSlideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl, updatePlaylistData, getHorizontalSwiper]);
 
   // Preload slides when Quick Slide mode changes
   useEffect(() => {
@@ -382,11 +397,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   }, [unpublishCallbackRef, getHorizontalSwiper, getSlidesForRow, filteredSlideRows, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl]);
 
   // Render slide content
-  const renderSlideContent = (slide: Slide, rowIcons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true) => {
-    // Log audio URL for debugging (only for active slides to reduce noise)
-    if (slide.audio_url && isActive) {
-      console.log('[MainContent] Active Slide:', slide.id, 'Audio URL:', slide.audio_url);
-    }
+  const renderSlideContent = (slide: Slide, rowIcons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true, enableAudioRef: boolean = false) => {
+    // Note: enableAudioRef parameter is kept for future use but not currently used
+    // Playlist now uses DOM query to find active audio element dynamically
 
     // Use per-slide icons if available, otherwise fallback to row icons
     const slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons;
@@ -409,6 +422,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               <EssentialAudioPlayer
                 key={`audio-${slide.id}`}
                 audioUrl={slide.audio_url}
+                slideId={slide.id}
+                rowId={slide.slide_row_id}
                 preload={false}
                 className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
               />
@@ -577,6 +592,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             <EssentialAudioPlayer
               key={`audio-${slide.id}`}
               audioUrl={slide.audio_url}
+              slideId={slide.id}
+              rowId={slide.slide_row_id}
               preload={false}
               className={isMobile ? 'w-full max-w-md mb-4' : 'max-w-md mb-4'}
             />
@@ -645,11 +662,11 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   };
 
   // Render horizontal swiper for a row's slides
-  const renderHorizontalSwiper = (row: SlideRow, slides: Slide[], isMobile: boolean = false) => {
+  const renderHorizontalSwiper = (row: SlideRow, slides: Slide[], isMobile: boolean = false, enableAudioRef: boolean = false) => {
     // Use memoized icon cache for better performance
     // row.icon_set is already an array from the API, no need to parse
     const icons = iconSetsCache[row.id] || row.icon_set || [];
-    console.log(`[MainContent] Rendering row ${row.title} (${row.id}) with icons:`, icons);
+    console.log(`[MainContent] Rendering row ${row.title} (${row.id}) with icons:`, icons, 'enableAudioRef:', enableAudioRef);
 
     if (slides.length === 0) {
       return (
@@ -683,7 +700,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id}>
-            {({ isActive }) => renderSlideContent(slide, icons, row, isMobile, isActive)}
+            {({ isActive }) => renderSlideContent(slide, icons, row, isMobile, isActive, enableAudioRef)}
           </SwiperSlide>
         ))}
       </Swiper>
@@ -761,6 +778,13 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                   setActiveSlideVideoUrl(rowSlides[0].video_url || null);
                 }
 
+                // Update playlist data for top icon bar (use filtered slides for schedule)
+                const visibleSlides = filterVisibleSlides(rowSlides);
+                const horizontalSwiper = getHorizontalSwiper(activeRow.id);
+                const hasAudio = visibleSlides.some(slide => slide.audio_url);
+                console.log('[MainContent] Row change playlist data - hasAudio:', hasAudio, 'visibleSlides:', visibleSlides.length, 'totalSlides:', rowSlides.length);
+                updatePlaylistData(activeRow.id, activeRow.playlist_delay_seconds, visibleSlides, horizontalSwiper, hasAudio);
+
                 // Preload adjacent rows for smoother navigation
                 const nextIndex = swiper.activeIndex + 1;
                 const prevIndex = swiper.activeIndex - 1;
@@ -779,7 +803,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               return (
                 <SwiperSlide key={row.id}>
                   <div className="h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
-                    {renderHorizontalSwiper(row, slides, false)}
+                    {renderHorizontalSwiper(row, slides, false, true)}
                   </div>
                 </SwiperSlide>
               );
@@ -818,6 +842,13 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 setActiveSlideVideoUrl(rowSlides[0].video_url || null);
               }
 
+              // Update playlist data for top icon bar (use filtered slides for schedule)
+              const visibleSlides = filterVisibleSlides(rowSlides);
+              const horizontalSwiper = getHorizontalSwiper(activeRow.id);
+              const hasAudio = visibleSlides.some(slide => slide.audio_url);
+              console.log('[MainContent] Mobile row change playlist data - hasAudio:', hasAudio, 'visibleSlides:', visibleSlides.length, 'totalSlides:', rowSlides.length);
+              updatePlaylistData(activeRow.id, activeRow.playlist_delay_seconds, visibleSlides, horizontalSwiper, hasAudio);
+
               // Preload adjacent rows for smoother navigation
               const nextIndex = swiper.activeIndex + 1;
               const prevIndex = swiper.activeIndex - 1;
@@ -836,7 +867,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             return (
               <SwiperSlide key={row.id}>
                 <div className="h-full" style={{pointerEvents: activeSlideVideoUrl ? 'none' : 'auto'}}>
-                  {renderHorizontalSwiper(row, slides, true)}
+                  {renderHorizontalSwiper(row, slides, true, false)}
                 </div>
               </SwiperSlide>
             );

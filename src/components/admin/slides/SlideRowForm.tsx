@@ -13,6 +13,7 @@ interface SlideRowFormProps {
     theme_color: string;
     display_order: number;
     is_published: boolean;
+    playlist_delay_seconds?: number;
   };
   onSubmit: (data: SlideRowFormData) => Promise<void>;
   onCancel: () => void;
@@ -27,6 +28,7 @@ export interface SlideRowFormData {
   theme_color: string;
   display_order: number;
   is_published: boolean;
+  playlist_delay_seconds: number;
 }
 
 const ROW_TYPES = ['ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM'];
@@ -40,6 +42,7 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
     theme_color: initialData?.theme_color || '#dc2626',
     display_order: initialData?.display_order || 0,
     is_published: initialData?.is_published || false,
+    playlist_delay_seconds: initialData?.playlist_delay_seconds ?? 0,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -221,6 +224,37 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
         />
         <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
           Lower numbers appear first
+        </p>
+      </div>
+
+      {/* Playlist Delay */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+          Playlist Delay (seconds)
+        </label>
+        <select
+          value={formData.playlist_delay_seconds}
+          onChange={(e) => setFormData({ ...formData, playlist_delay_seconds: parseInt(e.target.value) })}
+          className="w-full px-4 py-2 rounded"
+          style={{
+            backgroundColor: 'var(--card-bg)',
+            color: 'var(--text-color)',
+            border: '1px solid var(--border-color)'
+          }}
+        >
+          <option value={0}>0 seconds (no delay)</option>
+          <option value={5}>5 seconds</option>
+          <option value={10}>10 seconds</option>
+          <option value={15}>15 seconds</option>
+          <option value={20}>20 seconds</option>
+          <option value={25}>25 seconds</option>
+          <option value={30}>30 seconds</option>
+          <option value={35}>35 seconds</option>
+          <option value={40}>40 seconds</option>
+          <option value={45}>45 seconds</option>
+        </select>
+        <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+          Pause duration between audio tracks in playlist mode
         </p>
       </div>
 

@@ -67,6 +67,20 @@ export async function PATCH(
       }
     }
 
+    // Validate playlist_delay_seconds if provided
+    if (body.playlist_delay_seconds !== undefined) {
+      const delay = Number(body.playlist_delay_seconds);
+      if (isNaN(delay) || delay < 0 || delay > 45) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: 'Invalid playlist_delay_seconds. Must be a number between 0 and 45',
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Remove fields that shouldn't be updated directly
     const { id, created_at, slide_count, ...updateData } = body;
 

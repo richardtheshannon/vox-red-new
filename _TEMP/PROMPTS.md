@@ -1,5 +1,6 @@
 /* DO NOT REMOVE THE FOLLOWING PLACEHOLDER PROMPT:
 
+Lets get started fixing the PLAYLIST_TROUBLESHOOTING.md in the _TEMP directory.
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
@@ -10,12 +11,11 @@ Ask me any questions you have, strictly one question at a time before we get sta
 # git add .&& git commit -m "general quick commit" && git push origin master
 
 cd "c:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app" && cmd /c "del \\\\?\\%CD%\\nul"
-
-Update CLAUDE.md in the _TEMP directory, with any relevant application update overviews.
-
+-------------------------------------------
+FIRST: Update CLAUDE.md in the _TEMP directory, with any relevant application update overviews.
+SECOND: Revise and update CLAUDE.md in the _TEMP directory to only contain essential application information for continued development. This should be a concise, specific, outline of the application. Lets keep it under 500 lines. 
+-------------------------------------------
 Deployment failed. Please read ERROR.md in the _TEMP directory.
-
-### Revise and update CLAUDE.md in the _TEMP directory to only contain essential application information for continued development. This should be a concise, specific, outline of the application. Lets keep it under 500 lines. 
 
 taskkill /IM node.exe /F
 del \\?\C:\Users\icos\00_DEPLOY\vox-red\XXX_vox-red\NUL
