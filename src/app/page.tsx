@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
+import type { Slide } from '@/lib/queries/slides';
 import TopIconBar from '@/components/TopIconBar';
 import LeftIconBar from '@/components/LeftIconBar';
 import RightIconBar from '@/components/RightIconBar';
@@ -46,7 +47,7 @@ export default function Home() {
   const playlistDataRef = useRef<{
     rowId: string | null;
     delaySeconds: number;
-    slides: any[];
+    slides: Slide[];
     swiper: SwiperType | null;
   }>({ rowId: null, delaySeconds: 0, slides: [], swiper: null });
   const [hasAudioSlides, setHasAudioSlides] = useState(false);
@@ -193,7 +194,7 @@ export default function Home() {
   };
 
   // Callback to receive playlist data from MainContent
-  const updatePlaylistData = (rowId: string, delaySeconds: number, slides: any[], swiper: SwiperType | null, hasAudio: boolean) => {
+  const updatePlaylistData = (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => {
     playlistDataRef.current = { rowId, delaySeconds, slides, swiper };
     setHasAudioSlides(hasAudio);
   };
@@ -312,7 +313,7 @@ function MainContentWithRef({
   isQuickSlideMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
-  updatePlaylistData: (rowId: string, delaySeconds: number, slides: any[], swiper: SwiperType | null, hasAudio: boolean) => void;
+  updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
 }) {
   return (
     <MainContent

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import type { Swiper as SwiperType } from 'swiper';
+import type { Slide } from '@/lib/queries/slides';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePlaylist } from '../contexts/PlaylistContext';
 
@@ -7,7 +9,7 @@ interface TopIconBarProps {
   isSpaPlaying?: boolean;
   onSpaToggle?: () => void;
   hasAudioSlides?: boolean;
-  getPlaylistData?: () => { rowId: string | null; delaySeconds: number; slides: any[]; swiper: any | null };
+  getPlaylistData?: () => { rowId: string | null; delaySeconds: number; slides: Slide[]; swiper: SwiperType | null };
 }
 
 export default function TopIconBar({
