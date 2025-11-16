@@ -18,6 +18,8 @@ interface MainContentProps {
   setActiveSlideImageUrl: (imageUrl: string | null) => void;
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
   activeSlideVideoUrl: string | null;
+  setActiveSlideOverlayOpacity: (opacity: number) => void;
+  setActiveSlideContentTheme: (theme: 'light' | 'dark' | null) => void;
   isQuickSlideMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
@@ -40,7 +42,7 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,24 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
   // Get playlist context for audio playback management
   const { stopPlaylist } = usePlaylist();
+
+  // Helper function to update slide data (image, video, AND overlay)
+  const updateActiveSlideData = (slide: Slide | null) => {
+    if (slide) {
+      setActiveSlideImageUrl(slide.image_url || null);
+      setActiveSlideVideoUrl(slide.video_url || null);
+      setActiveSlideOverlayOpacity(Number(slide.title_bg_opacity) || 0);
+      // Use slide's content_theme if defined, otherwise null (use global theme)
+      setActiveSlideContentTheme(
+        slide.content_theme || null
+      );
+    } else {
+      setActiveSlideImageUrl(null);
+      setActiveSlideVideoUrl(null);
+      setActiveSlideOverlayOpacity(0);
+      setActiveSlideContentTheme(null);
+    }
+  };
 
   // Filter rows based on Quick Slide mode
   const filteredSlideRows = useMemo(() => {
@@ -141,8 +161,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       const firstRow = filteredSlideRows[0];
       const slides = slidesCache[firstRow.id];
       if (slides && slides.length > 0) {
-        setActiveSlideImageUrl(slides[0].image_url || null);
-        setActiveSlideVideoUrl(slides[0].video_url || null);
+        updateActiveSlideData(slides[0]);
 
         // Update playlist data for initial row (with small delay to ensure swiper is registered)
         setTimeout(() => {
@@ -287,8 +306,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 setActiveRow(firstRow.id);
                 const firstRowSlides = getSlidesForRow(firstRow.id);
                 if (firstRowSlides.length > 0) {
-                  setActiveSlideImageUrl(firstRowSlides[0].image_url || null);
-                  setActiveSlideVideoUrl(firstRowSlides[0].video_url || null);
+                  updateActiveSlideData(firstRowSlides[0]);
                 }
               }
             }
@@ -304,11 +322,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             console.log('[MainContent] Navigating to slide index:', targetIndex);
             horizontalSwiper.slideTo(targetIndex);
 
-            // Update background image/video
+            // Update background image/video/overlay
             const targetSlide = updatedSlides[targetIndex];
             if (targetSlide) {
-              setActiveSlideImageUrl(targetSlide.image_url || null);
-              setActiveSlideVideoUrl(targetSlide.video_url || null);
+              updateActiveSlideData(targetSlide);
             }
           }
         }, 100); // Small delay to ensure state updates
@@ -364,8 +381,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               setActiveRow(firstRow.id);
               const firstRowSlides = getSlidesForRow(firstRow.id);
               if (firstRowSlides.length > 0) {
-                setActiveSlideImageUrl(firstRowSlides[0].image_url || null);
-                setActiveSlideVideoUrl(firstRowSlides[0].video_url || null);
+                updateActiveSlideData(firstRowSlides[0]);
               }
             }
           }
@@ -381,11 +397,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           console.log('[MainContent] Navigating to slide index:', targetIndex);
           horizontalSwiper.slideTo(targetIndex);
 
-          // Update background image/video
+          // Update background image/video/overlay
           const targetSlide = updatedSlides[targetIndex];
           if (targetSlide) {
-            setActiveSlideImageUrl(targetSlide.image_url || null);
-            setActiveSlideVideoUrl(targetSlide.video_url || null);
+            updateActiveSlideData(targetSlide);
           }
         }
       }, 100); // Small delay to ensure state updates
@@ -497,29 +512,6 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
     const textColor = getTextColor();
 
-    // Helper to create semi-transparent background style
-    const createBgStyle = (opacity: number | undefined) => {
-      // Convert to number and check if valid
-      const numOpacity = Number(opacity) || 0;
-      if (numOpacity === 0) return {};
-
-      // Determine which theme to use: slide override or global theme
-      const effectiveTheme = slide.content_theme || globalTheme;
-
-      // Use effective theme to determine background color
-      const bgColor = effectiveTheme === 'light'
-        ? `rgba(0, 0, 0, ${numOpacity})` // Dark background for light text
-        : `rgba(255, 255, 255, ${numOpacity})`; // Light background for dark text
-
-      return {
-        backgroundColor: bgColor,
-        padding: '5px',
-        display: 'inline-block',
-        width: 'fit-content',
-        maxWidth: '100%'
-      };
-    };
-
     return (
       <div className={containerClass}>
         {/* Icons - Show per-slide icons if available, otherwise show row icons */}
@@ -574,17 +566,14 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         )}
 
         {/* Title */}
-        <div style={createBgStyle(slide.title_bg_opacity)}>
-          <h1
-            className="text-4xl font-bold mb-4"
-            style={{
-              color: textColor || '#000000',
-              marginBottom: slide.title_bg_opacity ? '0' : undefined
-            }}
-          >
-            {slide.title}
-          </h1>
-        </div>
+        <h1
+          className="text-4xl font-bold mb-4"
+          style={{
+            color: textColor || '#000000'
+          }}
+        >
+          {slide.title}
+        </h1>
 
         {/* Audio Player (if audio_url exists AND slide is active) */}
         {slide.audio_url && isActive && (
@@ -650,13 +639,11 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         )}
 
         {/* Body Content */}
-        <div style={createBgStyle(slide.body_bg_opacity)}>
-          <div
-            className="space-y-4"
-            style={{ color: textColor || '#000000' }}
-            dangerouslySetInnerHTML={{ __html: slide.body_content }}
-          />
-        </div>
+        <div
+          className="space-y-4"
+          style={{ color: textColor || '#000000' }}
+          dangerouslySetInnerHTML={{ __html: slide.body_content }}
+        />
       </div>
     );
   };
@@ -692,10 +679,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         onSlideChange={(swiper) => {
           // Update the scroll container when horizontal slide changes
           handleSlideChange(swiper);
-          // Update background image and video when slide changes
+          // Update background image, video, and overlay when slide changes
           const currentSlide = slides[swiper.activeIndex];
-          setActiveSlideImageUrl(currentSlide?.image_url || null);
-          setActiveSlideVideoUrl(currentSlide?.video_url || null);
+          updateActiveSlideData(currentSlide || null);
         }}
       >
         {slides.map((slide) => (
@@ -771,11 +757,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 loadSlidesForRow(activeRow.id);
                 setActiveRow(activeRow.id);
 
-                // Update background image and video for first slide of the new row
+                // Update background image, video, and overlay for first slide of the new row
                 const rowSlides = getSlidesForRow(activeRow.id);
                 if (rowSlides.length > 0) {
-                  setActiveSlideImageUrl(rowSlides[0].image_url || null);
-                  setActiveSlideVideoUrl(rowSlides[0].video_url || null);
+                  updateActiveSlideData(rowSlides[0]);
                 }
 
                 // Update playlist data for top icon bar (use filtered slides for schedule)
@@ -835,11 +820,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               loadSlidesForRow(activeRow.id);
               setActiveRow(activeRow.id);
 
-              // Update background image and video for first slide of the new row
+              // Update background image, video, and overlay for first slide of the new row
               const rowSlides = getSlidesForRow(activeRow.id);
               if (rowSlides.length > 0) {
-                setActiveSlideImageUrl(rowSlides[0].image_url || null);
-                setActiveSlideVideoUrl(rowSlides[0].video_url || null);
+                updateActiveSlideData(rowSlides[0]);
               }
 
               // Update playlist data for top icon bar (use filtered slides for schedule)

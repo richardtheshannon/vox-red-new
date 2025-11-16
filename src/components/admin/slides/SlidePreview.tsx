@@ -32,26 +32,14 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
     return effectiveTheme === 'light' ? '#ffffff' : '#000000';
   };
 
-  // Create semi-transparent background style (matches MainContent.tsx lines 164-184)
-  const createBgStyle = (opacity: number | undefined) => {
-    const numOpacity = Number(opacity) || 0;
-    if (numOpacity === 0) return {};
-
-    const effectiveTheme = slide.content_theme || 'dark';
-    const bgColor = effectiveTheme === 'light'
-      ? `rgba(0, 0, 0, ${numOpacity})` // Dark background for light text
-      : `rgba(255, 255, 255, ${numOpacity})`; // Light background for dark text
-
-    return {
-      backgroundColor: bgColor,
-      padding: '8px',
-      display: 'inline-block',
-      width: 'fit-content',
-      maxWidth: '100%'
-    };
-  };
-
   const textColor = getTextColor();
+
+  // Get overlay opacity and color (matches MainContent.tsx)
+  const overlayOpacity = Number(slide.title_bg_opacity) || 0;
+  const effectiveTheme = slide.content_theme || 'dark';
+  const overlayColor = effectiveTheme === 'light'
+    ? `rgba(255, 255, 255, ${overlayOpacity})` // White overlay for light theme
+    : `rgba(0, 0, 0, ${overlayOpacity})`; // Black overlay for dark theme
 
   return (
     <div className="space-y-4">
@@ -84,6 +72,7 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
           <div
             className={`h-full p-8 flex flex-col ${getLayoutClasses()}`}
             style={{
+              position: 'relative',
               backgroundColor: 'white',
               backgroundImage: slide.image_url ? `url(${slide.image_url})` : undefined,
               backgroundSize: 'cover',
@@ -91,10 +80,27 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
               backgroundRepeat: 'no-repeat'
             }}
           >
-            {/* Title */}
-            <div style={createBgStyle(slide.title_bg_opacity)} className="mb-2">
+            {/* Full background overlay (if opacity > 0) */}
+            {overlayOpacity > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: overlayColor,
+                  zIndex: 5,
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
+
+            {/* Content wrapper with higher z-index */}
+            <div style={{ position: 'relative', zIndex: 10 }}>
+              {/* Title */}
               <h1
-                className="text-3xl font-bold"
+                className="text-3xl font-bold mb-2"
                 style={{
                   fontFamily: 'var(--font-title)',
                   color: textColor,
@@ -103,13 +109,11 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
               >
                 {slide.title || 'Untitled Slide'}
               </h1>
-            </div>
 
-            {/* Subtitle */}
-            {slide.subtitle && (
-              <div style={createBgStyle(slide.title_bg_opacity)} className="mb-4">
+              {/* Subtitle */}
+              {slide.subtitle && (
                 <p
-                  className="text-lg"
+                  className="text-lg mb-4"
                   style={{
                     fontFamily: 'var(--font-title)',
                     color: textColor,
@@ -118,39 +122,37 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
                 >
                   {slide.subtitle}
                 </p>
-              </div>
-            )}
+              )}
 
-            {/* Audio Player Placeholder */}
-            {slide.audio_url && isClient && (
-              <div
-                className="mb-4 p-4 rounded"
-                style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                  border: '1px solid var(--border-color)',
-                  maxWidth: '400px'
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-rounded" style={{ fontSize: '24px', color: 'var(--icon-color)' }}>
-                    play_circle
-                  </span>
-                  <div className="flex-1">
-                    <div
-                      className="h-1 rounded"
-                      style={{ backgroundColor: 'var(--border-color)' }}
-                    />
-                    <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
-                      Audio: {slide.audio_url.split('/').pop()}
-                    </p>
+              {/* Audio Player Placeholder */}
+              {slide.audio_url && isClient && (
+                <div
+                  className="mb-4 p-4 rounded"
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                    border: '1px solid var(--border-color)',
+                    maxWidth: '400px'
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-rounded" style={{ fontSize: '24px', color: 'var(--icon-color)' }}>
+                      play_circle
+                    </span>
+                    <div className="flex-1">
+                      <div
+                        className="h-1 rounded"
+                        style={{ backgroundColor: 'var(--border-color)' }}
+                      />
+                      <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
+                        Audio: {slide.audio_url.split('/').pop()}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Body Content */}
-            {slide.layout_type !== 'MINIMAL' && (
-              <div style={createBgStyle(slide.body_bg_opacity)}>
+              {/* Body Content */}
+              {slide.layout_type !== 'MINIMAL' && (
                 <div
                   className="prose prose-sm max-w-none"
                   style={{
@@ -159,8 +161,8 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
                   }}
                   dangerouslySetInnerHTML={{ __html: slide.body_content || '<p>No content yet...</p>' }}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -183,6 +185,7 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
             <div
               className={`h-full p-6 flex flex-col ${getLayoutClasses()}`}
               style={{
+                position: 'relative',
                 backgroundColor: 'white',
                 backgroundImage: slide.image_url ? `url(${slide.image_url})` : undefined,
                 backgroundSize: 'cover',
@@ -190,10 +193,27 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
                 backgroundRepeat: 'no-repeat'
               }}
             >
-              {/* Title */}
-              <div style={createBgStyle(slide.title_bg_opacity)} className="mb-2">
+              {/* Full background overlay (if opacity > 0) */}
+              {overlayOpacity > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: overlayColor,
+                    zIndex: 5,
+                    pointerEvents: 'none'
+                  }}
+                />
+              )}
+
+              {/* Content wrapper with higher z-index */}
+              <div style={{ position: 'relative', zIndex: 10 }}>
+                {/* Title */}
                 <h1
-                  className="text-2xl font-bold"
+                  className="text-2xl font-bold mb-2"
                   style={{
                     fontFamily: 'var(--font-title)',
                     color: textColor,
@@ -202,13 +222,11 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
                 >
                   {slide.title || 'Untitled Slide'}
                 </h1>
-              </div>
 
-              {/* Subtitle */}
-              {slide.subtitle && (
-                <div style={createBgStyle(slide.title_bg_opacity)} className="mb-3">
+                {/* Subtitle */}
+                {slide.subtitle && (
                   <p
-                    className="text-sm"
+                    className="text-sm mb-3"
                     style={{
                       fontFamily: 'var(--font-title)',
                       color: textColor,
@@ -217,35 +235,33 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
                   >
                     {slide.subtitle}
                   </p>
-                </div>
-              )}
+                )}
 
-              {/* Audio Player Placeholder */}
-              {slide.audio_url && isClient && (
-                <div
-                  className="mb-3 p-3 rounded"
-                  style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-rounded" style={{ fontSize: '20px', color: 'var(--icon-color)' }}>
-                      play_circle
-                    </span>
-                    <div className="flex-1">
-                      <div
-                        className="h-1 rounded"
-                        style={{ backgroundColor: 'var(--border-color)' }}
-                      />
+                {/* Audio Player Placeholder */}
+                {slide.audio_url && isClient && (
+                  <div
+                    className="mb-3 p-3 rounded"
+                    style={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      border: '1px solid var(--border-color)'
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-rounded" style={{ fontSize: '20px', color: 'var(--icon-color)' }}>
+                        play_circle
+                      </span>
+                      <div className="flex-1">
+                        <div
+                          className="h-1 rounded"
+                          style={{ backgroundColor: 'var(--border-color)' }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Body Content */}
-              {slide.layout_type !== 'MINIMAL' && (
-                <div style={createBgStyle(slide.body_bg_opacity)}>
+                {/* Body Content */}
+                {slide.layout_type !== 'MINIMAL' && (
                   <div
                     className="prose prose-sm max-w-none text-sm"
                     style={{
@@ -254,8 +270,8 @@ export default function SlidePreview({ slide }: SlidePreviewProps) {
                     }}
                     dangerouslySetInnerHTML={{ __html: slide.body_content || '<p>No content yet...</p>' }}
                   />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

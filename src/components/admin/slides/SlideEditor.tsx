@@ -31,9 +31,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   const [videoUrl, setVideoUrl] = useState(slide?.video_url || '');
   const [layoutType, setLayoutType] = useState<'STANDARD' | 'OVERFLOW' | 'MINIMAL'>(slide?.layout_type || 'STANDARD');
   const [position, setPosition] = useState(slide?.position || 1);
-  const [contentTheme, setContentTheme] = useState<'light' | 'dark' | ''>(slide?.content_theme || '');
-  // Unified opacity - use title_bg_opacity as source, apply to both title and body
-  const [textBgOpacity, setTextBgOpacity] = useState<number>(Number(slide?.title_bg_opacity) || 0);
+  const [contentTheme, setContentTheme] = useState<'light' | 'dark' | undefined>(slide?.content_theme);
+  // Overlay opacity - full background overlay over the entire slide
+  const [overlayOpacity, setOverlayOpacity] = useState<number>(Number(slide?.title_bg_opacity) || 0);
   const [selectedIcons, setSelectedIcons] = useState<string[]>(() => {
     if (slide?.icon_set) {
       try {
@@ -113,10 +113,10 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
         image_url: imageUrl || null,
         video_url: videoUrl.trim() || undefined,
         layout_type: layoutType,
-        content_theme: contentTheme || undefined,
-        // Apply unified opacity to both title and body (always include, even when 0)
-        title_bg_opacity: textBgOpacity,
-        body_bg_opacity: textBgOpacity,
+        content_theme: contentTheme,
+        // Apply overlay opacity to both fields (title_bg_opacity is used for overlay rendering)
+        title_bg_opacity: overlayOpacity,
+        body_bg_opacity: overlayOpacity,
         // Scheduling fields
         publish_time_start: publishTimeStart || null,
         publish_time_end: publishTimeEnd || null,
@@ -150,9 +150,9 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       position,
       layout_type: layoutType,
       content_theme: contentTheme || undefined,
-      // Apply unified opacity to both title and body in preview
-      title_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
-      body_bg_opacity: textBgOpacity > 0 ? textBgOpacity : undefined,
+      // Apply overlay opacity to both fields in preview
+      title_bg_opacity: overlayOpacity > 0 ? overlayOpacity : undefined,
+      body_bg_opacity: overlayOpacity > 0 ? overlayOpacity : undefined,
       is_published: slide?.is_published ?? true,
       publish_time_start: publishTimeStart || null,
       publish_time_end: publishTimeEnd || null,
@@ -495,8 +495,8 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                   Content Theme (Optional)
                 </label>
                 <select
-                  value={contentTheme}
-                  onChange={(e) => setContentTheme(e.target.value as 'light' | 'dark' | '')}
+                  value={contentTheme || ''}
+                  onChange={(e) => setContentTheme(e.target.value === '' ? undefined : e.target.value as 'light' | 'dark')}
                   className="w-full px-4 py-2"
                   style={{
                     backgroundColor: 'var(--bg-color)',
@@ -513,23 +513,23 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 </p>
               </div>
 
-              {/* Text Background Opacity (applies to both title and body) */}
+              {/* Background Overlay Opacity */}
               <div className="mb-4">
                 <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
-                  Text Background Opacity: {textBgOpacity.toFixed(2)}
+                  Background Overlay Opacity: {overlayOpacity.toFixed(2)}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.05"
-                  value={textBgOpacity}
-                  onChange={(e) => setTextBgOpacity(parseFloat(e.target.value))}
+                  value={overlayOpacity}
+                  onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
                   className="w-full"
                   style={{ accentColor: '#dc2626' }}
                 />
                 <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
-                  0 = transparent, 1 = fully opaque. Adds semi-transparent background behind title and body content.
+                  0 = transparent, 1 = fully opaque. Adds overlay over entire background image (white in light mode, black in dark mode).
                 </p>
               </div>
             </div>

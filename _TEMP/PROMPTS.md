@@ -9,13 +9,13 @@ Ask me any questions you have, strictly one question at a time before we get sta
 # Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze your latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
 
 # git add .&& git commit -m "general quick commit" && git push origin master
+Deployment failed. Please read ERROR.md in the _TEMP directory.
 
 cd "c:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app" && cmd /c "del \\\\?\\%CD%\\nul"
 -------------------------------------------
 FIRST: Update CLAUDE.md in the _TEMP directory, with any relevant application update overviews.
 SECOND: Revise and update CLAUDE.md in the _TEMP directory to only contain essential application information for continued development. This should be a concise, specific, outline of the application. Lets keep it under 500 lines. 
 -------------------------------------------
-Deployment failed. Please read ERROR.md in the _TEMP directory.
 
 taskkill /IM node.exe /F
 del \\?\C:\Users\icos\00_DEPLOY\vox-red\XXX_vox-red\NUL

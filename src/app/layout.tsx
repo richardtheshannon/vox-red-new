@@ -3,8 +3,8 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Icon Border Template",
-  description: "Icon border layout with fixed positioning",
+  title: "lilde.com | spiritual growth",
+  description: "Spiritual content platform with slide-based navigation",
 };
 
 export default function RootLayout({

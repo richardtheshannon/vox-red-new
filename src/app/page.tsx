@@ -10,7 +10,7 @@ import BottomIconBar from '@/components/BottomIconBar';
 import MainContent from '@/components/MainContent';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 import { SwiperProvider } from '@/contexts/SwiperContext';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { PlaylistProvider } from '@/contexts/PlaylistContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -28,6 +28,10 @@ export default function Home() {
   const [activeSlideImageUrl, setActiveSlideImageUrl] = useState<string | null>(null);
   const [activeSlideVideoUrl, setActiveSlideVideoUrl] = useState<string | null>(null);
   const [videoDisplayMode, setVideoDisplayMode] = useState<'cover' | 'contained'>('cover');
+
+  // Track active slide overlay settings for full viewport overlay
+  const [activeSlideOverlayOpacity, setActiveSlideOverlayOpacity] = useState<number>(0);
+  const [activeSlideContentTheme, setActiveSlideContentTheme] = useState<'light' | 'dark' | null>(null);
 
   // Quick Slide Modal state
   const [isQuickSlideModalOpen, setIsQuickSlideModalOpen] = useState(false);
@@ -218,7 +222,14 @@ export default function Home() {
             backgroundColor: 'var(--content-bg)'
           }}
         >
-          {/* YouTube video layer (behind content, above background image) */}
+          {/* Full viewport overlay (above background, below all content) */}
+          <OverlayLayer
+            activeSlideContentTheme={activeSlideContentTheme}
+            activeSlideOverlayOpacity={activeSlideOverlayOpacity}
+            activeSlideImageUrl={activeSlideImageUrl}
+          />
+
+          {/* YouTube video layer (behind content, above background image and overlay) */}
           <YouTubeEmbed videoUrl={activeSlideVideoUrl} displayMode={videoDisplayMode} />
 
           <SwiperProvider
@@ -257,6 +268,8 @@ export default function Home() {
             setActiveSlideImageUrl={setActiveSlideImageUrl}
             setActiveSlideVideoUrl={setActiveSlideVideoUrl}
             activeSlideVideoUrl={activeSlideVideoUrl}
+            setActiveSlideOverlayOpacity={setActiveSlideOverlayOpacity}
+            setActiveSlideContentTheme={setActiveSlideContentTheme}
             isQuickSlideMode={isQuickSlideMode}
             onUnpublishDialogOpen={handleUnpublishDialogOpen}
             unpublishCallbackRef={mainContentUnpublishCallbackRef}
@@ -299,6 +312,8 @@ function MainContentWithRef({
   setActiveSlideImageUrl,
   setActiveSlideVideoUrl,
   activeSlideVideoUrl,
+  setActiveSlideOverlayOpacity,
+  setActiveSlideContentTheme,
   isQuickSlideMode,
   onUnpublishDialogOpen,
   unpublishCallbackRef,
@@ -310,6 +325,8 @@ function MainContentWithRef({
   setActiveSlideImageUrl: (imageUrl: string | null) => void;
   setActiveSlideVideoUrl: (videoUrl: string | null) => void;
   activeSlideVideoUrl: string | null;
+  setActiveSlideOverlayOpacity: (opacity: number) => void;
+  setActiveSlideContentTheme: (theme: 'light' | 'dark' | null) => void;
   isQuickSlideMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
@@ -323,10 +340,50 @@ function MainContentWithRef({
       setActiveSlideImageUrl={setActiveSlideImageUrl}
       setActiveSlideVideoUrl={setActiveSlideVideoUrl}
       activeSlideVideoUrl={activeSlideVideoUrl}
+      setActiveSlideOverlayOpacity={setActiveSlideOverlayOpacity}
+      setActiveSlideContentTheme={setActiveSlideContentTheme}
       isQuickSlideMode={isQuickSlideMode}
       onUnpublishDialogOpen={onUnpublishDialogOpen}
       unpublishCallbackRef={unpublishCallbackRef}
       updatePlaylistData={updatePlaylistData}
+    />
+  );
+}
+
+// Component for full viewport overlay - sits inside ThemeProvider to access global theme
+function OverlayLayer({
+  activeSlideContentTheme,
+  activeSlideOverlayOpacity,
+  activeSlideImageUrl
+}: {
+  activeSlideContentTheme: 'light' | 'dark' | null;
+  activeSlideOverlayOpacity: number;
+  activeSlideImageUrl: string | null;
+}) {
+  // Get global theme from context
+  const { theme: globalTheme } = useTheme();
+
+  // Don't render if no opacity or no background image
+  if (activeSlideOverlayOpacity === 0 || !activeSlideImageUrl) return null;
+
+  // Use slide theme if explicitly set, otherwise fall back to global theme
+  const effectiveTheme = activeSlideContentTheme || globalTheme;
+
+  // Calculate overlay color based on effective theme
+  const overlayColor = effectiveTheme === 'light'
+    ? `rgba(255, 255, 255, ${activeSlideOverlayOpacity})` // White overlay for light theme
+    : `rgba(0, 0, 0, ${activeSlideOverlayOpacity})`; // Black overlay for dark theme
+
+  return (
+    <div
+      className="transition-all duration-500"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: overlayColor,
+        zIndex: 1,
+        pointerEvents: 'none'
+      }}
     />
   );
 }
