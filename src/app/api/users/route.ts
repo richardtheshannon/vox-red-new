@@ -119,11 +119,14 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error creating user:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Request body:', JSON.stringify(body || {}, null, 2));
     return NextResponse.json(
       {
         status: 'error',
         message: 'Failed to create user',
         error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
