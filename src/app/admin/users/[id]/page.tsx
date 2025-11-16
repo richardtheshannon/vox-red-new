@@ -323,7 +323,7 @@ export default function EditUserPage() {
                           required
                         />
                         <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
-                          This is the user's login email
+                          This is the user&apos;s login email
                         </p>
                       </div>
 

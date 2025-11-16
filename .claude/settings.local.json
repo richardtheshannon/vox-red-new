@@ -46,7 +46,12 @@
       "Bash(set PGPASSWORD=Superculture1@)",
       "Bash(set PGPASSWORD=)",
       "Bash(tsx scripts/test-login.ts:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(del \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\check-constraint\\route.ts\")",
+      "Bash(del \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\create-test-admin\\route.ts\")",
+      "Bash(del \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\fix-roles\\route.ts\")",
+      "Bash(del \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\migrate-roles\\route.ts\")",
+      "Bash(npx next lint:*)"
     ],
     "deny": [],
     "ask": []

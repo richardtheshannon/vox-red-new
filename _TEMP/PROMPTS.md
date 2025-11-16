@@ -2,11 +2,10 @@
 ---------------------------------------------------------------
 Lets get started fixing the PLAYLIST_TROUBLESHOOTING.md in the _TEMP directory.
 ---------------------------------------------------------------
-Lets develop only Phase 9 of the "USER_ACCOUNTS_DEVELOPMENT_PLAN.md" in the _TEMP directory. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
+Lets develop only Phase 11 of the "USER_ACCOUNTS_DEVELOPMENT_PLAN.md" in the _TEMP directory. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
-Update USER_ACCOUNTS_DEVELOPMENT_PLAN.md in the _TEMP directory, with our progress so we can pick up where we left off.
+Review USER_ACCOUNTS_DEVELOPMENT_PLAN.md in the _TEMP directory, we will be making so additional developments.
 
-9 / 11
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 

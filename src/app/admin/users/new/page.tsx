@@ -200,7 +200,7 @@ export default function NewUserPage() {
                         required
                       />
                       <p className="text-xs mt-1" style={{ color: 'var(--secondary-text)' }}>
-                        This will be the user's login email
+                        This will be the user&apos;s login email
                       </p>
                     </div>
 
