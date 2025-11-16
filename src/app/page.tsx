@@ -13,6 +13,7 @@ import { SwiperProvider } from '@/contexts/SwiperContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { PlaylistProvider } from '@/contexts/PlaylistContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
+import LoginModal from '@/components/LoginModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import SpaAudioPlayer from '@/components/SpaAudioPlayer';
 
@@ -35,6 +36,9 @@ export default function Home() {
 
   // Quick Slide Modal state
   const [isQuickSlideModalOpen, setIsQuickSlideModalOpen] = useState(false);
+
+  // Login Modal state
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Quick Slide Mode state (toggle between all rows and Quick Slide row only)
   const [isQuickSlideMode, setIsQuickSlideMode] = useState(false);
@@ -125,6 +129,11 @@ export default function Home() {
   const handleQuickSlideSuccess = () => {
     // Reload the page to show the new quick slide
     window.location.reload();
+  };
+
+  // Handle Login Modal
+  const handleGroupClick = () => {
+    setIsLoginModalOpen(true);
   };
 
   // Toggle Quick Slide Mode
@@ -256,6 +265,7 @@ export default function Home() {
             hasBackgroundImage={!!activeSlideImageUrl}
             isQuickSlideMode={isQuickSlideMode}
             onAtrClick={toggleQuickSlideMode}
+            onGroupClick={handleGroupClick}
           />
           <BottomIconBar
             hasBackgroundImage={!!activeSlideImageUrl}
@@ -282,6 +292,12 @@ export default function Home() {
           isOpen={isQuickSlideModalOpen}
           onClose={() => setIsQuickSlideModalOpen(false)}
           onSuccess={handleQuickSlideSuccess}
+        />
+
+        {/* Login Modal */}
+        <LoginModal
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
         />
 
         {/* Unpublish Confirmation Dialog */}

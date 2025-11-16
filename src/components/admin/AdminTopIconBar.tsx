@@ -1,8 +1,13 @@
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function AdminTopIconBar() {
   const { theme, toggleTheme } = useTheme();
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
 
   return (
     <header className="icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem', backgroundColor: 'var(--bg-color)'}}>
@@ -16,15 +21,22 @@ export default function AdminTopIconBar() {
         <Link href="/admin/spa">
           <span className="material-symbols-outlined" title="Spa Mode">spa</span>
         </Link>
+        <Link href="/admin/users">
+          <span className="material-symbols-outlined" title="User Management">group</span>
+        </Link>
         <a href="https://media.lilde.com" target="_blank" rel="noopener noreferrer">
           <span className="material-symbols-outlined" title="Media">perm_media</span>
         </a>
         <span className="material-symbols-outlined" title="Bug Report">bug_report</span>
       </div>
       <div className="flex items-center">
-        <Link href="/">
-          <span className="material-symbols-outlined" title="Exit to App">exit_to_app</span>
-        </Link>
+        <span
+          className="material-symbols-outlined cursor-pointer hover:opacity-70"
+          onClick={handleLogout}
+          title="Logout"
+        >
+          logout
+        </span>
         <span
           className="material-symbols-outlined cursor-pointer hover:opacity-70"
           onClick={toggleTheme}

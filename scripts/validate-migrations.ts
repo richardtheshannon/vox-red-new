@@ -45,6 +45,12 @@ const expectedColumns: ColumnCheck[] = [
   { table: 'spa_tracks', column: 'id', description: 'Spa Mode: background music' },
   { table: 'spa_tracks', column: 'title', description: 'Spa Mode: background music' },
   { table: 'spa_tracks', column: 'volume', description: 'Spa Mode: per-track volume control (Oct 2025)' },
+
+  { table: 'users', column: 'id', description: 'User authentication: users table (Nov 2025)' },
+  { table: 'users', column: 'name', description: 'User authentication: users table (Nov 2025)' },
+  { table: 'users', column: 'email', description: 'User authentication: users table (Nov 2025)' },
+  { table: 'users', column: 'password_hash', description: 'User authentication: users table (Nov 2025)' },
+  { table: 'users', column: 'role', description: 'User authentication: users table (Nov 2025)' },
 ]
 
 const expectedConstraints: ConstraintCheck[] = [

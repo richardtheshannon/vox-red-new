@@ -92,7 +92,7 @@ export default function TopIconBar({
         )}
       </div>
       <div className="flex items-center">
-        <Link href="/admin">
+        <Link href="/login">
           <span className="material-symbols-outlined" title="Settings">settings</span>
         </Link>
         <span

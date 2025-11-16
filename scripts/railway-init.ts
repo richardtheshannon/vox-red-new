@@ -16,6 +16,8 @@ import { addTempUnpublishColumn } from './add-temp-unpublish'
 import { initializeSpaTracksTables } from './init-spa-tables'
 import { addSpaVolume } from './add-spa-volume'
 import { addPlaylistDelay } from './add-playlist-delay'
+import { initializeUsersTables } from './init-users-table'
+import { addUsersPasswordHash } from './add-users-password-hash'
 
 async function railwayInit() {
   try {
@@ -170,6 +172,34 @@ async function railwayInit() {
         console.error('❌ Playlist delay migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without playlist delay column')
+      }
+    }
+
+    // Initialize users tables (safe to run multiple times)
+    try {
+      await initializeUsersTables()
+      console.log('✅ Users table initialized')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Users table already exists, skipping initialization')
+      } else {
+        console.error('❌ Users table initialization failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without users table')
+      }
+    }
+
+    // Add password_hash column to users table (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addUsersPasswordHash()
+      console.log('✅ Users password_hash column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Users password_hash column already exists, skipping')
+      } else {
+        console.error('❌ Users password_hash migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without users password_hash column')
       }
     }
 
