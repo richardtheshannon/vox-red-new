@@ -33,12 +33,43 @@ us-west2
 
 History
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 vox-red-new
 /
-cba9bbdb
+e911c5ad
 Failed
 
-Nov 16, 2025, 11:25 AM
+Nov 16, 2025, 11:31 AM
 app.lilde.com
 Get Help
 Details
@@ -48,14 +79,14 @@ HTTP Logs
 Search build logs
 
 You reached the start of the range
-Nov 16, 2025, 11:25 AM
+Nov 16, 2025, 11:31 AM
  
 [Region: us-west1]
 ==============
 Using Nixpacks
 ==============
 
-context: nvqc-MFi3
+context: lhp3-qXTL
 ╔════════ Nixpacks v1.38.0 ═══════╗
 ║ setup      │ nodejs_18, npm-9_x ║
 ║─────────────────────────────────║
@@ -72,7 +103,7 @@ load build definition from Dockerfile
 
 internal
 load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-246ms
+238ms
 
 internal
 load .dockerignore
@@ -84,7 +115,7 @@ load build context
 
 stage-0
 FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
-10ms
+8ms
 
 stage-0
 WORKDIR /app/ cached
@@ -92,29 +123,29 @@ WORKDIR /app/ cached
 
 stage-0
 COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
-24ms
+84ms
 
 stage-0
 RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
-43s
+35s
 61 store paths deleted, 559.40 MiB freed
 
 stage-0
 COPY . /app/.
-109ms
+80ms
 
 stage-0
 RUN npm ci
-14s
+11s
 Run `npm audit` for details.
 
 stage-0
 COPY . /app/.
-158ms
+232ms
 
 stage-0
 RUN npm run build
-19s
+18s
 npm warn config production Use `--omit=dev` instead.
 > nextjs-app@0.1.0 build
 > next build
@@ -124,29 +155,10 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
    ▲ Next.js 15.5.4
    Creating an optimized production build ...
- ✓ Compiled successfully in 11.7s
+ ✓ Compiled successfully in 10.1s
    Linting and checking validity of types ...
-Failed to compile.
 ./src/app/admin/slides/[id]/page.tsx
 68:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-./src/app/admin/users/[id]/page.tsx
-326:43  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
-./src/app/admin/users/new/page.tsx
-203:46  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
-./src/app/api/check-constraint/route.ts
-11:37  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-20:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-./src/app/api/create-test-admin/route.ts
-58:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-./src/app/api/fix-roles/route.ts
-14:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-21:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-51:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-55:37  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-./src/app/api/migrate-roles/route.ts
-43:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-72:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-76:35  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 ./src/app/api/slides/import/route.ts
 3:10  Warning: 'createSlideRow' is defined but never used.  @typescript-eslint/no-unused-vars
 ./src/app/api/slides/rows/[id]/route.ts
@@ -197,6 +209,12 @@ Failed to compile.
 123:6  Warning: React Hook useCallback has a missing dependency: 'stopPlaylist'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
 201:6  Warning: React Hook useCallback has an unnecessary dependency: 'handleAudioEnded'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+src/app/api/auth/[...nextauth]/route.ts
+Type error: Route "src/app/api/auth/[...nextauth]/route.ts" does not match the required types of a Next.js Route.
+
+  "authOptions" is not a valid Route export field.
+Next.js build worker exited with code: 1 and signal: null
 Dockerfile:24
 -------------------
 22 |     # build phase
@@ -206,9 +224,8 @@ Dockerfile:24
 26 |
 -------------------
 ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
-Error: Docker build failed
 You reached the end of the range
-Nov 16, 2025, 11:26 AM
+Nov 16, 2025, 11:33 AM
 
 
-VOX-RED-NEW | Railway
+vox-red-new | Railway
