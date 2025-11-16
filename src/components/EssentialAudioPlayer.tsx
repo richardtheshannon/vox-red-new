@@ -25,6 +25,7 @@ function EssentialAudioPlayer({
 }: EssentialAudioPlayerProps) {
   const [isClient, setIsClient] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string>('');
   const [isPlaylistActive, setIsPlaylistActive] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -180,8 +181,18 @@ function EssentialAudioPlayer({
   if (loadError) {
     return (
       <div className={`my-4 ${className}`}>
-        <div className="h-12 bg-red-100 rounded flex items-center justify-start pl-4">
-          <span className="text-red-600 text-sm">{loadError} - Check console for details</span>
+        <div className="bg-red-100 rounded p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-rounded text-red-600" style={{ fontSize: '20px' }}>error</span>
+            <span className="text-red-600 text-sm font-semibold">{loadError}</span>
+          </div>
+          {errorDetails && (
+            <div className="text-red-700 text-xs font-mono">{errorDetails}</div>
+          )}
+          <div className="text-red-700 text-xs break-all">
+            <strong>URL:</strong> {audioUrl}
+          </div>
+          <div className="text-red-600 text-xs">Check browser console for full details</div>
         </div>
       </div>
     );
@@ -216,8 +227,41 @@ function EssentialAudioPlayer({
           height: '48px',
         }}
         onError={(e) => {
-          console.error('[AudioPlayer] Audio load error:', e);
+          const audio = audioRef.current;
+          const error = audio?.error;
+
+          // Get detailed error information
+          const errorCode = error?.code || 'unknown';
+          const errorMessages: Record<number, string> = {
+            1: 'MEDIA_ERR_ABORTED - User aborted the audio',
+            2: 'MEDIA_ERR_NETWORK - Network error while loading',
+            3: 'MEDIA_ERR_DECODE - Audio decoding failed',
+            4: 'MEDIA_ERR_SRC_NOT_SUPPORTED - Audio format not supported or file not found (404)',
+          };
+
+          const errorType = typeof errorCode === 'number' ? errorMessages[errorCode] : 'Unknown error';
+          const networkState = audio?.networkState;
+          const networkStates: Record<number, string> = {
+            0: 'NETWORK_EMPTY',
+            1: 'NETWORK_IDLE',
+            2: 'NETWORK_LOADING',
+            3: 'NETWORK_NO_SOURCE',
+          };
+          const networkStatus = typeof networkState === 'number' ? networkStates[networkState] : 'unknown';
+
+          console.error('[AudioPlayer] ═══════════════════════════════════════');
+          console.error('[AudioPlayer] Audio load error detected');
+          console.error('[AudioPlayer] URL:', audioUrl);
+          console.error('[AudioPlayer] Error Code:', errorCode);
+          console.error('[AudioPlayer] Error Type:', errorType);
+          console.error('[AudioPlayer] Network State:', networkStatus);
+          console.error('[AudioPlayer] Slide ID:', slideId);
+          console.error('[AudioPlayer] Row ID:', rowId);
+          console.error('[AudioPlayer] ═══════════════════════════════════════');
+
+          const errorMsg = `Error ${errorCode}: ${errorType}`;
           setLoadError('Failed to load audio file');
+          setErrorDetails(errorMsg);
         }}
         onLoadedMetadata={() => {
           console.log('[AudioPlayer] Audio loaded successfully:', audioUrl);

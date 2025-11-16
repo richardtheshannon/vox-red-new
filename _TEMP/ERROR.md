@@ -1,219 +1,200 @@
-VOX-RED-NEW
-
-
-production
-Architecture
-Observability
-Logs
-Settings
-
-
-
-
-
-
-
-
-
-
-Activity
-
-
-vox-red-new
-Deployments
-Variables
-Metrics
-Settings
-app.lilde.com
-us-west2
-1 Replica
-
-
-
-
-History
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-vox-red-new
-/
-63f10414
-Failed
-
-Nov 7, 2025, 8:49 AM
-app.lilde.com
-Get Help
-Details
-Build Logs
-Deploy Logs
-HTTP Logs
-Search build logs
-
-You reached the start of the range
-Nov 7, 2025, 8:49 AM
- 
-[Region: us-west1]
-==============
-Using Nixpacks
-==============
-
-context: hk24-daAQ
-╔════════ Nixpacks v1.38.0 ═══════╗
-║ setup      │ nodejs_18, npm-9_x ║
-║─────────────────────────────────║
-║ install    │ npm ci             ║
-║─────────────────────────────────║
-║ build      │ npm run build      ║
-║─────────────────────────────────║
-║ start      │ npm run start      ║
-╚═════════════════════════════════╝
-
-internal
-load build definition from Dockerfile
-0ms
-
-internal
-load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-270ms
-
-internal
-load .dockerignore
-0ms
-
-internal
-load build context
-0ms
-
-stage-0
-WORKDIR /app/ cached
-0ms
-
-stage-0
-COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
-11ms
-
-stage-0
-RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
-36s
-61 store paths deleted, 559.40 MiB freed
-
-stage-0
-COPY . /app/.
-87ms
-
-stage-0
-RUN npm ci
-11s
-found 0 vulnerabilities
-
-stage-0
-COPY . /app/.
-150ms
-
-stage-0
-RUN npm run build
-14s
-npm warn config production Use `--omit=dev` instead.
-> nextjs-app@0.1.0 build
-> next build
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-   ▲ Next.js 15.5.4
-   Creating an optimized production build ...
- ✓ Compiled successfully in 8.3s
-   Linting and checking validity of types ...
-Failed to compile.
-./src/app/admin/slides/[id]/page.tsx
-68:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-./src/app/api/slides/import/route.ts
-3:10  Warning: 'createSlideRow' is defined but never used.  @typescript-eslint/no-unused-vars
-./src/app/api/slides/rows/[id]/route.ts
-85:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-85:17  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-85:29  Warning: 'slide_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/app/api/slides/rows/[id]/slides/[slideId]/route.ts
-139:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:17  Warning: 'slide_row_id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:31  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:43  Warning: 'view_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:55  Warning: 'completion_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/app/layout.tsx
-18:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-23:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-28:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-32:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-36:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-40:9  Warning: Do not include stylesheets manually. See: https://nextjs.org/docs/messages/no-css-tags  @next/next/no-css-tags
-./src/app/page.tsx
-49:13  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-196:76  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-315:69  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-./src/components/EssentialAudioPlayer.tsx
-21:3  Warning: 'scratch' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/components/MainContent.tsx
-50:53  Warning: 'activeRowId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-59:11  Warning: 'stopPlaylist' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-136:6  Warning: React Hook useEffect has a missing dependency: 'loadSlidesForRow'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-177:6  Warning: React Hook useEffect has a missing dependency: 'loadSlidesForRow'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-400:133  Warning: 'enableAudioRef' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/components/SpaAudioPlayer.tsx
-24:6  Warning: React Hook useEffect has a missing dependency: 'loadActiveTrack'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-./src/components/TopIconBar.tsx
-10:81  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-10:96  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-./src/components/admin/slides/SlideEditor.tsx
-3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
-47:10  Warning: 'showPreview' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-47:23  Warning: 'setShowPreview' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/components/admin/slides/SlideRowList.tsx
-248:32  Warning: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
-./src/contexts/PlaylistContext.tsx
-123:6  Warning: React Hook useCallback has a missing dependency: 'stopPlaylist'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-201:6  Warning: React Hook useCallback has an unnecessary dependency: 'handleAudioEnded'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
-info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
-Dockerfile:24
--------------------
-22 |     # build phase
-23 |     COPY . /app/.
-24 | >>> RUN --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-node_modules/cache,target=/app/node_modules/.cache npm run build
-25 |
-26 |
--------------------
-ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
-Error: Docker build failed
-You reached the end of the range
-Nov 7, 2025, 8:50 AM
-
-
-vox-red-new | Railway
+ Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+ [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+ [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+ BottomIconBar context methods: Object
+ BottomIconBar context methods: Object
+ [MainContent] Filtering rows. Quick Slide Mode: false
+ [MainContent] Total slide rows: 0
+ [MainContent] Normal rows (excluding QUICKSLIDE): 0
+ [MainContent] Filtering rows. Quick Slide Mode: false
+ [MainContent] Total slide rows: 0
+ [MainContent] Normal rows (excluding QUICKSLIDE): 0
+ [MainContent] Building icon cache from slideRows...
+ [MainContent] Icon cache built: 0 rows
+ [MainContent] Building icon cache from slideRows...
+ [MainContent] Icon cache built: 0 rows
+ [MainContent] Fetching slide rows...
+ [MainContent] Quick Slide mode changed: false
+ [MainContent] Filtered slide rows: 0
+ [MainContent] No filtered slide rows available!
+MainContent.useEffect @ webpack-internal:///…MainContent.tsx:197
+ [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+ [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+ [MainContent] Fetched slide rows: Object
+ [MainContent] Total rows fetched: 4
+   - Audio Daily Published Listening (CUSTOM) - Published: true
+   - healing forgiveness plan (COURSE) - Published: true
+   - Next testing sequence (COURSE) - Published: true
+   - Quick Slides (QUICKSLIDE) - Published: true
+ [MainContent] Loading slides for row 188106ac-4e52-4465-aa66-16e5eef8c1e2...
+ [MainContent] Filtering rows. Quick Slide Mode: false
+ [MainContent] Total slide rows: 4
+ [MainContent] Normal rows (excluding QUICKSLIDE): 3
+ [MainContent] Filtering rows. Quick Slide Mode: false
+ [MainContent] Total slide rows: 4
+ [MainContent] Normal rows (excluding QUICKSLIDE): 3
+ [MainContent] Building icon cache from slideRows...
+   - Audio Daily Published Listening: ["check_circle_unread","clock_arrow_up","select_check_box"]
+   - healing forgiveness plan: ["select_check_box"]
+   - Next testing sequence: ["lightbulb","auto_awesome","schedule"]
+   - Quick Slides: ["select_check_box"]
+ [MainContent] Icon cache built: 4 rows
+ [MainContent] Building icon cache from slideRows...
+   - Audio Daily Published Listening: ["check_circle_unread","clock_arrow_up","select_check_box"]
+   - healing forgiveness plan: ["select_check_box"]
+   - Next testing sequence: ["lightbulb","auto_awesome","schedule"]
+   - Quick Slides: ["select_check_box"]
+ [MainContent] Icon cache built: 4 rows
+ [MainContent] Quick Slide mode changed: false
+ [MainContent] Filtered slide rows: 3
+ [MainContent] First filtered row: Audio Daily Published Listening 188106ac-4e52-4465-aa66-16e5eef8c1e2
+ [MainContent] Slides cached for this row: false
+ [MainContent] Loading slides for row: 188106ac-4e52-4465-aa66-16e5eef8c1e2
+ [MainContent] Loading slides for row 188106ac-4e52-4465-aa66-16e5eef8c1e2...
+ [MainContent] Slides response for row 188106ac-4e52-4465-aa66-16e5eef8c1e2: Object
+ [MainContent] Found 5 slides for row 188106ac-4e52-4465-aa66-16e5eef8c1e2
+ [MainContent] Loading slides for row a605064b-f2bc-4561-b7dc-89cb9d067e8f...
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+ Desktop Vertical Swiper initialized: Swiper
+ [MainContent] Quick Slide mode changed: false
+ [MainContent] Filtered slide rows: 3
+ [MainContent] First filtered row: Audio Daily Published Listening 188106ac-4e52-4465-aa66-16e5eef8c1e2
+ [MainContent] Slides cached for this row: true
+ Desktop Vertical Swiper initialized: Swiper
+ [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+ [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+ BottomIconBar context methods: Object
+ BottomIconBar context methods: Object
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+ [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+ [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+ [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+ [AudioPlayer] useEffect running: Object
+ [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+ [AudioPlayer] useEffect running: Object
+ [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+ [AudioPlayer] useEffect running: Object
+ [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+ [AudioPlayer] useEffect running: Object
+ [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+ [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/_images/ritual_017.jpeg
+ [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/_images/ritual_017.jpeg
+ [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/_images/ritual_017.jpeg
+ [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/_images/ritual_017.jpeg
+ [AudioPlayer] useEffect running: Object
+ [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+ [AudioPlayer] useEffect running: Object
+ [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:210 [MainContent] Slides response for row 188106ac-4e52-4465-aa66-16e5eef8c1e2: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:213 [MainContent] Found 5 slides for row 188106ac-4e52-4465-aa66-16e5eef8c1e2
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:210 [MainContent] Slides response for row a605064b-f2bc-4561-b7dc-89cb9d067e8f: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:213 [MainContent] Found 1 slides for row a605064b-f2bc-4561-b7dc-89cb9d067e8f
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:180 [MainContent] Quick Slide mode changed: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:181 [MainContent] Filtered slide rows: 3
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:185 [MainContent] First filtered row: Audio Daily Published Listening 188106ac-4e52-4465-aa66-16e5eef8c1e2
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:186 [MainContent] Slides cached for this row: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:38 [AudioPlayer] useEffect running: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:51 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:38 [AudioPlayer] useEffect running: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:51 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:38 [AudioPlayer] useEffect running: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:51 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:38 [AudioPlayer] useEffect running: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:51 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:212 [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/%40_The-Stable-Reset/MP3/001.mp3
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:212 [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/%40_The-Stable-Reset/MP3/001.mp3
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:212 [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/%40_The-Stable-Reset/MP3/001.mp3
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:212 [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/%40_The-Stable-Reset/MP3/001.mp3
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:38 [AudioPlayer] useEffect running: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:51 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:38 [AudioPlayer] useEffect running: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:51 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:171 [MainContent] Initial playlist data update - hasAudio: true visibleSlides: 5 horizontalSwiper: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:171 [MainContent] Initial playlist data update - hasAudio: true visibleSlides: 5 horizontalSwiper: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:171 [MainContent] Initial playlist data update - hasAudio: true visibleSlides: 5 horizontalSwiper: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\TopIconBar.tsx:26 [TopIconBar] hasAudioSlides: true isPlaylistActive: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\TopIconBar.tsx:26 [TopIconBar] hasAudioSlides: true isPlaylistActive: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\BottomIconBar.tsx:12 BottomIconBar context methods: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\BottomIconBar.tsx:12 BottomIconBar context methods: Object
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: true
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Audio Daily Published Listening (188106ac-4e52-4465-aa66-16e5eef8c1e2) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row healing forgiveness plan (a605064b-f2bc-4561-b7dc-89cb9d067e8f) with icons: Array(1) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:656 [MainContent] Rendering row Next testing sequence (5e9373e4-fa61-4623-9624-6b2060f0c0fd) with icons: Array(3) enableAudioRef: false
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:267 [AudioPlayer] Audio loaded successfully: https://media.lilde.com/media/%40_The-Stable-Reset/MP3/001.mp3
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\EssentialAudioPlayer.tsx:267 [AudioPlayer] Audio loaded successfully: https://media.lilde.com/media/%40_The-Stable-Reset/MP3/001.mp3
+intercept-console-error.js:57 [AudioPlayer] ═══════════════════════════════════════
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Audio load error detected
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] URL: https://media.lilde.com/media/_images/ritual_017.jpeg
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Error Code: 4
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Error Type: MEDIA_ERR_SRC_NOT_SUPPORTED - Audio format not supported or file not found (404)
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Network State: NETWORK_NO_SOURCE
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Slide ID: deb31e9f-0e52-447f-a77e-1735890fa080
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Row ID: 188106ac-4e52-4465-aa66-16e5eef8c1e2
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] ═══════════════════════════════════════
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] ═══════════════════════════════════════
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Audio load error detected
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] URL: https://media.lilde.com/media/_images/ritual_017.jpeg
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Error Code: 4
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Error Type: MEDIA_ERR_SRC_NOT_SUPPORTED - Audio format not supported or file not found (404)
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Network State: NETWORK_NO_SOURCE
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Slide ID: deb31e9f-0e52-447f-a77e-1735890fa080
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] Row ID: 188106ac-4e52-4465-aa66-16e5eef8c1e2
+error @ intercept-console-error.js:57
+intercept-console-error.js:57 [AudioPlayer] ═══════════════════════════════════════
+error @ intercept-console-error.js:57
+C:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app\src\components\MainContent.tsx:171 [MainContent] Initial playlist data update - hasAudio: true visibleSlides: 5 horizontalSwiper: true

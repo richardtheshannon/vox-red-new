@@ -52,7 +52,7 @@ export async function GET(
 
 /**
  * POST /api/slides/rows/[id]/slides
- * Body: { title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity }
+ * Body: { title, subtitle, body_content, audio_url, image_url, video_url, position, layout_type, content_theme, title_bg_opacity, body_bg_opacity, publish_time_start, publish_time_end, publish_days, icon_set }
  * Creates a new slide in the specified row
  */
 export async function POST(
@@ -155,6 +155,10 @@ export async function POST(
       content_theme: body.content_theme,
       title_bg_opacity: body.title_bg_opacity,
       body_bg_opacity: body.body_bg_opacity,
+      publish_time_start: body.publish_time_start,
+      publish_time_end: body.publish_time_end,
+      publish_days: body.publish_days,
+      icon_set: body.icon_set,
     });
 
     return NextResponse.json(

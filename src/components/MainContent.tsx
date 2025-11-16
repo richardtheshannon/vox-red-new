@@ -54,6 +54,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   // Store vertical swiper ref locally for navigation
   const verticalSwiperRef = React.useRef<SwiperType | null>(null);
 
+  // Track if initial background has been set (prevent useEffect from overwriting slide changes)
+  const initialBackgroundSetRef = React.useRef<boolean>(false);
+
   // Get global theme
   const { theme: globalTheme } = useTheme();
 
@@ -63,13 +66,12 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   // Helper function to update slide data (image, video, AND overlay)
   const updateActiveSlideData = (slide: Slide | null) => {
     if (slide) {
-      setActiveSlideImageUrl(slide.image_url || null);
-      setActiveSlideVideoUrl(slide.video_url || null);
+      // Explicitly clear background if slide has no image_url (ensures slides without backgrounds show theme color)
+      setActiveSlideImageUrl(slide.image_url ? slide.image_url : null);
+      setActiveSlideVideoUrl(slide.video_url ? slide.video_url : null);
       setActiveSlideOverlayOpacity(Number(slide.title_bg_opacity) || 0);
       // Use slide's content_theme if defined, otherwise null (use global theme)
-      setActiveSlideContentTheme(
-        slide.content_theme || null
-      );
+      setActiveSlideContentTheme(slide.content_theme || null);
     } else {
       setActiveSlideImageUrl(null);
       setActiveSlideVideoUrl(null);
@@ -155,13 +157,19 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     fetchSlideRows();
   }, []);
 
-  // Set initial background image and video when first row's slides are loaded
+  // Set initial background image and video when first row's slides are loaded (ONCE only)
   useEffect(() => {
+    // Only run this effect ONCE on initial load - don't overwrite slide navigation changes
+    if (initialBackgroundSetRef.current) {
+      return;
+    }
+
     if (filteredSlideRows.length > 0) {
       const firstRow = filteredSlideRows[0];
       const slides = slidesCache[firstRow.id];
       if (slides && slides.length > 0) {
         updateActiveSlideData(slides[0]);
+        initialBackgroundSetRef.current = true; // Mark as set
 
         // Update playlist data for initial row (with small delay to ensure swiper is registered)
         setTimeout(() => {
