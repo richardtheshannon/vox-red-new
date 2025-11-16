@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:verify": "tsx scripts/verify-build.ts",
+    "build:check": "next build && tsx scripts/verify-build.ts",
     "start": "tsx scripts/railway-init.ts && next start",
     "lint": "eslint",
     "db:init": "tsx scripts/init-db.ts",
@@ -12,6 +14,10 @@
     "db:slides:init": "tsx scripts/init-slide-tables.ts",
     "db:slides:seed": "tsx scripts/seed-slide-data.ts",
     "db:validate": "tsx scripts/validate-migrations.ts",
+    "db:seed:admin": "tsx scripts/seed-production-admin.ts",
+    "db:reset:password": "tsx scripts/reset-admin-password.ts",
+    "db:fix:schema": "tsx scripts/fix-users-schema.ts",
+    "db:check": "tsx scripts/check-db-constraints.ts",
     "railway:init": "tsx scripts/railway-init.ts"
   },
   "dependencies": {
