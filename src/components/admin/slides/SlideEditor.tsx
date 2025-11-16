@@ -31,7 +31,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   const [videoUrl, setVideoUrl] = useState(slide?.video_url || '');
   const [layoutType, setLayoutType] = useState<'STANDARD' | 'OVERFLOW' | 'MINIMAL'>(slide?.layout_type || 'STANDARD');
   const [position, setPosition] = useState(slide?.position || 1);
-  const [contentTheme, setContentTheme] = useState<'light' | 'dark' | undefined>(slide?.content_theme);
+  const [contentTheme, setContentTheme] = useState<'light' | 'dark' | null>(slide?.content_theme || null);
   // Overlay opacity - full background overlay over the entire slide
   const [overlayOpacity, setOverlayOpacity] = useState<number>(Number(slide?.title_bg_opacity) || 0);
   const [selectedIcons, setSelectedIcons] = useState<string[]>(() => {
@@ -149,7 +149,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       video_url: videoUrl || undefined,
       position,
       layout_type: layoutType,
-      content_theme: contentTheme || undefined,
+      content_theme: contentTheme,
       // Apply overlay opacity to both fields in preview
       title_bg_opacity: overlayOpacity > 0 ? overlayOpacity : undefined,
       body_bg_opacity: overlayOpacity > 0 ? overlayOpacity : undefined,
@@ -496,7 +496,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
                 </label>
                 <select
                   value={contentTheme || ''}
-                  onChange={(e) => setContentTheme(e.target.value === '' ? undefined : e.target.value as 'light' | 'dark')}
+                  onChange={(e) => setContentTheme(e.target.value === '' ? null : e.target.value as 'light' | 'dark')}
                   className="w-full px-4 py-2"
                   style={{
                     backgroundColor: 'var(--bg-color)',

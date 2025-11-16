@@ -100,14 +100,14 @@ export async function PATCH(
       }
     }
 
-    // Validate content_theme if provided
-    if (body.content_theme) {
+    // Validate content_theme if provided (allow null to clear the field)
+    if (body.content_theme !== undefined && body.content_theme !== null) {
       const validThemes = ['light', 'dark'];
       if (!validThemes.includes(body.content_theme)) {
         return NextResponse.json(
           {
             status: 'error',
-            message: `Invalid content_theme. Must be one of: ${validThemes.join(', ')}`,
+            message: `Invalid content_theme. Must be one of: ${validThemes.join(', ')}, or null`,
           },
           { status: 400 }
         );

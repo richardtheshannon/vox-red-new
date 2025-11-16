@@ -13,7 +13,7 @@ export interface Slide {
   video_url?: string | null
   position: number
   layout_type: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
-  content_theme?: 'light' | 'dark'
+  content_theme?: 'light' | 'dark' | null
   title_bg_opacity?: number
   body_bg_opacity?: number
   is_published: boolean
@@ -38,7 +38,7 @@ export interface CreateSlideData {
   video_url?: string
   position: number
   layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
-  content_theme?: 'light' | 'dark'
+  content_theme?: 'light' | 'dark' | null
   title_bg_opacity?: number
   body_bg_opacity?: number
   is_published?: boolean
@@ -57,7 +57,7 @@ export interface UpdateSlideData {
   video_url?: string | null
   position?: number
   layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL'
-  content_theme?: 'light' | 'dark'
+  content_theme?: 'light' | 'dark' | null
   title_bg_opacity?: number
   body_bg_opacity?: number
   is_published?: boolean
@@ -153,7 +153,7 @@ export async function updateSlide(slideId: string, data: UpdateSlideData): Promi
     fields.push(`layout_type = $${paramCount++}`)
     values.push(data.layout_type)
   }
-  if (data.content_theme !== undefined) {
+  if ('content_theme' in data) {
     fields.push(`content_theme = $${paramCount++}`)
     values.push(data.content_theme)
   }
