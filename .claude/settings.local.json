@@ -53,7 +53,8 @@
       "Bash(del \"c:\\Users\\icos\\00_DEPLOY\\vox-red\\_ new-ui\\nextjs-app\\src\\app\\api\\migrate-roles\\route.ts\")",
       "Bash(npx next lint:*)",
       "Bash(cat:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "Bash(set DATABASE_URL=postgresql://postgres:lmtHqTYDkfXPVSSItdmvGGmvdFSnhLer@yamabiko.proxy.rlwy.net:59122/railway)"
     ],
     "deny": [],
     "ask": []
