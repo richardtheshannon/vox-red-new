@@ -55,13 +55,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate role
-    const validRoles = ['admin', 'user'];
+    // Validate role (handle both uppercase and lowercase)
+    const validRoles = ['admin', 'user', 'ADMIN', 'USER'];
     if (!validRoles.includes(body.role)) {
       return NextResponse.json(
         {
           status: 'error',
-          message: `Invalid role. Must be one of: ${validRoles.join(', ')}`,
+          message: `Invalid role. Must be one of: admin, user`,
         },
         { status: 400 }
       );

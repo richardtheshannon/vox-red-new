@@ -76,25 +76,25 @@ export async function PATCH(
       }
     }
 
-    // Validate role if provided
+    // Validate role if provided (handle both uppercase and lowercase)
     if (body.role) {
-      const validRoles = ['admin', 'user'];
+      const validRoles = ['admin', 'user', 'ADMIN', 'USER'];
       if (!validRoles.includes(body.role)) {
         return NextResponse.json(
           {
             status: 'error',
-            message: `Invalid role. Must be one of: ${validRoles.join(', ')}`,
+            message: `Invalid role. Must be one of: admin, user`,
           },
           { status: 400 }
         );
       }
 
-      // Check if trying to change last admin to user
+      // Check if trying to change last admin to user (case-insensitive comparison)
       const currentUser = await getUserById(userId);
-      if (currentUser && currentUser.role === 'admin' && body.role === 'user') {
-        // Count admin users
+      if (currentUser && currentUser.role?.toUpperCase() === 'ADMIN' && body.role?.toUpperCase() === 'USER') {
+        // Count admin users (case-insensitive)
         const allUsers = await getAllUsers();
-        const adminCount = allUsers.filter(u => u.role === 'admin').length;
+        const adminCount = allUsers.filter(u => u.role?.toUpperCase() === 'ADMIN').length;
 
         if (adminCount <= 1) {
           return NextResponse.json(
@@ -210,10 +210,10 @@ export async function DELETE(
       );
     }
 
-    // Prevent deleting last admin user
-    if (user.role === 'admin') {
+    // Prevent deleting last admin user (case-insensitive)
+    if (user.role?.toUpperCase() === 'ADMIN') {
       const allUsers = await getAllUsers();
-      const adminCount = allUsers.filter(u => u.role === 'admin').length;
+      const adminCount = allUsers.filter(u => u.role?.toUpperCase() === 'ADMIN').length;
 
       if (adminCount <= 1) {
         return NextResponse.json(

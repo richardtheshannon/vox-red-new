@@ -34,7 +34,8 @@ export async function requireAuth() {
 export async function requireAdmin() {
   const session = await requireAuth()
 
-  if (session.user.role !== 'admin') {
+  // Handle both uppercase and lowercase admin roles for compatibility
+  if (session.user.role?.toUpperCase() !== 'ADMIN') {
     redirect('/')
   }
 
@@ -56,7 +57,8 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function isAdmin(): Promise<boolean> {
   const session = await getSession()
-  return session?.user?.role === 'admin'
+  // Handle both uppercase and lowercase admin roles for compatibility
+  return session?.user?.role?.toUpperCase() === 'ADMIN'
 }
 
 /**
