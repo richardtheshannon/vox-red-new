@@ -118,7 +118,8 @@ function SlideItem({
 }) {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-  const getBodyPreview = (bodyContent: string) => {
+  const getBodyPreview = (bodyContent: string | undefined) => {
+    if (!bodyContent) return 'No content';
     // Strip HTML tags and get first 100 characters
     const text = bodyContent.replace(/<[^>]*>/g, '');
     return text.length > 100 ? text.substring(0, 100) + '...' : text;

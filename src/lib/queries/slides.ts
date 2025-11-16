@@ -7,7 +7,7 @@ export interface Slide {
   slide_row_id: string
   title: string
   subtitle?: string
-  body_content: string
+  body_content?: string
   audio_url?: string
   image_url?: string | null
   video_url?: string | null
@@ -32,7 +32,7 @@ export interface CreateSlideData {
   slide_row_id: string
   title: string
   subtitle?: string
-  body_content: string
+  body_content?: string
   audio_url?: string
   image_url?: string
   video_url?: string
@@ -93,7 +93,7 @@ export async function createSlide(data: CreateSlideData): Promise<Slide> {
     data.slide_row_id,
     data.title,
     data.subtitle || null,
-    data.body_content,
+    data.body_content || null,
     data.audio_url || null,
     data.image_url || null,
     data.video_url || null,

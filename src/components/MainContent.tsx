@@ -650,7 +650,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         <div
           className="space-y-4"
           style={{ color: textColor || '#000000' }}
-          dangerouslySetInnerHTML={{ __html: slide.body_content }}
+          dangerouslySetInnerHTML={{ __html: slide.body_content || '' }}
         />
       </div>
     );

@@ -76,11 +76,11 @@ export async function POST(
     }
 
     // Validate required fields
-    if (!body.title || !body.body_content) {
+    if (!body.title) {
       return NextResponse.json(
         {
           status: 'error',
-          message: 'Missing required fields: title and body_content are required',
+          message: 'Missing required field: title is required',
         },
         { status: 400 }
       );

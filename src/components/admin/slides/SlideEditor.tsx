@@ -96,11 +96,6 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
 
     const bodyContent = editor.getHTML();
 
-    if (!bodyContent.trim() || bodyContent === '<p></p>') {
-      setError('Body content is required');
-      return;
-    }
-
     try {
       setSaving(true);
       setError(null);
@@ -270,7 +265,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
             {/* Body Content - Rich Text Editor */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
-                Body Content *
+                Body Content (Optional)
               </label>
 
               {/* Editor Toolbar */}
