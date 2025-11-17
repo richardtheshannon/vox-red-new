@@ -67,6 +67,10 @@ export default function Home() {
   }>({ rowId: null, delaySeconds: 0, slides: [], swiper: null });
   const [hasAudioSlides, setHasAudioSlides] = useState(false);
 
+  // Slide counter state
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(1);
+  const [totalSlides, setTotalSlides] = useState(0);
+
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
   const slidePrev = () => {
@@ -223,6 +227,12 @@ export default function Home() {
     setHasAudioSlides(hasAudio);
   };
 
+  // Callback to update slide counter from MainContent
+  const updateSlideCounter = (currentIndex: number, total: number) => {
+    setCurrentSlideIndex(currentIndex + 1); // Convert 0-based to 1-based
+    setTotalSlides(total);
+  };
+
   // Get playlist data for toggle
   const getPlaylistData = () => {
     return playlistDataRef.current;
@@ -266,6 +276,8 @@ export default function Home() {
             onSpaToggle={toggleSpaMode}
             hasAudioSlides={hasAudioSlides}
             getPlaylistData={getPlaylistData}
+            currentSlideIndex={currentSlideIndex}
+            totalSlides={totalSlides}
           />
           <LeftIconBar hasBackgroundImage={!!activeSlideImageUrl} />
           <RightIconBar
@@ -294,6 +306,7 @@ export default function Home() {
             onUnpublishDialogOpen={handleUnpublishDialogOpen}
             unpublishCallbackRef={mainContentUnpublishCallbackRef}
             updatePlaylistData={updatePlaylistData}
+            updateSlideCounter={updateSlideCounter}
           />
         </SwiperProvider>
 
@@ -348,7 +361,8 @@ function MainContentWithRef({
   isQuickSlideMode,
   onUnpublishDialogOpen,
   unpublishCallbackRef,
-  updatePlaylistData
+  updatePlaylistData,
+  updateSlideCounter
 }: {
   setSwiperRef: (swiper: SwiperType | null) => void;
   handleSlideChange: (swiper: SwiperType) => void;
@@ -362,6 +376,7 @@ function MainContentWithRef({
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
+  updateSlideCounter: (currentIndex: number, total: number) => void;
 }) {
   return (
     <MainContent
@@ -377,6 +392,7 @@ function MainContentWithRef({
       onUnpublishDialogOpen={onUnpublishDialogOpen}
       unpublishCallbackRef={unpublishCallbackRef}
       updatePlaylistData={updatePlaylistData}
+      updateSlideCounter={updateSlideCounter}
     />
   );
 }

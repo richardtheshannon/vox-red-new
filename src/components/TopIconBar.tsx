@@ -11,6 +11,8 @@ interface TopIconBarProps {
   onSpaToggle?: () => void;
   hasAudioSlides?: boolean;
   getPlaylistData?: () => { rowId: string | null; delaySeconds: number; slides: Slide[]; swiper: SwiperType | null };
+  currentSlideIndex?: number;
+  totalSlides?: number;
 }
 
 export default function TopIconBar({
@@ -18,7 +20,9 @@ export default function TopIconBar({
   isSpaPlaying = false,
   onSpaToggle,
   hasAudioSlides = false,
-  getPlaylistData
+  getPlaylistData,
+  currentSlideIndex = 1,
+  totalSlides = 0
 }: TopIconBarProps) {
   const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
@@ -90,6 +94,20 @@ export default function TopIconBar({
             style={{ opacity: isPlaylistActive ? 1 : 0.6 }}
           >
             {getPlaylistIcon()}
+          </span>
+        )}
+        {/* Slide counter - always visible */}
+        {totalSlides > 0 && (
+          <span
+            style={{
+              fontSize: '14px',
+              fontWeight: '500',
+              color: 'var(--icon-color)',
+              marginLeft: '4px',
+              userSelect: 'none'
+            }}
+          >
+            {currentSlideIndex}/{totalSlides}
           </span>
         )}
       </div>

@@ -24,6 +24,7 @@ interface MainContentProps {
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
+  updateSlideCounter: (currentIndex: number, total: number) => void;
 }
 
 // TypeScript interfaces for API data
@@ -42,7 +43,7 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData, updateSlideCounter }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -186,6 +187,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         updateActiveSlideData(slides[0]);
         initialBackgroundSetRef.current = true; // Mark as set
 
+        // Update slide counter to first slide
+        updateSlideCounter(0, slides.length);
+
         // Update playlist data for initial row (with small delay to ensure swiper is registered)
         setTimeout(() => {
           const visibleSlides = filterVisibleSlides(slides);
@@ -196,7 +200,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         }, 200);
       }
     }
-  }, [slidesCache, filteredSlideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl, updatePlaylistData, getHorizontalSwiper]);
+  }, [slidesCache, filteredSlideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl, updatePlaylistData, getHorizontalSwiper, updateSlideCounter]);
 
   // Preload slides when Quick Slide mode changes
   useEffect(() => {
@@ -707,6 +711,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           // Update background image, video, and overlay when slide changes
           const currentSlide = slides[swiper.activeIndex];
           updateActiveSlideData(currentSlide || null);
+          // Update slide counter
+          updateSlideCounter(swiper.activeIndex, slides.length);
         }}
       >
         {slides.map((slide) => (
@@ -786,6 +792,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 const rowSlides = getSlidesForRow(activeRow.id);
                 if (rowSlides.length > 0) {
                   updateActiveSlideData(rowSlides[0]);
+                  // Update slide counter to first slide of new row
+                  updateSlideCounter(0, rowSlides.length);
                 }
 
                 // Update playlist data for top icon bar (use filtered slides for schedule)
@@ -849,6 +857,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               const rowSlides = getSlidesForRow(activeRow.id);
               if (rowSlides.length > 0) {
                 updateActiveSlideData(rowSlides[0]);
+                // Update slide counter to first slide of new row
+                updateSlideCounter(0, rowSlides.length);
               }
 
               // Update playlist data for top icon bar (use filtered slides for schedule)
