@@ -77,12 +77,14 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   const updateActiveSlideData = (slide: Slide | null) => {
     if (slide) {
       // Explicitly clear background if slide has no image_url (ensures slides without backgrounds show theme color)
-      setActiveSlideImageUrl(slide.image_url ? slide.image_url : null);
-      setActiveSlideVideoUrl(slide.video_url ? slide.video_url : null);
+      // Use separate checks to ensure null is set when image/video are missing
+      setActiveSlideImageUrl(slide.image_url || null);
+      setActiveSlideVideoUrl(slide.video_url || null);
       setActiveSlideOverlayOpacity(Number(slide.title_bg_opacity) || 0);
       // Use slide's content_theme if defined, otherwise null (use global theme)
       setActiveSlideContentTheme(slide.content_theme || null);
     } else {
+      // Explicitly clear all background/video state
       setActiveSlideImageUrl(null);
       setActiveSlideVideoUrl(null);
       setActiveSlideOverlayOpacity(0);
@@ -364,6 +366,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 const firstRowSlides = getSlidesForRow(firstRow.id);
                 if (firstRowSlides.length > 0) {
                   updateActiveSlideData(firstRowSlides[0]);
+                } else {
+                  // Clear background if no slides in first row
+                  updateActiveSlideData(null);
                 }
               }
             }
@@ -377,13 +382,16 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             }
 
             console.log('[MainContent] Navigating to slide index:', targetIndex);
+
+            // CRITICAL FIX: Clear background FIRST to prevent image persistence
+            updateActiveSlideData(null);
+
+            // Then navigate and update with the correct slide data
             horizontalSwiper.slideTo(targetIndex);
 
-            // Update background image/video/overlay
+            // Update background image/video/overlay with the target slide
             const targetSlide = updatedSlides[targetIndex];
-            if (targetSlide) {
-              updateActiveSlideData(targetSlide);
-            }
+            updateActiveSlideData(targetSlide || null);
           }
         }, 100); // Small delay to ensure state updates
       } else {
@@ -439,6 +447,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               const firstRowSlides = getSlidesForRow(firstRow.id);
               if (firstRowSlides.length > 0) {
                 updateActiveSlideData(firstRowSlides[0]);
+              } else {
+                // Clear background if no slides in first row
+                updateActiveSlideData(null);
               }
             }
           }
@@ -452,13 +463,16 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           }
 
           console.log('[MainContent] Navigating to slide index:', targetIndex);
+
+          // CRITICAL FIX: Clear background FIRST to prevent image persistence
+          updateActiveSlideData(null);
+
+          // Then navigate and update with the correct slide data
           horizontalSwiper.slideTo(targetIndex);
 
-          // Update background image/video/overlay
+          // Update background image/video/overlay with the target slide
           const targetSlide = updatedSlides[targetIndex];
-          if (targetSlide) {
-            updateActiveSlideData(targetSlide);
-          }
+          updateActiveSlideData(targetSlide || null);
         }
       }, 100); // Small delay to ensure state updates
     };
@@ -739,10 +753,12 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           // Update the scroll container when horizontal slide changes
           handleSlideChange(swiper);
           // Update background image, video, and overlay when slide changes
-          const currentSlide = slides[swiper.activeIndex];
+          // Use getSlidesForRow to get current slides (not stale closure) after unpublish
+          const currentSlides = getSlidesForRow(row.id);
+          const currentSlide = currentSlides[swiper.activeIndex];
           updateActiveSlideData(currentSlide || null);
-          // Update slide counter
-          updateSlideCounter(swiper.activeIndex, slides.length);
+          // Update slide counter with current slides count
+          updateSlideCounter(swiper.activeIndex, currentSlides.length);
         }}
       >
         {slides.map((slide) => (

@@ -2,7 +2,7 @@
 
 **Project**: Spiritual Content Platform with Slide-Based Navigation
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: January 17, 2025
+**Last Updated**: November 17, 2025
 
 ---
 
@@ -123,6 +123,7 @@ const slides = getSlidesForRow(rowId) // Applies schedule filter + randomization
 - **Private rows** (`user_id = [UUID]`): Visible only to assigned user
 - **Admin view**: See ALL rows
 - **Implementation**: Server-side filtering in `getAllSlideRows()`
+- **Auto-Refresh**: MainContent monitors `sessionStatus` and auto-refetches rows on login/logout
 
 ### Dynamic Scheduling
 - **Time windows**: `publish_time_start/end` (supports overnight)
@@ -216,29 +217,21 @@ NEXTAUTH_SECRET=<strong-secret>
 
 ## Recent Updates
 
+### Session Auto-Refresh on Login (November 17, 2025)
+**What**: User-assigned rows appear immediately after login (no hard refresh needed)
+**Why**: Fix UX issue where users had to manually refresh to see private rows after logging in
+**How**: MainContent monitors `sessionStatus` from NextAuth, refetches rows when status changes
+**Files Modified**: `MainContent.tsx` (added `useSession` hook, sessionStatus dependency in fetch effect)
+**Impact**: Improved UX - seamless transition from public to personalized content upon authentication
+
 ### Slide Randomization (January 17, 2025)
 **What**: Per-row randomization with time-based intervals (hourly/daily/weekly)
-**Why**: Enable daily devotionals, rotating quotes, curated content without manual updates
-**How**: Seeded Fisher-Yates shuffle based on current time interval
-**Files**:
-- Created: `slideRandomizer.ts`, `add-slide-randomization.sql`, `run-randomization-migration.ts`
-- Modified: `slideRows.ts`, `route.ts` (API), `SlideRowForm.tsx`, `MainContent.tsx`
+**Files**: `slideRandomizer.ts`, `SlideRowForm.tsx`, `MainContent.tsx`
 **Database**: 4 new columns (`randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`)
 
-### Slide Counter (January 17, 2025)
-**What**: Visual position indicator (e.g., "3/12")
-**Where**: Top icon bar, right of playlist_play icon
-**How**: State flow: MainContent → page.tsx → TopIconBar
-
-### Optional Slide Title (January 17, 2025)
-**What**: Slides can be created without titles
-**Why**: Image-only slides, quote slides, etc.
-**Impact**: Made `title` nullable in database and UI
-
 ### User-Specific Private Rows (January 17, 2025)
-**What**: Assign rows to specific users
-**Why**: Personalized spiritual content per user
-**How**: `user_id` column on `slide_rows`, server-side filtering
+**What**: Assign rows to specific users for personalized content
+**How**: `user_id` column on `slide_rows`, server-side filtering in `getAllSlideRows()`
 
 ---
 
@@ -247,10 +240,9 @@ NEXTAUTH_SECRET=<strong-secret>
 | Issue | Solution |
 |-------|----------|
 | Sessions not persisting | Generate strong `NEXTAUTH_SECRET` with `openssl rand -base64 32` |
-| Icons not showing/hiding | Check `{session && <Icon />}` pattern in icon bars |
+| Private rows not appearing after login | Fixed (Nov 17, 2025) - MainContent now auto-refetches on session change |
 | Cannot access /setup | Users exist. Use `npm run db:seed:admin` instead |
 | Deployment failed (ESLint) | Run `npx eslint [file]` locally before pushing |
-| Slide counter not updating | Check swiper callbacks in MainContent call `updateSlideCounter()` |
 | Randomization not working | Verify `randomize_enabled=true`, count >= 1, valid interval |
 
 ---
@@ -314,4 +306,4 @@ const rows = await getAllSlideRows(publishedOnly, userId, isAdmin)
 
 ---
 
-**Status**: Production Ready | **Token Count**: Under 500 lines ✅ | **Last Updated**: January 17, 2025
+**Status**: Production Ready | **Lines**: 236/500 ✅ | **Last Updated**: November 17, 2025
