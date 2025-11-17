@@ -47,7 +47,7 @@ export interface UpdateSlideRowData {
 // Get all slide rows
 export async function getAllSlideRows(publishedOnly = false, userId?: string | null, isAdmin = false): Promise<SlideRow[]> {
   let sql: string
-  let params: any[] = []
+  let params: string[] = []
 
   if (publishedOnly && userId && !isAdmin) {
     // User view: published rows that are either public OR owned by this user
