@@ -53,8 +53,8 @@ export async function getUserByEmail(email: string): Promise<UserWithPassword | 
 export async function createUser(data: CreateUserData): Promise<User> {
   const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS)
 
-  // Keep role as-is (lowercase) - production CHECK constraint uses lower(role)
-  // so both 'admin' and 'ADMIN' work, but we'll use lowercase to match existing data
+  // Convert role to uppercase for production CHECK constraint compatibility
+  // Production DB requires uppercase roles ('ADMIN', 'USER', 'MODERATOR')
 
   // Try with username column first (for production DB with legacy schema)
   // Set username to NULL to avoid UNIQUE constraint issues
@@ -69,7 +69,7 @@ export async function createUser(data: CreateUserData): Promise<User> {
       data.name,
       data.email,
       hashedPassword,
-      data.role,
+      data.role.toUpperCase(),
     ])
 
     if (!user) throw new Error('Failed to create user')
@@ -87,7 +87,7 @@ export async function createUser(data: CreateUserData): Promise<User> {
         data.name,
         data.email,
         hashedPassword,
-        data.role,
+        data.role.toUpperCase(),
       ])
 
       if (!user) throw new Error('Failed to create user')
