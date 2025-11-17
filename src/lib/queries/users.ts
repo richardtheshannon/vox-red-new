@@ -49,25 +49,50 @@ export async function getUserByEmail(email: string): Promise<UserWithPassword | 
 }
 
 // Create new user with bcrypt hashed password
+// Updated: 2025-11-16 - Added username compatibility for legacy production DB schema
 export async function createUser(data: CreateUserData): Promise<User> {
   const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS)
 
-  const sql = `
-    INSERT INTO users (name, email, password_hash, role)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id, name, email, role, created_at, updated_at
-  `
+  // Try with username column first (for production DB with legacy schema)
+  // If that fails, fall back to standard insert without username
+  try {
+    const sqlWithUsername = `
+      INSERT INTO users (name, email, password_hash, role, username)
+      VALUES ($1, $2, $3, $4, $1)
+      RETURNING id, name, email, role, created_at, updated_at
+    `
 
-  const user = await queryOne<User>(sql, [
-    data.name,
-    data.email,
-    hashedPassword,
-    data.role,
-  ])
+    const user = await queryOne<User>(sqlWithUsername, [
+      data.name,
+      data.email,
+      hashedPassword,
+      data.role,
+    ])
 
-  if (!user) throw new Error('Failed to create user')
+    if (!user) throw new Error('Failed to create user')
+    return user
+  } catch (error) {
+    // If username column doesn't exist, try without it
+    if (error instanceof Error && error.message.includes('column "username" of relation "users" does not exist')) {
+      const sqlWithoutUsername = `
+        INSERT INTO users (name, email, password_hash, role)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, name, email, role, created_at, updated_at
+      `
 
-  return user
+      const user = await queryOne<User>(sqlWithoutUsername, [
+        data.name,
+        data.email,
+        hashedPassword,
+        data.role,
+      ])
+
+      if (!user) throw new Error('Failed to create user')
+      return user
+    }
+    // Re-throw if it's a different error
+    throw error
+  }
 }
 
 // Update user (name, email, role only - password updated via separate function)
