@@ -9,10 +9,12 @@ interface RightIconBarProps {
   hasBackgroundImage?: boolean;
   isQuickSlideMode?: boolean;
   onAtrClick?: () => void;
+  isSimpleShiftMode?: boolean;
+  onSimpleShiftClick?: () => void;
   onGroupClick?: () => void;
 }
 
-export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, onGroupClick }: RightIconBarProps) {
+export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, isSimpleShiftMode = false, onSimpleShiftClick, onGroupClick }: RightIconBarProps) {
   const { data: session } = useSession();
   return (
     <aside className={`icon-container fixed right-0 flex flex-col justify-between items-center ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem', top: '0', bottom: '0', paddingTop: '50px', paddingBottom: '50px', zIndex: 15}}>
@@ -37,6 +39,18 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
               }}
             >
               atr
+            </span>
+            <span
+              className="material-symbols-outlined"
+              title={isSimpleShiftMode ? 'Exit Simple Shift Mode' : 'Simple Shift Mode'}
+              onClick={onSimpleShiftClick}
+              style={{
+                cursor: 'pointer',
+                opacity: isSimpleShiftMode ? 1 : 0.6,
+                transition: 'opacity 0.3s ease'
+              }}
+            >
+              move_up
             </span>
             <span className="material-symbols-outlined" title="Credit Card">credit_card</span>
             <span className="material-symbols-outlined" title="Payment">payment</span>

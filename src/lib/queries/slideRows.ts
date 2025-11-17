@@ -6,7 +6,7 @@ export interface SlideRow {
   id: string
   title: string
   description?: string
-  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
+  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE' | 'SIMPLESHIFT'
   is_published: boolean
   display_order: number
   icon_set?: string[] // Parsed from JSON
@@ -26,7 +26,7 @@ export interface SlideRow {
 export interface CreateSlideRowData {
   title: string
   description?: string
-  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE'
+  row_type: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE' | 'SIMPLESHIFT'
   icon_set?: string[]
   theme_color?: string
   display_order?: number

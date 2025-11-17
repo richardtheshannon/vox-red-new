@@ -50,6 +50,9 @@ export default function Home() {
   // Quick Slide Mode state (toggle between all rows and Quick Slide row only)
   const [isQuickSlideMode, setIsQuickSlideMode] = useState(false);
 
+  // Simple Shift Mode state (toggle between all rows and Simple Shift row only)
+  const [isSimpleShiftMode, setIsSimpleShiftMode] = useState(false);
+
   // Unpublish confirmation dialog state
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [slideToUnpublish, setSlideToUnpublish] = useState<{ slideId: string; rowId: string } | null>(null);
@@ -154,6 +157,11 @@ export default function Home() {
   // Toggle Quick Slide Mode
   const toggleQuickSlideMode = () => {
     setIsQuickSlideMode(prev => !prev);
+  };
+
+  // Toggle Simple Shift Mode
+  const toggleSimpleShiftMode = () => {
+    setIsSimpleShiftMode(prev => !prev);
   };
 
   // Handle unpublish dialog open
@@ -287,6 +295,8 @@ export default function Home() {
             hasBackgroundImage={!!activeSlideImageUrl}
             isQuickSlideMode={isQuickSlideMode}
             onAtrClick={toggleQuickSlideMode}
+            isSimpleShiftMode={isSimpleShiftMode}
+            onSimpleShiftClick={toggleSimpleShiftMode}
             onGroupClick={handleGroupClick}
           />
           <BottomIconBar
@@ -303,6 +313,7 @@ export default function Home() {
             setActiveSlideOverlayOpacity={setActiveSlideOverlayOpacity}
             setActiveSlideContentTheme={setActiveSlideContentTheme}
             isQuickSlideMode={isQuickSlideMode}
+            isSimpleShiftMode={isSimpleShiftMode}
             onUnpublishDialogOpen={handleUnpublishDialogOpen}
             unpublishCallbackRef={mainContentUnpublishCallbackRef}
             updatePlaylistData={updatePlaylistData}
@@ -359,6 +370,7 @@ function MainContentWithRef({
   setActiveSlideOverlayOpacity,
   setActiveSlideContentTheme,
   isQuickSlideMode,
+  isSimpleShiftMode,
   onUnpublishDialogOpen,
   unpublishCallbackRef,
   updatePlaylistData,
@@ -373,6 +385,7 @@ function MainContentWithRef({
   setActiveSlideOverlayOpacity: (opacity: number) => void;
   setActiveSlideContentTheme: (theme: 'light' | 'dark' | null) => void;
   isQuickSlideMode: boolean;
+  isSimpleShiftMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
@@ -389,6 +402,7 @@ function MainContentWithRef({
       setActiveSlideOverlayOpacity={setActiveSlideOverlayOpacity}
       setActiveSlideContentTheme={setActiveSlideContentTheme}
       isQuickSlideMode={isQuickSlideMode}
+      isSimpleShiftMode={isSimpleShiftMode}
       onUnpublishDialogOpen={onUnpublishDialogOpen}
       unpublishCallbackRef={unpublishCallbackRef}
       updatePlaylistData={updatePlaylistData}

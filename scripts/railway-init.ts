@@ -21,6 +21,7 @@ import { addUsersPasswordHash } from './add-users-password-hash'
 import { runUserOwnershipMigration } from './run-user-ownership-migration'
 import { makeTitleOptional } from './make-title-optional'
 import { runRandomizationMigration } from './run-randomization-migration'
+import { addSimpleshiftType } from './add-simpleshift-type'
 
 async function railwayInit() {
   try {
@@ -245,6 +246,20 @@ async function railwayInit() {
         console.error('❌ Slide randomization migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without slide randomization columns')
+      }
+    }
+
+    // Add SIMPLESHIFT row type (safe to run multiple times)
+    try {
+      await addSimpleshiftType()
+      console.log('✅ SIMPLESHIFT row type added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ SIMPLESHIFT row type already exists, skipping')
+      } else {
+        console.error('❌ SIMPLESHIFT migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without SIMPLESHIFT row type')
       }
     }
 
