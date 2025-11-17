@@ -96,7 +96,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       setError(null);
 
       const slideData: Partial<Slide> = {
-        title: title.trim() || undefined,
+        title: title.trim() || null,
         subtitle: subtitle.trim() || undefined,
         body_content: bodyContent,
         audio_url: audioUrl || undefined,

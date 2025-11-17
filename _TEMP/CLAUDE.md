@@ -2,7 +2,7 @@
 
 **Project**: Spiritual Content Platform with Slide-Based Navigation
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: January 2025
+**Last Updated**: January 17, 2025
 
 ---
 
@@ -12,6 +12,7 @@
 npm run dev              # Dev server (http://localhost:3000)
 npm run build            # Production build
 npx tsc --noEmit         # TypeScript validation
+npm run db:validate      # Check pending migrations
 ```
 
 **URLs**: http://localhost:3000/ | /admin | /login | /setup
@@ -27,10 +28,10 @@ npx tsc --noEmit         # TypeScript validation
 
 ---
 
-## Architecture Overview
+## Architecture
 
 ### Frontend (/)
-- **50px Icon Border**: Fixed header/footer/sidebars (z-20), square UI design
+- **50px Icon Border**: Fixed header/footer/sidebars (z-20), square UI
 - **Navigation**: Vertical Swiper (rows) + Horizontal Swiper (slides)
 - **Background System**: Full-viewport images with theme overlay
 - **User-Specific Content**: Private rows visible only to assigned users
@@ -57,19 +58,16 @@ role ('ADMIN'|'USER'|'MODERATOR'), created_at, updated_at
 id, title, description, row_type, is_published, display_order
 icon_set (JSON), theme_color, slide_count, playlist_delay_seconds
 user_id (UUID, nullable) - Private row owner (null = public)
-created_by (UUID, nullable), created_at, updated_at
-UNIQUE(slide_row_id, position) - Each position unique within a row
 ```
 
 ### slides
 ```sql
-id, slide_row_id, title, subtitle, body_content (OPTIONAL), position
+id, slide_row_id, title (OPTIONAL), subtitle, body_content (OPTIONAL), position
 layout_type ('STANDARD'|'OVERFLOW'|'MINIMAL')
 audio_url, image_url, video_url
 content_theme ('light'|'dark'|null), title_bg_opacity (0-1)
 is_published, publish_time_start/end, publish_days (JSON [0-6])
-temp_unpublish_until (timestamp), icon_set (JSON, nullable)
-view_count, completion_count, created_at, updated_at
+temp_unpublish_until (timestamp), icon_set (JSON)
 ```
 
 ### spa_tracks
@@ -82,7 +80,7 @@ volume (0-100), publish_time_start/end, publish_days (JSON)
 
 ## Key Files
 
-### Core Application
+### Core
 - `src/app/page.tsx` - Main frontend page
 - `src/components/MainContent.tsx` - Slide rendering + user filtering
 - `src/components/Providers.tsx` - SessionProvider + ThemeProvider
@@ -90,30 +88,21 @@ volume (0-100), publish_time_start/end, publish_days (JSON)
 ### Authentication
 - `src/lib/auth.ts` - `requireAuth()`, `requireAdmin()`
 - `src/lib/authOptions.ts` - NextAuth config
-- `src/app/login/page.tsx` - Login page
-- `src/app/setup/page.tsx` - First admin setup
 
-### Database Layer
+### Database
 - `src/lib/db.ts` - PostgreSQL connection
 - `src/lib/queries/slideRows.ts` - Row CRUD + user filtering
 - `src/lib/queries/slides.ts` - Slide CRUD + `getNextPosition()`
 - `src/lib/queries/users.ts` - User management
-- `src/lib/queries/spaTracks.ts` - Spa track CRUD
 
 ### Admin Components
-- `src/components/admin/slides/SlideEditor.tsx` - Slide editor with Tiptap
+- `src/components/admin/slides/SlideEditor.tsx` - Slide editor
 - `src/components/admin/slides/SlideRowForm.tsx` - Row editor + user assignment
-- `src/components/admin/slides/SlideManager.tsx` - Slide list management
 
 ### API Routes
 - `src/app/api/slides/rows/route.ts` - Row CRUD API
 - `src/app/api/slides/rows/[id]/slides/route.ts` - Slide CRUD API
 - `src/app/api/users/route.ts` - User management API
-
-### Contexts
-- `src/contexts/ThemeContext.tsx` - Persistent theme (localStorage)
-- `src/contexts/SwiperContext.tsx` - Navigation state
-- `src/contexts/PlaylistContext.tsx` - Playlist state
 
 ---
 
@@ -139,24 +128,19 @@ NEXTAUTH_URL="http://localhost:3000"       # Production: https://your-app.railwa
 ### User-Specific Private Rows
 **Visibility Rules**:
 - **Public rows** (`user_id = null`): Visible to everyone
-- **Private rows** (`user_id = [UUID]`): Visible only to assigned user when logged in
-- **Admin view**: Admins see ALL rows (public + everyone's private rows)
+- **Private rows** (`user_id = [UUID]`): Visible only to assigned user
+- **Admin view**: See ALL rows
 
-**Implementation**: Server-side filtering in `getAllSlideRows()` (src/lib/queries/slideRows.ts)
-- Not logged in: Only public published rows
-- Logged in user: Public rows + their private rows
-- Admin: ALL rows
+**Implementation**: Server-side filtering in `getAllSlideRows()`
 
-**Admin UI**: `/admin/slides` → Create/Edit Row → "Row Visibility" dropdown
-
-### Authentication & Authorization
+### Authentication
 ```typescript
-// Server-side protection
+// Server-side
 import { requireAuth, requireAdmin } from '@/lib/auth'
-const session = await requireAuth()    // Any authenticated user
-const session = await requireAdmin()   // Admin role only
+const session = await requireAuth()    // Any user
+const session = await requireAdmin()   // Admin only
 
-// Client-side auth-gating
+// Client-side
 import { useSession } from 'next-auth/react'
 const { data: session } = useSession()
 {session && <PrivateContent />}
@@ -169,15 +153,14 @@ const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
 ```
 **CSS Variables**: `--text-color`, `--bg-color`, `--card-bg`, `--border-color`, `--icon-color`
 
-### Background & Layout System
+### Background & Layout
 - Full-viewport backgrounds via `image_url`
-- Theme-responsive overlay (white/black), opacity 0-1
+- Theme-responsive overlay (opacity 0-1)
 - Per-slide theme override: `content_theme`
-- Z-Stack: Background (z-0) → Overlay (z-1) → Video (z-10) → Content (z-20)
-- **Layout Types**: STANDARD (centered), OVERFLOW (scrollable), MINIMAL (title + audio only)
+- **Layout Types**: STANDARD (centered), OVERFLOW (scrollable), MINIMAL (title + audio)
 
 ### Dynamic Scheduling
-- Time windows: `publish_time_start/end` (supports overnight spans)
+- Time windows: `publish_time_start/end` (supports overnight)
 - Day restrictions: `publish_days` [0=Sun, 6=Sat]
 - Temporary unpublish: `temp_unpublish_until`
 
@@ -196,7 +179,6 @@ POST /api/setup           - Create first admin
 ```
 GET    /api/slides/rows                - List rows (user-filtered)
 POST   /api/slides/rows                - Create row
-GET    /api/slides/rows/[id]           - Get single row
 PATCH  /api/slides/rows/[id]           - Update row
 DELETE /api/slides/rows/[id]           - Delete row
 POST   /api/slides/rows/reorder        - Reorder rows
@@ -206,11 +188,9 @@ POST   /api/slides/rows/reorder        - Reorder rows
 ```
 GET    /api/slides/rows/[id]/slides              - List slides
 POST   /api/slides/rows/[id]/slides              - Create slide (auto-position)
-GET    /api/slides/rows/[id]/slides/[slideId]    - Get single slide
 PATCH  /api/slides/rows/[id]/slides/[slideId]    - Update slide
 DELETE /api/slides/rows/[id]/slides/[slideId]    - Delete slide
 POST   /api/slides/rows/[id]/slides/reorder      - Reorder slides
-POST   /api/slides/bulk-publish                  - Bulk publish/unpublish
 ```
 
 ### Users (Admin Only)
@@ -219,7 +199,6 @@ GET    /api/users              - List users
 POST   /api/users              - Create user
 PATCH  /api/users/[id]         - Update user
 DELETE /api/users/[id]         - Delete user
-POST   /api/users/[id]/password - Update password
 ```
 
 **Response Format**: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
@@ -228,15 +207,13 @@ POST   /api/users/[id]/password - Update password
 
 ## Code Patterns
 
-### Position Auto-Calculation (Slides)
+### Position Auto-Calculation
 ```typescript
-// Server automatically calculates position using getNextPosition()
-// Uses MAX(position) + 1 to avoid conflicts
 import { getNextPosition } from '@/lib/queries/slides'
-const position = await getNextPosition(rowId)  // Returns next available position
+const position = await getNextPosition(rowId)  // MAX(position) + 1
 ```
 
-### Safe Body Content Rendering
+### Safe Content Rendering
 ```typescript
 dangerouslySetInnerHTML={{ __html: slide.body_content || '' }}
 ```
@@ -247,19 +224,19 @@ import { createUser } from '@/lib/queries/users'
 const user = await createUser({
   name: 'John Doe',
   email: 'john@example.com',
-  password: 'password123',  // Auto-hashed with bcrypt
+  password: 'password123',  // Auto-hashed
   role: 'ADMIN'             // Uppercase
 })
 ```
 
-### User-Specific Row Creation
+### Optional Title Slides
 ```typescript
-import { createSlideRow } from '@/lib/queries/slideRows'
-const row = await createSlideRow({
-  title: 'Personal Meditation',
-  row_type: 'ROUTINE',
-  is_published: true,
-  user_id: 'user-uuid-here'  // null for public row
+// Create slide without title (image-only)
+const slide = await createSlide({
+  slide_row_id: rowId,
+  title: undefined,  // Optional
+  image_url: '/media/background.jpg',
+  layout_type: 'STANDARD'
 })
 ```
 
@@ -272,8 +249,8 @@ const row = await createSlideRow({
 - **Icons**: 24px, weight 100, use `var(--icon-color)`
 - **No ORM**: Direct PostgreSQL for performance
 - **Position Auto-Calc**: Server uses `getNextPosition()` - never send position on create
-- **Body Content**: Optional - always use `|| ''` fallback
-- **Roles**: Uppercase in production ('ADMIN', 'USER', 'MODERATOR')
+- **Optional Fields**: `title`, `body_content`, `subtitle` - always use `|| ''` fallback
+- **Roles**: Uppercase ('ADMIN', 'USER', 'MODERATOR')
 - **Passwords**: bcrypt hashed, min 8 chars
 
 ---
@@ -282,23 +259,24 @@ const row = await createSlideRow({
 
 ### Pre-Deploy Checklist
 ```bash
-npx tsc --noEmit        # Must have 0 TypeScript errors
-npm run build           # Must pass ESLint
+npm run db:validate     # Check migrations
+npx tsc --noEmit        # 0 TypeScript errors
+npm run build           # Pass ESLint
 git add . && git commit -m "..." && git push origin master
 ```
 
 ### Auto-Deploy Process
 1. Push to GitHub → Railway auto-deploys
-2. Runs `npm run build` (TypeScript + ESLint must pass)
+2. Runs `npm run build` (TypeScript + ESLint)
 3. Runs `npm start` → executes `railway:init`
 4. Migrations run automatically (safe - uses `IF NOT EXISTS`)
 5. App starts
 
 ### Environment Variables (Railway)
 ```env
-DATABASE_URL=postgresql://...              # Auto-provided by Railway
+DATABASE_URL=postgresql://...              # Auto-provided
 NEXTAUTH_URL=https://your-app.railway.app
-NEXTAUTH_SECRET=<strong-secret>            # openssl rand -base64 32
+NEXTAUTH_SECRET=<strong-secret>
 ```
 
 ### Database Scripts
@@ -312,61 +290,56 @@ railway run npm run [script]       # Run any script on Railway DB
 
 ## Recent Updates
 
-### Slide Position Fix (January 17, 2025)
-**Issue**: Creating slides failed with duplicate position constraint error
-**Root Cause**: API used `existingSlides.length + 1` which fails when slides are reordered/deleted
-**Fix**: Now uses `getNextPosition(id)` which correctly calculates `MAX(position) + 1`
-**Files Modified**:
-- `src/app/api/slides/rows/[id]/slides/route.ts` - Updated position calculation logic
+### Optional Slide Title (January 17, 2025)
+**Feature**: Slides can now be created without titles (for image-only slides)
+**Changes**:
+- Made `title` column nullable in database
+- Updated TypeScript interfaces: `title?: string`
+- Removed title validation in API and UI
+- Added conditional rendering in MainContent
 
-**Impact**: Slide creation now works reliably regardless of gaps in position sequence
+**Files Modified**: 6 files
+- `scripts/make-title-optional.ts` - Database migration
+- `scripts/railway-init.ts` - Auto-migration on deployment
+- `src/lib/queries/slides.ts` - TypeScript interfaces
+- `src/app/api/slides/rows/[id]/slides/route.ts` - Removed validation
+- `src/components/admin/slides/SlideEditor.tsx` - UI updates
+- `src/components/MainContent.tsx` - Conditional title rendering
+
+**Impact**: Users can create slides with just background images, audio, video, or body content without requiring a title.
+
+### Slide Position Fix (January 17, 2025)
+**Fix**: Uses `getNextPosition()` which calculates `MAX(position) + 1`
+**Impact**: Slide creation works reliably regardless of gaps in position sequence
 
 ### User-Specific Private Rows (January 17, 2025)
 **Feature**: Assign slide rows to specific users for personalized content
-**Changes**:
-- Added `user_id` column to `slide_rows` table (nullable, foreign key to `users.id`)
-- Server-side filtering in `getAllSlideRows()` based on user ownership and role
-- Admin UI: "Row Visibility" dropdown in SlideRowForm
-- Backward compatible: All existing rows are public (`user_id = null`)
+**Changes**: Added `user_id` column to `slide_rows`, server-side filtering
+**Impact**: Users only see public rows + their assigned private rows. Admins see all.
 
-**Files Modified**: 7 files
-- `scripts/migrations/add-user-ownership.sql` - Database migration
-- `scripts/railway-init.ts` - Auto-migration on deployment
-- `src/lib/queries/slideRows.ts` - User filtering logic
-- `src/app/api/slides/rows/route.ts` - Session-based API filtering
-- `src/components/admin/slides/SlideRowForm.tsx` - User assignment UI
-- `package.json` - Added migration script
-
-**Impact**: Users only see public rows + their assigned private rows. Admins see all rows.
-
-### Authentication & Theme Improvements (January 2025)
-- Frontend icons now auth-gated using `useSession()`
-- Theme uses localStorage (was sessionStorage) for persistence
+### Authentication & Theme (January 2025)
+- Frontend icons auth-gated using `useSession()`
+- Theme uses localStorage for persistence
 - 30-day session persistence
-- Login auto-redirects if authenticated
 
 ---
 
 ## Troubleshooting
 
-### Slide Creation Fails with Duplicate Position Error
-**Status**: FIXED (January 17, 2025)
-**Previous Issue**: Used `existingSlides.length + 1` for position
-**Current Fix**: Uses `getNextPosition()` which queries `MAX(position) + 1`
+### Slide Creation Fails
+**Status**: FIXED - Uses `getNextPosition()` for auto-positioning
 
 ### Sessions Not Persisting
 **Fix**: Generate strong NEXTAUTH_SECRET: `openssl rand -base64 32`
 
 ### Icons Not Showing/Hiding
-**Verify**: Check browser console for session state
 **Pattern**: All icon bars use `{session && <Icon />}`
 
 ### Cannot Access /setup
-**Cause**: Users already exist in database
-**Fix**: Use `npm run db:seed:admin` instead
+**Cause**: Users already exist
+**Fix**: Use `npm run db:seed:admin`
 
 ### Deployment Failed (ESLint)
-**Common**: Check for `any` types, unused variables
 **Fix**: Run `npx eslint [file]` locally before pushing
 
 ---
