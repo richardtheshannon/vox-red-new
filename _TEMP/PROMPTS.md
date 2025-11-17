@@ -11,7 +11,7 @@ Review USER_ACCOUNTS_README.md in the _TEMP directory, we will be making so addi
 
 Ask me any questions you have, strictly one question at a time before we get started. 
 
-# Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze your latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
+# Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze the latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
 
 # git add .&& git commit -m "general quick commit" && git push origin master
 

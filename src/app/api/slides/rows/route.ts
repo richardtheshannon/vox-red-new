@@ -1,17 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllSlideRows, createSlideRow } from '@/lib/queries/slideRows';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 
 /**
  * GET /api/slides/rows
  * Query params: ?published=true (optional)
  * Returns all slide rows, optionally filtered by published status
+ * Filters based on user ownership and role
  */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const publishedOnly = searchParams.get('published') === 'true';
 
-    const rows = await getAllSlideRows(publishedOnly);
+    // Get session to filter by user ownership
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id || null;
+    const isAdmin = session?.user?.role?.toUpperCase() === 'ADMIN';
+
+    const rows = await getAllSlideRows(publishedOnly, userId, isAdmin);
 
     return NextResponse.json({
       status: 'success',
@@ -32,7 +40,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/slides/rows
- * Body: { title, description, row_type, icon_set, theme_color, display_order, is_published, created_by }
+ * Body: { title, description, row_type, icon_set, theme_color, display_order, is_published, created_by, user_id }
  * Creates a new slide row
  */
 export async function POST(request: NextRequest) {
@@ -72,6 +80,7 @@ export async function POST(request: NextRequest) {
       is_published: body.is_published,
       playlist_delay_seconds: body.playlist_delay_seconds,
       created_by: body.created_by,
+      user_id: body.user_id,
     });
 
     return NextResponse.json(

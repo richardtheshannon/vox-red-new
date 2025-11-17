@@ -18,6 +18,7 @@ import { addSpaVolume } from './add-spa-volume'
 import { addPlaylistDelay } from './add-playlist-delay'
 import { initializeUsersTables } from './init-users-table'
 import { addUsersPasswordHash } from './add-users-password-hash'
+import { runUserOwnershipMigration } from './run-user-ownership-migration'
 
 async function railwayInit() {
   try {
@@ -200,6 +201,20 @@ async function railwayInit() {
         console.error('❌ Users password_hash migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without users password_hash column')
+      }
+    }
+
+    // Add user_id column to slide_rows for user-specific private rows (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await runUserOwnershipMigration()
+      console.log('✅ User ownership column added to slide_rows')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ User ownership column already exists, skipping')
+      } else {
+        console.error('❌ User ownership migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without user ownership column')
       }
     }
 

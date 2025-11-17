@@ -14,6 +14,7 @@ export interface SlideRow {
   slide_count: number
   playlist_delay_seconds: number
   created_by?: string
+  user_id?: string | null // User who owns this row (null = public)
   created_at: Date
   updated_at: Date
 }
@@ -28,6 +29,7 @@ export interface CreateSlideRowData {
   is_published?: boolean
   playlist_delay_seconds?: number
   created_by?: string
+  user_id?: string | null
 }
 
 export interface UpdateSlideRowData {
@@ -39,15 +41,33 @@ export interface UpdateSlideRowData {
   display_order?: number
   is_published?: boolean
   playlist_delay_seconds?: number
+  user_id?: string | null
 }
 
 // Get all slide rows
-export async function getAllSlideRows(publishedOnly = false): Promise<SlideRow[]> {
-  const sql = publishedOnly
-    ? 'SELECT * FROM slide_rows WHERE is_published = true ORDER BY display_order, created_at DESC'
-    : 'SELECT * FROM slide_rows ORDER BY display_order, created_at DESC'
+export async function getAllSlideRows(publishedOnly = false, userId?: string | null, isAdmin = false): Promise<SlideRow[]> {
+  let sql: string
+  let params: any[] = []
 
-  const rows = await query<SlideRow>(sql)
+  if (publishedOnly && userId && !isAdmin) {
+    // User view: published rows that are either public OR owned by this user
+    sql = 'SELECT * FROM slide_rows WHERE is_published = true AND (user_id IS NULL OR user_id = $1) ORDER BY display_order, created_at DESC'
+    params = [userId]
+  } else if (publishedOnly && !userId) {
+    // Not logged in: only public published rows
+    sql = 'SELECT * FROM slide_rows WHERE is_published = true AND user_id IS NULL ORDER BY display_order, created_at DESC'
+  } else if (!publishedOnly && userId && !isAdmin) {
+    // User admin view: all rows that are public OR owned by this user
+    sql = 'SELECT * FROM slide_rows WHERE user_id IS NULL OR user_id = $1 ORDER BY display_order, created_at DESC'
+    params = [userId]
+  } else {
+    // Admin view OR no user: all rows
+    sql = publishedOnly
+      ? 'SELECT * FROM slide_rows WHERE is_published = true ORDER BY display_order, created_at DESC'
+      : 'SELECT * FROM slide_rows ORDER BY display_order, created_at DESC'
+  }
+
+  const rows = await query<SlideRow>(sql, params)
 
   // Parse icon_set JSON strings to arrays
   return rows.map(row => ({
@@ -72,8 +92,8 @@ export async function getSlideRowById(id: string): Promise<SlideRow | null> {
 // Create new slide row
 export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow> {
   const sql = `
-    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by, user_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING *
   `
 
@@ -87,6 +107,7 @@ export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow
     data.is_published ?? false,
     data.playlist_delay_seconds ?? 0,
     data.created_by || null,
+    data.user_id || null,
   ])
 
   if (!row) throw new Error('Failed to create slide row')
@@ -136,6 +157,10 @@ export async function updateSlideRow(id: string, data: UpdateSlideRowData): Prom
   if (data.playlist_delay_seconds !== undefined) {
     fields.push(`playlist_delay_seconds = $${paramCount++}`)
     values.push(data.playlist_delay_seconds)
+  }
+  if (data.user_id !== undefined) {
+    fields.push(`user_id = $${paramCount++}`)
+    values.push(data.user_id)
   }
 
   if (fields.length === 0) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import IconPicker from './IconPicker';
 
 interface SlideRowFormProps {
@@ -14,6 +14,7 @@ interface SlideRowFormProps {
     display_order: number;
     is_published: boolean;
     playlist_delay_seconds?: number;
+    user_id?: string | null;
   };
   onSubmit: (data: SlideRowFormData) => Promise<void>;
   onCancel: () => void;
@@ -29,6 +30,13 @@ export interface SlideRowFormData {
   display_order: number;
   is_published: boolean;
   playlist_delay_seconds: number;
+  user_id: string | null;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
 }
 
 const ROW_TYPES = ['ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM'];
@@ -43,10 +51,32 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
     display_order: initialData?.display_order || 0,
     is_published: initialData?.is_published || false,
     playlist_delay_seconds: initialData?.playlist_delay_seconds ?? 0,
+    user_id: initialData?.user_id || null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  // Fetch users for the dropdown
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        if (data.status === 'success' && data.users) {
+          setUsers(data.users);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -255,6 +285,36 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
         </select>
         <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
           Pause duration between audio tracks in playlist mode
+        </p>
+      </div>
+
+      {/* User Ownership */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+          Row Visibility
+        </label>
+        <select
+          value={formData.user_id || ''}
+          onChange={(e) => setFormData({ ...formData, user_id: e.target.value || null })}
+          disabled={loadingUsers}
+          className="w-full px-4 py-2 rounded"
+          style={{
+            backgroundColor: 'var(--card-bg)',
+            color: 'var(--text-color)',
+            border: '1px solid var(--border-color)'
+          }}
+        >
+          <option value="">Public (visible to everyone)</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              Private to {user.name} ({user.email})
+            </option>
+          ))}
+        </select>
+        <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+          {formData.user_id
+            ? 'This row will only be visible to the selected user when logged in'
+            : 'This row will be visible to all users'}
         </p>
       </div>
 

@@ -18,6 +18,7 @@
     "db:reset:password": "tsx scripts/reset-admin-password.ts",
     "db:fix:schema": "tsx scripts/fix-users-schema.ts",
     "db:check": "tsx scripts/check-db-constraints.ts",
+    "db:migrate:user-ownership": "tsx scripts/run-user-ownership-migration.ts",
     "railway:init": "tsx scripts/railway-init.ts"
   },
   "dependencies": {
