@@ -85,19 +85,34 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     console.log('[MainContent] Filtering rows. Quick Slide Mode:', isQuickSlideMode);
     console.log('[MainContent] Total slide rows:', slideRows.length);
 
+    let rows: SlideRow[];
     if (isQuickSlideMode) {
       // Show only QUICKSLIDE rows
-      const quickslideRows = slideRows.filter(row => row.row_type === 'QUICKSLIDE');
-      console.log('[MainContent] QUICKSLIDE rows found:', quickslideRows.length);
-      quickslideRows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
-      return quickslideRows;
+      rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE');
+      console.log('[MainContent] QUICKSLIDE rows found:', rows.length);
+      rows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
     } else {
       // Show all rows EXCEPT QUICKSLIDE
-      const normalRows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE');
-      console.log('[MainContent] Normal rows (excluding QUICKSLIDE):', normalRows.length);
-      return normalRows;
+      rows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE');
+      console.log('[MainContent] Normal rows (excluding QUICKSLIDE):', rows.length);
     }
-  }, [slideRows, isQuickSlideMode]);
+
+    // Filter out rows that have zero visible slides (due to scheduling)
+    const rowsWithVisibleSlides = rows.filter(row => {
+      const slides = slidesCache[row.id] || [];
+      const visibleSlides = filterVisibleSlides(slides);
+      const hasVisibleSlides = visibleSlides.length > 0;
+
+      if (!hasVisibleSlides && slides.length > 0) {
+        console.log(`[MainContent] Hiding row "${row.title}" - all ${slides.length} slides filtered by schedule`);
+      }
+
+      return hasVisibleSlides || slides.length === 0; // Include rows not yet loaded
+    });
+
+    console.log('[MainContent] Rows with visible slides:', rowsWithVisibleSlides.length);
+    return rowsWithVisibleSlides;
+  }, [slideRows, isQuickSlideMode, slidesCache]);
 
   // Memoize icon sets (already parsed by API, no need to parse again)
   const iconSetsCache = useMemo(() => {

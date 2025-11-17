@@ -15,6 +15,8 @@ Ask me any questions you have, strictly one question at a time before we get sta
 
 # git add .&& git commit -m "general quick commit" && git push origin master
 
+
+Failed to create user
 Deployment failed. Please read ERROR.md in the _TEMP directory.
 
 cd "c:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app" && cmd /c "del \\\\?\\%CD%\\nul"
