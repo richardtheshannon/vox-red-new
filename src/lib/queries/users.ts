@@ -49,16 +49,19 @@ export async function getUserByEmail(email: string): Promise<UserWithPassword | 
 }
 
 // Create new user with bcrypt hashed password
-// Updated: 2025-11-16 - Added username compatibility for legacy production DB schema
+// Updated: 2025-11-17 - Set username to NULL for legacy production DB schema compatibility
 export async function createUser(data: CreateUserData): Promise<User> {
   const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS)
 
+  // Keep role as-is (lowercase) - production CHECK constraint uses lower(role)
+  // so both 'admin' and 'ADMIN' work, but we'll use lowercase to match existing data
+
   // Try with username column first (for production DB with legacy schema)
-  // If that fails, fall back to standard insert without username
+  // Set username to NULL to avoid UNIQUE constraint issues
   try {
     const sqlWithUsername = `
       INSERT INTO users (name, email, password_hash, role, username)
-      VALUES ($1, $2, $3, $4, $1)
+      VALUES ($1, $2, $3, $4, NULL)
       RETURNING id, name, email, role, created_at, updated_at
     `
 
