@@ -66,10 +66,10 @@ History
 
 vox-red-new
 /
-19daa0b8
+e9ec63cd
 Failed
 
-Nov 16, 2025, 4:09 PM
+Nov 16, 2025, 4:13 PM
 app.lilde.com
 Get Help
 Details
@@ -79,14 +79,14 @@ HTTP Logs
 Search build logs
 
 You reached the start of the range
-Nov 16, 2025, 4:09 PM
+Nov 16, 2025, 4:13 PM
  
 [Region: us-west1]
 ==============
 Using Nixpacks
 ==============
 
-context: wxtd-cluN
+context: f179-AGwL
 ╔════════ Nixpacks v1.38.0 ═══════╗
 ║ setup      │ nodejs_18, npm-9_x ║
 ║─────────────────────────────────║
@@ -103,7 +103,7 @@ load build definition from Dockerfile
 
 internal
 load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-224ms
+222ms
 
 internal
 load .dockerignore
@@ -118,21 +118,20 @@ load build context
 0ms
 
 stage-0
+RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d cached
+0ms
+
+stage-0
+COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
+0ms
+
+stage-0
 WORKDIR /app/ cached
 0ms
 
 stage-0
-COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
-16ms
-
-stage-0
-RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
-36s
-61 store paths deleted, 559.40 MiB freed
-
-stage-0
 COPY . /app/.
-84ms
+39ms
 
 stage-0
 RUN npm ci
@@ -141,11 +140,11 @@ Run `npm audit` for details.
 
 stage-0
 COPY . /app/.
-126ms
+125ms
 
 stage-0
 RUN npm run build
-18s
+19s
 npm warn config production Use `--omit=dev` instead.
 > nextjs-app@0.1.0 build
 > next build
@@ -155,9 +154,8 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
    ▲ Next.js 15.5.4
    Creating an optimized production build ...
- ✓ Compiled successfully in 10.8s
+ ✓ Compiled successfully in 10.3s
    Linting and checking validity of types ...
-Failed to compile.
 ./src/app/admin/slides/[id]/page.tsx
 68:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
 ./src/app/api/slides/import/route.ts
@@ -180,7 +178,6 @@ Failed to compile.
 126:54  Warning: 'updated_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
 ./src/app/api/users/route.ts
 10:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
-42:13  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
 ./src/app/layout.tsx
 18:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
 23:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
@@ -211,6 +208,18 @@ Failed to compile.
 123:6  Warning: React Hook useCallback has a missing dependency: 'stopPlaylist'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
 201:6  Warning: React Hook useCallback has an unnecessary dependency: 'handleAudioEnded'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+./src/app/api/users/route.ts:112:7
+Type error: Type 'string' is not assignable to type '"admin" | "user"'.
+
+  110 |       email: body.email.toLowerCase().trim(),
+  111 |       password: body.password,
+> 112 |       role: body.role,
+      |       ^
+  113 |     });
+  114 |
+  115 |     return NextResponse.json(
+Next.js build worker exited with code: 1 and signal: null
 Dockerfile:24
 -------------------
 22 |     # build phase
@@ -222,7 +231,7 @@ Dockerfile:24
 ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
 Error: Docker build failed
 You reached the end of the range
-Nov 16, 2025, 4:10 PM
+Nov 16, 2025, 4:14 PM
 
 
 vox-red-new | Railway

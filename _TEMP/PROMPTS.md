@@ -4,7 +4,7 @@ Lets get started fixing the PLAYLIST_TROUBLESHOOTING.md in the _TEMP directory.
 ---------------------------------------------------------------
 Lets develop only Phase 11 of the "USER_ACCOUNTS_DEVELOPMENT_PLAN.md" in the _TEMP directory. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
-Review USER_ACCOUNTS_DEVELOPMENT_PLAN.md in the _TEMP directory, we will be making so additional developments.
+Review USER_ACCOUNTS_README.md in the _TEMP directory, we will be making so additional developments.
 
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
@@ -33,6 +33,9 @@ Richard HighlineAdventures (Personal Plan) Not Premium
 richard the shannon, gmail (Personal Plan) Not Premium
 
 -------------------------------------------------------------------------
+
+set DATABASE_URL=postgresql://postgres:lmtHqTYDkfXPVSSItdmvGGmvdFSnhLer@yamabiko.proxy.rlwy.net:59122/railway
+npm run db:fix:schema
 
 arrow_circle_up, arrow_circle_down, arrow_circle_left, arrow_circle_right 
 these icons in the footer of the appplication should be set to navigate slides. so that left and right navigates the slides from left to right and up and down navigates the various rows of slides

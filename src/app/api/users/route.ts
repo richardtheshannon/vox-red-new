@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       name: body.name,
       email: body.email.toLowerCase().trim(),
       password: body.password,
-      role: body.role,
+      role: body.role as 'admin' | 'user',
     });
 
     return NextResponse.json(
