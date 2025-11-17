@@ -11,6 +11,7 @@ import { usePlaylist } from '@/contexts/PlaylistContext';
 import { Slide } from '@/lib/queries/slides';
 import { filterVisibleSlides } from '@/lib/utils/scheduleFilter';
 import { applyRandomization } from '@/lib/utils/slideRandomizer';
+import { useSession } from 'next-auth/react';
 
 interface MainContentProps {
   setSwiperRef: (swiper: SwiperType | null) => void;
@@ -53,6 +54,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Get session to monitor authentication state changes
+  const { data: session, status: sessionStatus } = useSession();
 
   // Get swiper context to register horizontal swipers
   const { setHorizontalSwiper, getHorizontalSwiper, activeRowId } = useSwiperContext();
@@ -135,12 +139,17 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     return cache;
   }, [slideRows]);
 
-  // Fetch published slide rows on mount
+  // Fetch published slide rows on mount and when session status changes
   useEffect(() => {
+    // Skip fetching if session is still loading
+    if (sessionStatus === 'loading') {
+      return;
+    }
+
     const fetchSlideRows = async () => {
       try {
         setLoading(true);
-        console.log('[MainContent] Fetching slide rows...');
+        console.log('[MainContent] Fetching slide rows... (sessionStatus:', sessionStatus, ')');
         const response = await fetch('/api/slides/rows?published=true', {
           // Enable caching for better performance
           next: { revalidate: 60 } // Revalidate every 60 seconds
@@ -154,6 +163,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             console.log(`  - ${row.title} (${row.row_type}) - Published: ${row.is_published}`);
           });
           setSlideRows(data.rows);
+          // Clear slides cache when refetching rows (to ensure fresh data)
+          setSlidesCache({});
 
           // Preload slides for first 2 rows for better UX
           if (data.rows.length > 0) {
@@ -176,7 +187,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     };
 
     fetchSlideRows();
-  }, []);
+  }, [sessionStatus]);
 
   // Set initial background image and video when first row's slides are loaded (ONCE only)
   useEffect(() => {
