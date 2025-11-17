@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
  * Updated: 2025-11-16 - Fixed role constraint compatibility
  */
 export async function POST(request: NextRequest) {
-  let body: any;
+  let body: { name?: string; email?: string; password?: string; role?: string } = {};
 
   try {
     // Require admin authentication
