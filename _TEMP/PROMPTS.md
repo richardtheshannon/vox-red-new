@@ -9,7 +9,7 @@ Review USER_ACCOUNTS_README.md in the _TEMP directory, we will be making so addi
 ---------------------------------------------------------------
 # Read CLAUDE.md  in the _TEMP directory add it to context.  Stop and warn me if our development might harm or break functionality or layouts. I am running "npm run dev" already on http://localhost:3000/ in another terminal. Warn me when I am at 75% of my limit. All edits should be as minimal as possible. Be surgical and precise. All updates should use as many existing systems and resources as possible and only introduce new installments when absolutely necessary.
 
-Ask me any questions you have, strictly one question at a time before we get started. 
+Ask me any questions you may have, strictly one question at a time before we get started. 
 
 # Lets get ready to push to railway, please run: npm run db:validate | Expected output: Should show "No pending migrations" or analyze the latest migration, and then run: npx tsc --noEmit | Final TypeScript Check
 

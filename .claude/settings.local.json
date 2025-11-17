@@ -54,7 +54,8 @@
       "Bash(npx next lint:*)",
       "Bash(cat:*)",
       "Bash(git ls-tree:*)",
-      "Bash(set DATABASE_URL=postgresql://postgres:lmtHqTYDkfXPVSSItdmvGGmvdFSnhLer@yamabiko.proxy.rlwy.net:59122/railway)"
+      "Bash(set DATABASE_URL=postgresql://postgres:lmtHqTYDkfXPVSSItdmvGGmvdFSnhLer@yamabiko.proxy.rlwy.net:59122/railway)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

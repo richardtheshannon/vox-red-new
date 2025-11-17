@@ -1,115 +1,197 @@
-Error creating user: error: new row for relation "users" violates check constraint "users_role_check"
-  file: 'execMain.c',
-    at async h (.next/server/app/api/auth/[...nextauth]/route.js:1:2446)
-    at async i (.next/server/app/api/auth/[...nextauth]/route.js:1:2520)
-  line: '2033',
-    at async l (.next/server/app/api/auth/[...nextauth]/route.js:5:9)
-    at async j (.next/server/app/api/users/route.js:1:7356)
-  routine: 'ExecConstraints'
-}
-    at async k (.next/server/app/api/users/route.js:1:3217) {
-  detail: 'Failing row contains (f2838653-ca95-4a28-b3cc-283d5a8eccf8, john@doe.com, null, John Doe, admin, 2025-11-17 14:20:37.743233, 2025-11-17 14:20:37.743233, $2b$10$9EEQZxretjq.akAKHAZize0wLAEGjjI3RJM8XjshQO1sEB3wCt41y).',
-  length: 386,
-  severity: 'ERROR',
-  hint: undefined,
-  code: '23514',
-  position: undefined,
-  internalPosition: undefined,
-  internalQuery: undefined,
-  where: undefined,
-  schema: 'public',
-  table: 'users',
-  column: undefined,
-  dataType: undefined,
-  constraint: 'users_role_check',
-Error stack: error: new row for relation "users" violates check constraint "users_role_check"
-    at /app/node_modules/pg/lib/client.js:545:17
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async h (/app/.next/server/app/api/auth/[...nextauth]/route.js:1:2446)
-    at async i (/app/.next/server/app/api/auth/[...nextauth]/route.js:1:2520)
-    at async l (/app/.next/server/app/api/auth/[...nextauth]/route.js:5:9)
-    at async j (/app/.next/server/app/api/users/route.js:1:7356)
-    at async rN.do (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:5:21042)
-    at async rN.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:5:25860)
-    at async k (/app/.next/server/app/api/users/route.js:1:3217)
-    at async rN.handleResponse (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:1:105568)
-Request body: {
-  "name": "John Doe",
-  "email": "john@doe.com",
-  "password": "Superculture1@",
-  "role": "admin"
-}
-    at async rN.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:5:25860)
-    at async k (/app/.next/server/app/api/users/route.js:1:3217)
-    at async i (/app/.next/server/app/api/auth/[...nextauth]/route.js:1:2520)
-    at /app/node_modules/pg/lib/client.js:545:17
-    at async l (/app/.next/server/app/api/auth/[...nextauth]/route.js:5:9)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async j (/app/.next/server/app/api/users/route.js:1:7356)
-    at async h (/app/.next/server/app/api/auth/[...nextauth]/route.js:1:2446)
-    at async rN.do (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:5:21042)
-Error stack: error: new row for relation "users" violates check constraint "users_role_check"
-  "email": "john@doe.com",
-  "password": "Superculture1@",
-    at async rN.handleResponse (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:1:105568)
-  "role": "admin"
-Request body: {
-}
-  "name": "John Doe",
-Error creating user: error: new row for relation "users" violates check constraint "users_role_check"
-    at async h (.next/server/app/api/auth/[...nextauth]/route.js:1:2446)
-    at async i (.next/server/app/api/auth/[...nextauth]/route.js:1:2520)
-    at async l (.next/server/app/api/auth/[...nextauth]/route.js:5:9)
-    at async j (.next/server/app/api/users/route.js:1:7356)
-    at async k (.next/server/app/api/users/route.js:1:3217) {
-  length: 386,
-  severity: 'ERROR',
-  code: '23514',
-  detail: 'Failing row contains (a992230d-33c7-4279-ad8b-4c81806c5cab, john@doe.com, null, John Doe, admin, 2025-11-17 14:22:56.311433, 2025-11-17 14:22:56.311433, $2b$10$33BPQNfe0j7pUo6vW5zvi.nfDQN7ICyjDld7zhAbOyG/kY0u3muA6).',
-  hint: undefined,
-  position: undefined,
-  internalPosition: undefined,
-  internalQuery: undefined,
-  where: undefined,
-  schema: 'public',
-  table: 'users',
-  column: undefined,
-  dataType: undefined,
-  constraint: 'users_role_check',
-  file: 'execMain.c',
-  line: '2033',
-  routine: 'ExecConstraints'
-}
+VOX-RED-NEW
 
 
-layout-2d4c96d5737cbddb.js:1 [AdminAuthGuard] User role: ADMIN Type: string
-layout-2d4c96d5737cbddb.js:1 [AdminAuthGuard] Access granted - user is admin
-new:1 The resource https://app.lilde.com/_next/static/css/e2c436fd740d88d7.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-/api/users:1  Failed to load resource: the server responded with a status of 500 ()
-new:1 The resource https://app.lilde.com/_next/static/css/e2c436fd740d88d7.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-layout-2d4c96d5737cbddb.js:1 [AdminAuthGuard] User role: ADMIN Type: string
-layout-2d4c96d5737cbddb.js:1 [AdminAuthGuard] Access granted - user is admin
-new:1 The resource https://app.lilde.com/_next/static/css/e2c436fd740d88d7.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-new:1 The resource https://app.lilde.com/_next/static/css/e2c436fd740d88d7.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+production
+Architecture
+Observability
+Logs
+Settings
 
 
-{name: "John Doe", email: "john@doe.com", password: "Superculture1@", role: "admin"}
-email
-: 
-"john@doe.com"
-name
-: 
-"John Doe"
-password
-: 
-"Superculture1@"
-role
-: 
-"admin"
 
-{
-    "status": "error",
-    "message": "Failed to create user",
-    "error": "new row for relation \"users\" violates check constraint \"users_role_check\"",
-    "stack": "error: new row for relation \"users\" violates check constraint \"users_role_check\"\n    at /app/node_modules/pg/lib/client.js:545:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async h (/app/.next/server/app/api/auth/[...nextauth]/route.js:1:2446)\n    at async i (/app/.next/server/app/api/auth/[...nextauth]/route.js:1:2520)\n    at async l (/app/.next/server/app/api/auth/[...nextauth]/route.js:5:9)\n    at async j (/app/.next/server/app/api/users/route.js:1:7356)\n    at async rN.do (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:5:21042)\n    at async rN.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:5:25860)\n    at async k (/app/.next/server/app/api/users/route.js:1:3217)\n    at async rN.handleResponse (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:1:105568)"
-}
+
+
+
+
+
+
+
+Activity
+
+
+vox-red-new
+Deployments
+Variables
+Metrics
+Settings
+app.lilde.com
+us-west2
+1 Replica
+
+
+
+
+History
+
+vox-red-new
+/
+bd7cc2c8
+Failed
+
+Nov 17, 2025, 9:50 AM
+app.lilde.com
+Get Help
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Search build logs
+
+You reached the start of the range
+Nov 17, 2025, 9:50 AM
+ 
+[Region: us-west1]
+==============
+Using Nixpacks
+==============
+
+context: k4p5-0g1c
+╔════════ Nixpacks v1.38.0 ═══════╗
+║ setup      │ nodejs_18, npm-9_x ║
+║─────────────────────────────────║
+║ install    │ npm ci             ║
+║─────────────────────────────────║
+║ build      │ npm run build      ║
+║─────────────────────────────────║
+║ start      │ npm run start      ║
+╚═════════════════════════════════╝
+
+internal
+load build definition from Dockerfile
+0ms
+
+internal
+load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
+218ms
+
+internal
+load .dockerignore
+0ms
+
+internal
+load build context
+0ms
+
+stage-0
+FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
+10ms
+
+stage-0
+RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d cached
+0ms
+
+stage-0
+COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
+0ms
+
+stage-0
+WORKDIR /app/ cached
+0ms
+
+stage-0
+COPY . /app/.
+171ms
+
+stage-0
+RUN npm ci
+15s
+Run `npm audit` for details.
+
+stage-0
+COPY . /app/.
+212ms
+
+stage-0
+RUN npm run build
+22s
+npm warn config production Use `--omit=dev` instead.
+> nextjs-app@0.1.0 build
+> next build
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+   ▲ Next.js 15.5.4
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 13.6s
+   Linting and checking validity of types ...
+Failed to compile.
+./src/app/admin/slides/[id]/page.tsx
+67:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+./src/app/api/slides/import/route.ts
+3:10  Warning: 'createSlideRow' is defined but never used.  @typescript-eslint/no-unused-vars
+./src/app/api/slides/rows/[id]/route.ts
+85:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+85:17  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+85:29  Warning: 'slide_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+./src/app/api/slides/rows/[id]/slides/[slideId]/route.ts
+139:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+139:17  Warning: 'slide_row_id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+139:31  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+139:43  Warning: 'view_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+139:55  Warning: 'completion_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+./src/app/api/users/[id]/route.ts
+126:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+126:17  Warning: 'password' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+126:27  Warning: 'password_hash' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+126:42  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+126:54  Warning: 'updated_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+./src/app/api/users/route.ts
+10:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+./src/app/layout.tsx
+19:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+24:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+29:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+33:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+37:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+41:9  Warning: Do not include stylesheets manually. See: https://nextjs.org/docs/messages/no-css-tags  @next/next/no-css-tags
+./src/components/EssentialAudioPlayer.tsx
+21:3  Warning: 'scratch' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+229:19  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+./src/components/MainContent.tsx
+52:53  Warning: 'activeRowId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+64:11  Warning: 'stopPlaylist' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+173:6  Warning: React Hook useEffect has a missing dependency: 'loadSlidesForRow'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+199:6  Warning: React Hook useEffect has a missing dependency: 'updateActiveSlideData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+219:6  Warning: React Hook useEffect has a missing dependency: 'loadSlidesForRow'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+435:6  Warning: React Hook React.useEffect has a missing dependency: 'updateActiveSlideData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+438:133  Warning: 'enableAudioRef' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+./src/components/SpaAudioPlayer.tsx
+24:6  Warning: React Hook useEffect has a missing dependency: 'loadActiveTrack'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+./src/components/admin/slides/SlideEditor.tsx
+3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+47:10  Warning: 'showPreview' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+47:23  Warning: 'setShowPreview' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+./src/components/admin/slides/SlideRowList.tsx
+248:32  Warning: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
+./src/contexts/PlaylistContext.tsx
+123:6  Warning: React Hook useCallback has a missing dependency: 'stopPlaylist'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+201:6  Warning: React Hook useCallback has an unnecessary dependency: 'handleAudioEnded'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+./src/lib/queries/slideRows.ts
+50:15  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Dockerfile:24
+-------------------
+22 |     # build phase
+23 |     COPY . /app/.
+24 | >>> RUN --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-node_modules/cache,target=/app/node_modules/.cache npm run build
+25 |
+26 |
+-------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
+Error: Docker build failed
+You reached the end of the range
+Nov 17, 2025, 9:51 AM
+
+
+VOX-RED-NEW | Railway
