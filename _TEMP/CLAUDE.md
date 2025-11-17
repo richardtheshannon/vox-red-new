@@ -12,7 +12,6 @@
 npm run dev              # Dev server (http://localhost:3000)
 npm run build            # Production build
 npx tsc --noEmit         # TypeScript validation
-npm run db:validate      # Validate database migrations
 ```
 
 **URLs**: http://localhost:3000/ | /admin | /login | /setup
@@ -25,23 +24,23 @@ npm run db:validate      # Validate database migrations
 - **Database**: PostgreSQL (direct `pg` client, no ORM)
 - **Authentication**: NextAuth.js 4.24.13 (JWT, 30-day sessions)
 - **UI**: Swiper.js 12.0.2, Tiptap editor, Tailwind CSS, Material Symbols
-- **State**: ThemeContext (localStorage), SwiperContext, PlaylistContext
 
 ---
 
-## Architecture Overview
+## Architecture
 
 ### Frontend (/)
-- **50px Icon Border**: Fixed header/footer/sidebars (z-20) on all pages
+- **50px Icon Border**: Fixed header/footer/sidebars (z-20)
 - **Auth-Gated Icons**: Private features hidden unless authenticated
 - **Navigation**: Vertical Swiper (rows) + Horizontal Swiper (slides)
 - **Background System**: Full-viewport images with theme overlay
-- **Spa Mode**: Background music player with playlist support
+- **User-Specific Content**: Private rows visible only to assigned users
 
 ### Admin (/admin)
 - **Protected**: Requires authentication + admin role
-- **Full CRUD**: Slides, spa tracks, users (admin only)
+- **Full CRUD**: Slides, slide rows, spa tracks, users
 - **Tiptap Editor**: Rich text editing for slide content
+- **User Assignment**: Assign rows to specific users (private rows)
 
 ---
 
@@ -58,6 +57,8 @@ created_at, updated_at
 ```sql
 id, title, description, row_type, is_published, display_order
 icon_set (JSON), theme_color, slide_count, playlist_delay_seconds
+user_id (UUID, nullable) - Owner of private row (null = public)
+created_by (UUID, nullable), created_at, updated_at
 ```
 
 ### slides
@@ -67,7 +68,7 @@ layout_type ('STANDARD'|'OVERFLOW'|'MINIMAL')
 audio_url, image_url, video_url
 content_theme ('light'|'dark'|null), title_bg_opacity (0-1)
 is_published, publish_time_start/end, publish_days (JSON [0-6])
-temp_unpublish_until (timestamp)
+temp_unpublish_until (timestamp), icon_set (JSON, nullable)
 ```
 
 ### spa_tracks
@@ -80,32 +81,34 @@ volume (0-100), publish_time_start/end, publish_days (JSON)
 
 ## Key Files
 
-### Core Application
+### Core
 - `src/app/layout.tsx` - Root layout with Providers
-- `src/components/Providers.tsx` - SessionProvider + ThemeProvider
 - `src/app/page.tsx` - Main frontend page
-- `src/components/MainContent.tsx` - Slide rendering
-
-### Icon Bars (Auth-Gated)
-- `src/components/TopIconBar.tsx` - Header icons
-- `src/components/BottomIconBar.tsx` - Footer icons
-- `src/components/LeftIconBar.tsx` - Left sidebar icons
-- `src/components/RightIconBar.tsx` - Right sidebar icons
+- `src/components/MainContent.tsx` - Slide rendering + user filtering
+- `src/components/Providers.tsx` - SessionProvider + ThemeProvider
 
 ### Authentication
 - `src/lib/auth.ts` - `requireAuth()`, `requireAdmin()`
 - `src/lib/authOptions.ts` - NextAuth config
-- `src/app/login/page.tsx` - Login page (server component)
+- `src/app/login/page.tsx` - Login page
 - `src/app/setup/page.tsx` - First admin setup
+
+### Database
+- `src/lib/db.ts` - PostgreSQL connection
+- `src/lib/queries/slideRows.ts` - Slide row CRUD + user filtering
+- `src/lib/queries/slides.ts` - Slide CRUD operations
+- `src/lib/queries/users.ts` - User management
+- `src/lib/queries/spaTracks.ts` - Spa track CRUD
+
+### Admin UI
+- `src/components/admin/slides/SlideRowForm.tsx` - Row editor (includes user assignment)
+- `src/components/admin/slides/SlideEditor.tsx` - Slide editor with Tiptap
+- `src/components/admin/slides/SlideRowList.tsx` - Row management
 
 ### Contexts
 - `src/contexts/ThemeContext.tsx` - Persistent theme (localStorage)
 - `src/contexts/SwiperContext.tsx` - Navigation context
 - `src/contexts/PlaylistContext.tsx` - Playlist state
-
-### Database
-- `src/lib/db.ts` - PostgreSQL connection
-- `src/lib/queries/*.ts` - CRUD operations (users, slides, slideRows, spaTracks)
 
 ---
 
@@ -126,62 +129,45 @@ NEXTAUTH_URL="http://localhost:3000"       # Production: https://your-app.railwa
 
 ---
 
-## Authentication & Icon Visibility
+## Key Features
 
-### Public Icons (Always Visible)
-```
-home, spa, playlist_play, light_mode/dark_mode, menu, group
-arrow_circle_up, arrow_circle_down, arrow_circle_left, arrow_circle_right
-```
+### User-Specific Private Rows (January 2025)
+**Visibility Rules**:
+- **Public rows** (`user_id = null`): Visible to everyone
+- **Private rows** (`user_id = [UUID]`): Visible only to assigned user when logged in
+- **Admin view**: Admins see ALL rows (public + everyone's private rows)
 
-### Private Icons (Auth Required)
-```
-settings, refresh, comment, bottom_panel_open, open_with
-atr, credit_card, payment, tag, analytics, photo_library, videocam
-```
-
-### Implementation Pattern
+**Implementation**:
 ```typescript
-import { useSession } from 'next-auth/react'
-
-const { data: session } = useSession()
-
-// Conditional rendering
-{session && <PrivateIcon />}
+// Server-side filtering in getAllSlideRows()
+// src/lib/queries/slideRows.ts
+- Not logged in: Only public published rows
+- Logged in user: Public rows + their private rows
+- Admin: ALL rows
 ```
 
-### Server-Side Auth
+**Admin UI**: `/admin/slides` → Create/Edit Row → "Row Visibility" dropdown
+
+### Authentication & Authorization
 ```typescript
+// Server-side protection
 import { requireAuth, requireAdmin } from '@/lib/auth'
-
 const session = await requireAuth()    // Any authenticated user
 const session = await requireAdmin()   // Admin role only
+
+// Client-side auth-gating
+import { useSession } from 'next-auth/react'
+const { data: session } = useSession()
+{session && <PrivateContent />}
 ```
 
----
-
-## Theme System
-
-### Usage
+### Theme System
 ```typescript
 import { useTheme } from '@/contexts/ThemeContext'
-
-const { theme, toggleTheme } = useTheme()
-// theme: 'light' | 'dark'
+const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
 ```
 
-### CSS Variables
-```css
-var(--text-color)       /* Main text */
-var(--bg-color)         /* Background */
-var(--card-bg)          /* Cards */
-var(--border-color)     /* Borders */
-var(--icon-color)       /* Icons */
-```
-
----
-
-## Key Features
+**CSS Variables**: `--text-color`, `--bg-color`, `--card-bg`, `--border-color`, `--icon-color`
 
 ### Background System
 - Full-viewport backgrounds via `image_url`
@@ -197,11 +183,7 @@ var(--icon-color)       /* Icons */
 ### Dynamic Scheduling
 - Time windows: `publish_time_start/end` (supports overnight spans)
 - Day restrictions: `publish_days` [0=Sun, 6=Sat]
-- Client-side filtering in MainContent
-
-### YouTube Videos
-- Supports: `youtube.com/watch?v=`, `youtu.be/`, raw IDs
-- Modes: Cover (full-screen) | Contained (60px padding)
+- Temporary unpublish: `temp_unpublish_until`
 
 ---
 
@@ -209,9 +191,26 @@ var(--icon-color)       /* Icons */
 
 ### Authentication
 ```
-POST /api/auth/signin          - Login
-GET  /api/auth/session         - Current session
-POST /api/setup                - Create first admin
+POST /api/auth/signin     - Login
+GET  /api/auth/session    - Current session
+POST /api/setup           - Create first admin
+```
+
+### Slide Rows (User-Filtered)
+```
+GET    /api/slides/rows                - List rows (user-filtered)
+POST   /api/slides/rows                - Create row (supports user_id)
+GET    /api/slides/rows/[id]           - Get single row
+PATCH  /api/slides/rows/[id]           - Update row (supports user_id)
+DELETE /api/slides/rows/[id]           - Delete row
+```
+
+### Slides
+```
+GET    /api/slides/rows/[id]/slides          - List slides
+POST   /api/slides/rows/[id]/slides          - Create slide
+PATCH  /api/slides/rows/[id]/slides/[slideId] - Update slide
+DELETE /api/slides/rows/[id]/slides/[slideId] - Delete slide
 ```
 
 ### Users (Admin Only)
@@ -223,24 +222,6 @@ DELETE /api/users/[id]         - Delete user
 POST   /api/users/[id]/password - Update password
 ```
 
-### Slides
-```
-GET    /api/slides/rows                      - List rows
-GET    /api/slides/rows/[id]/slides          - List slides
-POST   /api/slides/rows/[id]/slides          - Create slide
-PATCH  /api/slides/rows/[id]/slides/[slideId] - Update slide
-DELETE /api/slides/rows/[id]/slides/[slideId] - Delete slide
-```
-
-### Spa Tracks
-```
-GET    /api/spa/tracks         - List tracks
-GET    /api/spa/tracks/active  - Active tracks
-POST   /api/spa/tracks         - Create track
-PATCH  /api/spa/tracks/[id]    - Update track
-DELETE /api/spa/tracks/[id]    - Delete track
-```
-
 **Response Format**: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 
 ---
@@ -249,7 +230,6 @@ DELETE /api/spa/tracks/[id]    - Delete track
 
 ### Safe Body Content Rendering
 ```typescript
-// ALWAYS use fallback for optional body_content
 dangerouslySetInnerHTML={{ __html: slide.body_content || '' }}
 ```
 
@@ -263,24 +243,18 @@ const user = await createUser({
   password: 'password123',  // Auto-hashed
   role: 'ADMIN'             // Uppercase for production
 })
-
-await updateUserPassword(userId, newPassword)  // Auto-hashed
 ```
 
-### Auth-Gated Components
+### User-Specific Row Creation
 ```typescript
-import { useSession } from 'next-auth/react'
+import { createSlideRow } from '@/lib/queries/slideRows'
 
-export default function MyComponent() {
-  const { data: session } = useSession()
-
-  return (
-    <>
-      <PublicContent />
-      {session && <PrivateContent />}
-    </>
-  )
-}
+const row = await createSlideRow({
+  title: 'Personal Meditation',
+  row_type: 'ROUTINE',
+  is_published: true,
+  user_id: 'user-uuid-here'  // null for public
+})
 ```
 
 ---
@@ -298,89 +272,88 @@ export default function MyComponent() {
 
 ---
 
-## Production Deployment (Railway)
+## Railway Deployment
 
-### Pre-Deploy Checklist
+### Pre-Deploy
 ```bash
-npm run db:validate      # Validate migrations
 npx tsc --noEmit        # 0 TypeScript errors
-npm run build           # Must succeed
 git add . && git commit -m "..." && git push origin master
 ```
 
-### Environment Variables
+### Auto-Deploy Process
+1. Push to GitHub → Railway auto-deploys
+2. Runs `npm run build` (must pass TypeScript + ESLint)
+3. Runs `npm start` → executes `railway:init`
+4. Migrations run automatically (safe - uses `IF NOT EXISTS`)
+5. App starts
+
+### Environment Variables (Railway)
 ```env
 DATABASE_URL=postgresql://...              # Auto-provided by Railway
 NEXTAUTH_URL=https://your-app.railway.app
 NEXTAUTH_SECRET=<strong-secret>            # openssl rand -base64 32
 ```
 
-### Admin Tools
+### Database Scripts
 ```bash
-# Create admin (bypasses /setup)
-set DATABASE_URL=postgresql://...
-npm run db:seed:admin
-
-# Reset admin password
-npm run db:reset:password
-
-# Check database schema
-npm run db:check
-npm run db:validate
-
-# Fix schema mismatch
-npm run db:fix:schema
+npm run db:seed:admin              # Create admin user
+npm run db:reset:password          # Reset admin password
+npm run db:migrate:user-ownership  # Run user ownership migration manually
+railway run npm run [script]       # Run any script on Railway DB
 ```
+
+---
+
+## Recent Updates
+
+### User-Specific Private Rows (January 17, 2025)
+**Feature**: Assign slide rows to specific users for personalized content
+
+**Changes**:
+- Added `user_id` column to `slide_rows` table (nullable, foreign key to `users.id`)
+- Server-side filtering in `getAllSlideRows()` based on user ownership and role
+- Admin UI: "Row Visibility" dropdown in SlideRowForm (Public or assign to user)
+- Backward compatible: All existing rows are public (`user_id = null`)
+
+**Files Modified**: 7 files
+- `scripts/migrations/add-user-ownership.sql` - Database migration
+- `scripts/railway-init.ts` - Auto-migration on deployment
+- `src/lib/queries/slideRows.ts` - User filtering logic
+- `src/app/api/slides/rows/route.ts` - Session-based API filtering
+- `src/components/admin/slides/SlideRowForm.tsx` - User assignment UI
+- `package.json` - Added migration script
+
+**Impact**: Users only see public rows + their assigned private rows. Admins see all rows.
+
+### Authentication-Based Icon Visibility (January 2025)
+- Frontend icons now auth-gated using `useSession()`
+- Public icons always visible (navigation, theme, login)
+- Private icons require authentication (settings, admin features)
+
+### Persistent Theme + Session (January 2025)
+- Theme uses localStorage (was sessionStorage)
+- 30-day session persistence
+- Login auto-redirects if authenticated
 
 ---
 
 ## Troubleshooting
 
 ### Sessions Not Persisting
-- **Fix**: Generate strong NEXTAUTH_SECRET: `openssl rand -base64 32`
-- Restart dev server after changing .env
+**Fix**: Generate strong NEXTAUTH_SECRET: `openssl rand -base64 32`
 
-### Icons Not Showing/Hiding Based on Auth
-- **Verify**: Check browser console for session state
-- **Test**: Login via group icon → private icons should appear
-- **Pattern**: All icon bars use `{session && <Icon />}` pattern
-
-### Theme Resets on Navigation
-- **Status**: Fixed (Jan 2025) - uses localStorage at root level
-- **Verify**: `src/components/Providers.tsx` has ThemeProvider
+### Icons Not Showing/Hiding
+**Verify**: Check browser console for session state
+**Pattern**: All icon bars use `{session && <Icon />}`
 
 ### Cannot Access /setup
-- **Cause**: Users already exist
-- **Fix**: Use `npm run db:seed:admin` instead
+**Cause**: Users already exist
+**Fix**: Use `npm run db:seed:admin` instead
+
+### Deployment Failed (ESLint)
+**Common**: Check for `any` types, unused variables
+**Fix**: `npx eslint [file]` locally before pushing
 
 ---
 
-## Recent Updates
-
-### Authentication-Based Icon Visibility (January 2025)
-**Changes**:
-- Frontend icons now auth-gated using `useSession()`
-- Public icons always visible (navigation, theme, login)
-- Private icons require authentication (settings, admin features)
-- Zero breaking changes - all features work when authenticated
-
-**Files Changed**: 4 files
-- `src/components/TopIconBar.tsx` - settings icon
-- `src/components/BottomIconBar.tsx` - refresh, comment, bottom_panel_open
-- `src/components/LeftIconBar.tsx` - open_with
-- `src/components/RightIconBar.tsx` - atr, credit_card, payment, tag, analytics, photo_library, videocam
-
-**Impact**: Clean public-facing frontend, authenticated users see full features
-
-### Persistent Theme + Session (January 2025)
-**Changes**:
-- Theme uses localStorage (was sessionStorage)
-- Single root-level ThemeProvider
-- 30-day session persistence
-- Login auto-redirects if authenticated
-
-**Impact**: Theme and sessions persist across browser restarts
-
----
-
-**Status**: Production Ready | **Last Updated**: January 2025
+**Status**: Production Ready | **Last Updated**: January 17, 2025

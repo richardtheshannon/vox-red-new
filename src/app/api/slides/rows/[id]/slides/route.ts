@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSlidesForRow, createSlide } from '@/lib/queries/slides';
+import { getSlidesForRow, createSlide, getNextPosition } from '@/lib/queries/slides';
 import { getSlideRowById } from '@/lib/queries/slideRows';
 
 /**
@@ -138,8 +138,7 @@ export async function POST(
     // If position not provided, get the next available position
     let position = body.position;
     if (!position) {
-      const existingSlides = await getSlidesForRow(id);
-      position = existingSlides.length + 1;
+      position = await getNextPosition(id);
     }
 
     const newSlide = await createSlide({
