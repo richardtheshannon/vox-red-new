@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
  * Body: { name, email, password, role }
  * Creates a new user
  * Requires admin authentication
+ * Updated: 2025-11-16 - Fixed role constraint compatibility
  */
 export async function POST(request: NextRequest) {
   try {

@@ -51,13 +51,13 @@ async function fixRoleConstraint() {
     console.log('✅ Constraint dropped')
     console.log('')
 
-    // Add new flexible constraint that accepts both cases
+    // Add new flexible constraint that accepts ALL case variations
     console.log('🔄 Adding flexible role constraint...')
     await client.query(`
       ALTER TABLE users ADD CONSTRAINT users_role_check
-      CHECK (role IN ('admin', 'user', 'moderator', 'ADMIN', 'USER', 'MODERATOR'));
+      CHECK (LOWER(role) IN ('admin', 'user', 'moderator'));
     `)
-    console.log('✅ New constraint added (accepts both uppercase and lowercase)')
+    console.log('✅ New constraint added (accepts any case: admin, ADMIN, Admin, etc.)')
     console.log('')
 
     console.log('🎉 Role constraint fix completed!')
