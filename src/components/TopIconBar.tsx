@@ -3,6 +3,7 @@ import type { Swiper as SwiperType } from 'swiper';
 import type { Slide } from '@/lib/queries/slides';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePlaylist } from '../contexts/PlaylistContext';
+import { useSession } from 'next-auth/react';
 
 interface TopIconBarProps {
   hasBackgroundImage?: boolean;
@@ -19,6 +20,7 @@ export default function TopIconBar({
   hasAudioSlides = false,
   getPlaylistData
 }: TopIconBarProps) {
+  const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
   const { isPlaylistActive, isPaused, startPlaylist, pausePlaylist, resumePlaylist } = usePlaylist();
 
@@ -92,9 +94,11 @@ export default function TopIconBar({
         )}
       </div>
       <div className="flex items-center">
-        <Link href="/login">
-          <span className="material-symbols-outlined" title="Settings">settings</span>
-        </Link>
+        {session && (
+          <Link href="/login">
+            <span className="material-symbols-outlined" title="Settings">settings</span>
+          </Link>
+        )}
         <span
           className="material-symbols-outlined cursor-pointer hover:opacity-70"
           onClick={toggleTheme}
