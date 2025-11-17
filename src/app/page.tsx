@@ -14,10 +14,14 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { PlaylistProvider } from '@/contexts/PlaylistContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
 import LoginModal from '@/components/LoginModal';
+import LogoutModal from '@/components/LogoutModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import SpaAudioPlayer from '@/components/SpaAudioPlayer';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
+  const { data: session } = useSession();
+
   // Vertical swiper (for rows)
   const verticalSwiperRef = useRef<SwiperType | null>(null);
 
@@ -39,6 +43,9 @@ export default function Home() {
 
   // Login Modal state
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // Logout Modal state
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Quick Slide Mode state (toggle between all rows and Quick Slide row only)
   const [isQuickSlideMode, setIsQuickSlideMode] = useState(false);
@@ -131,9 +138,13 @@ export default function Home() {
     window.location.reload();
   };
 
-  // Handle Login Modal
+  // Handle Login/Logout Modal
   const handleGroupClick = () => {
-    setIsLoginModalOpen(true);
+    if (session) {
+      setIsLogoutModalOpen(true);
+    } else {
+      setIsLoginModalOpen(true);
+    }
   };
 
   // Toggle Quick Slide Mode
@@ -297,6 +308,12 @@ export default function Home() {
         <LoginModal
           isOpen={isLoginModalOpen}
           onClose={() => setIsLoginModalOpen(false)}
+        />
+
+        {/* Logout Modal */}
+        <LogoutModal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
         />
 
         {/* Unpublish Confirmation Dialog */}

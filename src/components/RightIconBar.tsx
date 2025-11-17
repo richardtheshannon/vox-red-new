@@ -20,7 +20,7 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
         <span
           className="material-symbols-outlined cursor-pointer hover:opacity-70"
           onClick={onGroupClick}
-          title="Login"
+          title={session ? "Logout" : "Login"}
         >
           group
         </span>
