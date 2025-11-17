@@ -219,6 +219,17 @@ function SlideItem({
                     Unpublished
                   </span>
                 )}
+                {slide.temp_unpublish_until && new Date(slide.temp_unpublish_until) > new Date() && (
+                  <span
+                    className="px-2 py-0.5 text-xs"
+                    style={{
+                      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                      color: '#22c55e',
+                    }}
+                  >
+                    Temp Hidden
+                  </span>
+                )}
               </div>
               {slide.subtitle && (
                 <p className="text-xs truncate" style={{ color: 'var(--secondary-text)' }}>
@@ -339,6 +350,7 @@ export default function SlideManager({
   const [localSlides, setLocalSlides] = useState<Slide[]>(slides);
   const [selectedSlideIds, setSelectedSlideIds] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [republishLoading, setRepublishLoading] = useState(false);
 
   // Update local slides when prop changes (e.g., after a delete or external update)
   useEffect(() => {
@@ -439,6 +451,38 @@ export default function SlideManager({
     }
   };
 
+  // Bulk republish temporarily unpublished slides
+  const handleBulkRepublishTemp = async () => {
+    try {
+      setRepublishLoading(true);
+      const response = await fetch(`/api/slides/rows/${row.id}/slides/bulk-republish-temp`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to republish slides');
+      }
+
+      // Show success message
+      alert(`Successfully republished ${data.count} slide(s)`);
+
+      // Refresh to get updated data
+      await onRefresh();
+    } catch (err) {
+      console.error('Error republishing slides:', err);
+      alert('Failed to republish slides. Please try again.');
+    } finally {
+      setRepublishLoading(false);
+    }
+  };
+
+  // Count temp-unpublished slides
+  const tempUnpublishedCount = localSlides.filter(
+    slide => slide.temp_unpublish_until && new Date(slide.temp_unpublish_until) > new Date()
+  ).length;
+
   return (
     <div className="space-y-6">
       {/* Header with Bulk Actions */}
@@ -511,6 +555,23 @@ export default function SlideManager({
                   }}
                 >
                   {bulkActionLoading ? 'Unpublishing...' : 'Unpublish Selected'}
+                </button>
+              </>
+            )}
+
+            {tempUnpublishedCount > 0 && (
+              <>
+                <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--border-color)' }} />
+                <button
+                  onClick={handleBulkRepublishTemp}
+                  disabled={republishLoading}
+                  className="px-4 py-1.5 text-sm transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: '#22c55e',
+                    color: 'white',
+                  }}
+                >
+                  {republishLoading ? 'Republishing...' : `Republish All Temp-Unpublished (${tempUnpublishedCount})`}
                 </button>
               </>
             )}
