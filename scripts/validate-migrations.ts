@@ -29,6 +29,10 @@ const expectedColumns: ColumnCheck[] = [
   { table: 'slide_rows', column: 'title', description: 'Core table: slide_rows' },
   { table: 'slide_rows', column: 'row_type', description: 'Core table: slide_rows' },
   { table: 'slide_rows', column: 'playlist_delay_seconds', description: 'Playlist delay feature (Nov 2025)' },
+  { table: 'slide_rows', column: 'randomize_enabled', description: 'Slide randomization feature (Jan 2025)' },
+  { table: 'slide_rows', column: 'randomize_count', description: 'Slide randomization feature (Jan 2025)' },
+  { table: 'slide_rows', column: 'randomize_interval', description: 'Slide randomization feature (Jan 2025)' },
+  { table: 'slide_rows', column: 'randomize_seed', description: 'Slide randomization feature (Jan 2025)' },
 
   { table: 'slides', column: 'id', description: 'Core table: slides' },
   { table: 'slides', column: 'title', description: 'Core table: slides' },
@@ -55,6 +59,8 @@ const expectedColumns: ColumnCheck[] = [
 
 const expectedConstraints: ConstraintCheck[] = [
   { table: 'slide_rows', constraint: 'slide_rows_playlist_delay_seconds_range', description: 'Playlist delay range: 0-45 seconds' },
+  { table: 'slide_rows', constraint: 'check_randomize_count', description: 'Randomize count must be >= 1 if set' },
+  { table: 'slide_rows', constraint: 'check_randomize_interval', description: 'Randomize interval must be hourly/daily/weekly' },
 ]
 
 async function validateMigrations() {

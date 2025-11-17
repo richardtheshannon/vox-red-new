@@ -15,6 +15,10 @@ export interface SlideRow {
   playlist_delay_seconds: number
   created_by?: string
   user_id?: string | null // User who owns this row (null = public)
+  randomize_enabled: boolean
+  randomize_count?: number | null
+  randomize_interval?: 'hourly' | 'daily' | 'weekly' | null
+  randomize_seed?: number | null
   created_at: Date
   updated_at: Date
 }
@@ -30,6 +34,10 @@ export interface CreateSlideRowData {
   playlist_delay_seconds?: number
   created_by?: string
   user_id?: string | null
+  randomize_enabled?: boolean
+  randomize_count?: number | null
+  randomize_interval?: 'hourly' | 'daily' | 'weekly' | null
+  randomize_seed?: number | null
 }
 
 export interface UpdateSlideRowData {
@@ -42,6 +50,10 @@ export interface UpdateSlideRowData {
   is_published?: boolean
   playlist_delay_seconds?: number
   user_id?: string | null
+  randomize_enabled?: boolean
+  randomize_count?: number | null
+  randomize_interval?: 'hourly' | 'daily' | 'weekly' | null
+  randomize_seed?: number | null
 }
 
 // Get all slide rows
@@ -92,8 +104,8 @@ export async function getSlideRowById(id: string): Promise<SlideRow | null> {
 // Create new slide row
 export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow> {
   const sql = `
-    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by, user_id, randomize_enabled, randomize_count, randomize_interval, randomize_seed)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
     RETURNING *
   `
 
@@ -108,6 +120,10 @@ export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow
     data.playlist_delay_seconds ?? 0,
     data.created_by || null,
     data.user_id || null,
+    data.randomize_enabled ?? false,
+    data.randomize_count || null,
+    data.randomize_interval || null,
+    data.randomize_seed || null,
   ])
 
   if (!row) throw new Error('Failed to create slide row')
@@ -161,6 +177,22 @@ export async function updateSlideRow(id: string, data: UpdateSlideRowData): Prom
   if (data.user_id !== undefined) {
     fields.push(`user_id = $${paramCount++}`)
     values.push(data.user_id)
+  }
+  if (data.randomize_enabled !== undefined) {
+    fields.push(`randomize_enabled = $${paramCount++}`)
+    values.push(data.randomize_enabled)
+  }
+  if (data.randomize_count !== undefined) {
+    fields.push(`randomize_count = $${paramCount++}`)
+    values.push(data.randomize_count)
+  }
+  if (data.randomize_interval !== undefined) {
+    fields.push(`randomize_interval = $${paramCount++}`)
+    values.push(data.randomize_interval)
+  }
+  if (data.randomize_seed !== undefined) {
+    fields.push(`randomize_seed = $${paramCount++}`)
+    values.push(data.randomize_seed)
   }
 
   if (fields.length === 0) {

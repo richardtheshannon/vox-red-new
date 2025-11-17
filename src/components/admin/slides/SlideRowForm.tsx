@@ -15,6 +15,9 @@ interface SlideRowFormProps {
     is_published: boolean;
     playlist_delay_seconds?: number;
     user_id?: string | null;
+    randomize_enabled?: boolean;
+    randomize_count?: number | null;
+    randomize_interval?: 'hourly' | 'daily' | 'weekly' | null;
   };
   onSubmit: (data: SlideRowFormData) => Promise<void>;
   onCancel: () => void;
@@ -31,6 +34,9 @@ export interface SlideRowFormData {
   is_published: boolean;
   playlist_delay_seconds: number;
   user_id: string | null;
+  randomize_enabled: boolean;
+  randomize_count: number | null;
+  randomize_interval: 'hourly' | 'daily' | 'weekly' | null;
 }
 
 interface User {
@@ -52,6 +58,9 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
     is_published: initialData?.is_published || false,
     playlist_delay_seconds: initialData?.playlist_delay_seconds ?? 0,
     user_id: initialData?.user_id || null,
+    randomize_enabled: initialData?.randomize_enabled || false,
+    randomize_count: initialData?.randomize_count || null,
+    randomize_interval: initialData?.randomize_interval || null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -87,6 +96,16 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
 
     if (!formData.row_type) {
       newErrors.row_type = 'Row type is required';
+    }
+
+    // Validate randomization fields
+    if (formData.randomize_enabled) {
+      if (!formData.randomize_count || formData.randomize_count < 1) {
+        newErrors.randomize_count = 'Must be at least 1 when randomization is enabled';
+      }
+      if (!formData.randomize_interval) {
+        newErrors.randomize_interval = 'Interval is required when randomization is enabled';
+      }
     }
 
     setErrors(newErrors);
@@ -316,6 +335,96 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
             ? 'This row will only be visible to the selected user when logged in'
             : 'This row will be visible to all users'}
         </p>
+      </div>
+
+      {/* Slide Randomization */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+          Slide Randomization
+        </label>
+        <div className="space-y-4">
+          {/* Enable Randomization Checkbox */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.randomize_enabled}
+              onChange={(e) => setFormData({
+                ...formData,
+                randomize_enabled: e.target.checked,
+                // Reset fields when disabling
+                randomize_count: e.target.checked ? formData.randomize_count : null,
+                randomize_interval: e.target.checked ? formData.randomize_interval : null,
+              })}
+              className="cursor-pointer"
+            />
+            <span style={{ color: 'var(--text-color)' }}>Enable slide randomization</span>
+          </label>
+
+          {/* Conditional Fields - Only show when randomization is enabled */}
+          {formData.randomize_enabled && (
+            <>
+              {/* Randomize Count */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+                  Number of slides to show *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.randomize_count || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    randomize_count: e.target.value ? parseInt(e.target.value) : null
+                  })}
+                  className="w-full px-4 py-2 rounded"
+                  style={{
+                    backgroundColor: 'var(--card-bg)',
+                    color: 'var(--text-color)',
+                    border: `1px solid ${errors.randomize_count ? '#dc2626' : 'var(--border-color)'}`
+                  }}
+                  placeholder="3"
+                />
+                {errors.randomize_count && (
+                  <p className="text-red-600 text-sm mt-1">{errors.randomize_count}</p>
+                )}
+                <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  How many random slides to display from this row
+                </p>
+              </div>
+
+              {/* Randomize Interval */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+                  Re-randomize interval *
+                </label>
+                <select
+                  value={formData.randomize_interval || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    randomize_interval: e.target.value as 'hourly' | 'daily' | 'weekly' | null || null
+                  })}
+                  className="w-full px-4 py-2 rounded"
+                  style={{
+                    backgroundColor: 'var(--card-bg)',
+                    color: 'var(--text-color)',
+                    border: `1px solid ${errors.randomize_interval ? '#dc2626' : 'var(--border-color)'}`
+                  }}
+                >
+                  <option value="">Select interval...</option>
+                  <option value="hourly">Hourly (changes every hour)</option>
+                  <option value="daily">Daily (changes every day)</option>
+                  <option value="weekly">Weekly (changes every week)</option>
+                </select>
+                {errors.randomize_interval && (
+                  <p className="text-red-600 text-sm mt-1">{errors.randomize_interval}</p>
+                )}
+                <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+                  How often the random selection changes
+                </p>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Published Status */}

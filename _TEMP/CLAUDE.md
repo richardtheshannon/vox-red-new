@@ -36,6 +36,7 @@ npm run db:validate      # Check pending migrations
 - **Background System**: Full-viewport images with theme overlay
 - **User-Specific Content**: Private rows visible only to assigned users
 - **Auth-Gated Icons**: Private features hidden unless authenticated
+- **Slide Counter**: Top bar displays current/total slides (e.g., "3/12")
 
 ### Admin (/admin)
 - **Protected**: Requires authentication + admin role
@@ -47,42 +48,22 @@ npm run db:validate      # Check pending migrations
 
 ## Database Schema
 
-### users
-```sql
-id (UUID), name, email (unique), password_hash (bcrypt)
-role ('ADMIN'|'USER'|'MODERATOR'), created_at, updated_at
-```
+**users**: `id`, `name`, `email`, `password_hash`, `role` ('ADMIN'|'USER'|'MODERATOR')
 
-### slide_rows
-```sql
-id, title, description, row_type, is_published, display_order
-icon_set (JSON), theme_color, slide_count, playlist_delay_seconds
-user_id (UUID, nullable) - Private row owner (null = public)
-```
+**slide_rows**: `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable - private row owner)
 
-### slides
-```sql
-id, slide_row_id, title (OPTIONAL), subtitle, body_content (OPTIONAL), position
-layout_type ('STANDARD'|'OVERFLOW'|'MINIMAL')
-audio_url, image_url, video_url
-content_theme ('light'|'dark'|null), title_bg_opacity (0-1)
-is_published, publish_time_start/end, publish_days (JSON [0-6])
-temp_unpublish_until (timestamp), icon_set (JSON)
-```
+**slides**: `id`, `slide_row_id`, `title` (nullable), `subtitle`, `body_content` (nullable), `position`, `layout_type` ('STANDARD'|'OVERFLOW'|'MINIMAL'), `audio_url`, `image_url`, `video_url`, `content_theme` ('light'|'dark'|null), `title_bg_opacity`, `is_published`, `publish_time_start/end`, `publish_days` (JSON), `temp_unpublish_until`, `icon_set` (JSON)
 
-### spa_tracks
-```sql
-id, title, audio_url, is_published, display_order
-volume (0-100), publish_time_start/end, publish_days (JSON)
-```
+**spa_tracks**: `id`, `title`, `audio_url`, `is_published`, `display_order`, `volume`, `publish_time_start/end`, `publish_days` (JSON)
 
 ---
 
 ## Key Files
 
 ### Core
-- `src/app/page.tsx` - Main frontend page
-- `src/components/MainContent.tsx` - Slide rendering + user filtering
+- `src/app/page.tsx` - Main frontend, state management, slide counter
+- `src/components/MainContent.tsx` - Slide rendering, user filtering, swiper callbacks
+- `src/components/TopIconBar.tsx` - Top icon bar with slide counter display
 - `src/components/Providers.tsx` - SessionProvider + ThemeProvider
 
 ### Authentication
@@ -98,11 +79,6 @@ volume (0-100), publish_time_start/end, publish_days (JSON)
 ### Admin Components
 - `src/components/admin/slides/SlideEditor.tsx` - Slide editor
 - `src/components/admin/slides/SlideRowForm.tsx` - Row editor + user assignment
-
-### API Routes
-- `src/app/api/slides/rows/route.ts` - Row CRUD API
-- `src/app/api/slides/rows/[id]/slides/route.ts` - Slide CRUD API
-- `src/app/api/users/route.ts` - User management API
 
 ---
 
@@ -126,14 +102,12 @@ NEXTAUTH_URL="http://localhost:3000"       # Production: https://your-app.railwa
 ## Key Features
 
 ### User-Specific Private Rows
-**Visibility Rules**:
 - **Public rows** (`user_id = null`): Visible to everyone
 - **Private rows** (`user_id = [UUID]`): Visible only to assigned user
 - **Admin view**: See ALL rows
+- **Implementation**: Server-side filtering in `getAllSlideRows()`
 
-**Implementation**: Server-side filtering in `getAllSlideRows()`
-
-### Authentication
+### Authentication Patterns
 ```typescript
 // Server-side
 import { requireAuth, requireAdmin } from '@/lib/auth'
@@ -153,11 +127,11 @@ const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
 ```
 **CSS Variables**: `--text-color`, `--bg-color`, `--card-bg`, `--border-color`, `--icon-color`
 
-### Background & Layout
-- Full-viewport backgrounds via `image_url`
-- Theme-responsive overlay (opacity 0-1)
-- Per-slide theme override: `content_theme`
-- **Layout Types**: STANDARD (centered), OVERFLOW (scrollable), MINIMAL (title + audio)
+### Slide Counter
+- **Location**: Top icon bar, next to playlist_play icon
+- **Format**: "1/12" (current/total)
+- **Updates**: Automatically when scrolling rows or slides
+- **State Flow**: MainContent → page.tsx → TopIconBar
 
 ### Dynamic Scheduling
 - Time windows: `publish_time_start/end` (supports overnight)
@@ -166,7 +140,7 @@ const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
 
 ---
 
-## API Endpoints
+## API Routes
 
 ### Authentication
 ```
@@ -175,70 +149,25 @@ GET  /api/auth/session    - Current session
 POST /api/setup           - Create first admin
 ```
 
-### Slide Rows (User-Filtered)
+### Slide Rows
 ```
-GET    /api/slides/rows                - List rows (user-filtered)
-POST   /api/slides/rows                - Create row
-PATCH  /api/slides/rows/[id]           - Update row
-DELETE /api/slides/rows/[id]           - Delete row
-POST   /api/slides/rows/reorder        - Reorder rows
+GET/POST   /api/slides/rows           - List/create (user-filtered)
+PATCH/DELETE /api/slides/rows/[id]    - Update/delete
 ```
 
 ### Slides
 ```
-GET    /api/slides/rows/[id]/slides              - List slides
-POST   /api/slides/rows/[id]/slides              - Create slide (auto-position)
-PATCH  /api/slides/rows/[id]/slides/[slideId]    - Update slide
-DELETE /api/slides/rows/[id]/slides/[slideId]    - Delete slide
-POST   /api/slides/rows/[id]/slides/reorder      - Reorder slides
+GET/POST   /api/slides/rows/[id]/slides              - List/create
+PATCH/DELETE /api/slides/rows/[id]/slides/[slideId]  - Update/delete
 ```
 
-### Users (Admin Only)
+### Users (Admin)
 ```
-GET    /api/users              - List users
-POST   /api/users              - Create user
-PATCH  /api/users/[id]         - Update user
-DELETE /api/users/[id]         - Delete user
+GET/POST   /api/users        - List/create
+PATCH/DELETE /api/users/[id] - Update/delete
 ```
 
 **Response Format**: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
-
----
-
-## Code Patterns
-
-### Position Auto-Calculation
-```typescript
-import { getNextPosition } from '@/lib/queries/slides'
-const position = await getNextPosition(rowId)  // MAX(position) + 1
-```
-
-### Safe Content Rendering
-```typescript
-dangerouslySetInnerHTML={{ __html: slide.body_content || '' }}
-```
-
-### User Creation
-```typescript
-import { createUser } from '@/lib/queries/users'
-const user = await createUser({
-  name: 'John Doe',
-  email: 'john@example.com',
-  password: 'password123',  // Auto-hashed
-  role: 'ADMIN'             // Uppercase
-})
-```
-
-### Optional Title Slides
-```typescript
-// Create slide without title (image-only)
-const slide = await createSlide({
-  slide_row_id: rowId,
-  title: undefined,  // Optional
-  image_url: '/media/background.jpg',
-  layout_type: 'STANDARD'
-})
-```
 
 ---
 
@@ -257,22 +186,14 @@ const slide = await createSlide({
 
 ## Railway Deployment
 
-### Pre-Deploy Checklist
+### Pre-Deploy
 ```bash
-npm run db:validate     # Check migrations
 npx tsc --noEmit        # 0 TypeScript errors
 npm run build           # Pass ESLint
-git add . && git commit -m "..." && git push origin master
+git push origin master  # Auto-deploys to Railway
 ```
 
-### Auto-Deploy Process
-1. Push to GitHub → Railway auto-deploys
-2. Runs `npm run build` (TypeScript + ESLint)
-3. Runs `npm start` → executes `railway:init`
-4. Migrations run automatically (safe - uses `IF NOT EXISTS`)
-5. App starts
-
-### Environment Variables (Railway)
+### Environment (Railway)
 ```env
 DATABASE_URL=postgresql://...              # Auto-provided
 NEXTAUTH_URL=https://your-app.railway.app
@@ -282,65 +203,63 @@ NEXTAUTH_SECRET=<strong-secret>
 ### Database Scripts
 ```bash
 npm run db:seed:admin              # Create admin user
-npm run db:reset:password          # Reset admin password
-railway run npm run [script]       # Run any script on Railway DB
+railway run npm run [script]       # Run on Railway DB
 ```
 
 ---
 
 ## Recent Updates
 
+### Slide Counter (January 17, 2025)
+**Feature**: Visual slide position indicator in top icon bar
+**Display**: Shows "1/12" format (current slide / total slides)
+**Location**: Top icon bar, right of playlist_play icon
+**Behavior**:
+- Updates when scrolling slides (horizontal navigation)
+- Resets to 1 when switching rows (vertical navigation)
+- Always visible when slides are loaded
+
+**Implementation**:
+- State management in `page.tsx` (`currentSlideIndex`, `totalSlides`)
+- Callback system: MainContent calls `updateSlideCounter(index, total)`
+- Display component: `TopIconBar.tsx` with minimal styling
+- Uses `var(--icon-color)` for theme consistency
+
+**Files Modified**: 3 files
+- `src/app/page.tsx` - State and callback
+- `src/components/MainContent.tsx` - Swiper change handlers
+- `src/components/TopIconBar.tsx` - Counter display
+
+**Impact**: Users always see their position in the current slide row, improving navigation awareness.
+
 ### Optional Slide Title (January 17, 2025)
-**Feature**: Slides can now be created without titles (for image-only slides)
-**Changes**:
-- Made `title` column nullable in database
-- Updated TypeScript interfaces: `title?: string`
-- Removed title validation in API and UI
-- Added conditional rendering in MainContent
-
-**Files Modified**: 6 files
-- `scripts/make-title-optional.ts` - Database migration
-- `scripts/railway-init.ts` - Auto-migration on deployment
-- `src/lib/queries/slides.ts` - TypeScript interfaces
-- `src/app/api/slides/rows/[id]/slides/route.ts` - Removed validation
-- `src/components/admin/slides/SlideEditor.tsx` - UI updates
-- `src/components/MainContent.tsx` - Conditional title rendering
-
-**Impact**: Users can create slides with just background images, audio, video, or body content without requiring a title.
-
-### Slide Position Fix (January 17, 2025)
-**Fix**: Uses `getNextPosition()` which calculates `MAX(position) + 1`
-**Impact**: Slide creation works reliably regardless of gaps in position sequence
+**Feature**: Slides can be created without titles (image-only slides)
+**Changes**: Made `title` nullable, removed validation, conditional rendering
+**Files**: 6 files (database, queries, API, admin UI, MainContent)
+**Impact**: Slides with just images, audio, video, or body content
 
 ### User-Specific Private Rows (January 17, 2025)
 **Feature**: Assign slide rows to specific users for personalized content
 **Changes**: Added `user_id` column to `slide_rows`, server-side filtering
-**Impact**: Users only see public rows + their assigned private rows. Admins see all.
+**Impact**: Users see public rows + assigned private rows. Admins see all.
 
-### Authentication & Theme (January 2025)
-- Frontend icons auth-gated using `useSession()`
-- Theme uses localStorage for persistence
-- 30-day session persistence
+### Slide Position Auto-Calc (January 17, 2025)
+**Fix**: Uses `getNextPosition()` with `MAX(position) + 1`
+**Impact**: Reliable slide creation regardless of position gaps
 
 ---
 
 ## Troubleshooting
 
-### Slide Creation Fails
-**Status**: FIXED - Uses `getNextPosition()` for auto-positioning
+**Sessions Not Persisting**: Generate strong `NEXTAUTH_SECRET` with `openssl rand -base64 32`
 
-### Sessions Not Persisting
-**Fix**: Generate strong NEXTAUTH_SECRET: `openssl rand -base64 32`
+**Icons Not Showing/Hiding**: All icon bars use `{session && <Icon />}` pattern
 
-### Icons Not Showing/Hiding
-**Pattern**: All icon bars use `{session && <Icon />}`
+**Cannot Access /setup**: Users exist. Use `npm run db:seed:admin` instead
 
-### Cannot Access /setup
-**Cause**: Users already exist
-**Fix**: Use `npm run db:seed:admin`
+**Deployment Failed (ESLint)**: Run `npx eslint [file]` locally before pushing
 
-### Deployment Failed (ESLint)
-**Fix**: Run `npx eslint [file]` locally before pushing
+**Slide Counter Not Updating**: Check swiper callbacks in MainContent.tsx call `updateSlideCounter()`
 
 ---
 

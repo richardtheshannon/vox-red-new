@@ -81,6 +81,55 @@ export async function PATCH(
       }
     }
 
+    // Validate randomization fields if provided
+    if (body.randomize_enabled !== undefined && body.randomize_enabled === true) {
+      // If randomization is enabled, count and interval are required
+      if (!body.randomize_count || body.randomize_count < 1) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: 'randomize_count is required and must be >= 1 when randomization is enabled',
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!body.randomize_interval) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: 'randomize_interval is required when randomization is enabled',
+          },
+          { status: 400 }
+        );
+      }
+
+      const validIntervals = ['hourly', 'daily', 'weekly'];
+      if (!validIntervals.includes(body.randomize_interval)) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: `Invalid randomize_interval. Must be one of: ${validIntervals.join(', ')}`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // If randomize_count is provided independently, validate it
+    if (body.randomize_count !== undefined && body.randomize_count !== null) {
+      const count = Number(body.randomize_count);
+      if (isNaN(count) || count < 1) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: 'Invalid randomize_count. Must be >= 1',
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Remove fields that shouldn't be updated directly
     const { id, created_at, slide_count, ...updateData } = body;
 

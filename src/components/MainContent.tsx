@@ -10,6 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { usePlaylist } from '@/contexts/PlaylistContext';
 import { Slide } from '@/lib/queries/slides';
 import { filterVisibleSlides } from '@/lib/utils/scheduleFilter';
+import { applyRandomization } from '@/lib/utils/slideRandomizer';
 
 interface MainContentProps {
   setSwiperRef: (swiper: SwiperType | null) => void;
@@ -39,6 +40,10 @@ interface SlideRow {
   icon_set: string[]; // Already parsed by API
   theme_color: string | null;
   playlist_delay_seconds: number;
+  randomize_enabled: boolean;
+  randomize_count: number | null;
+  randomize_interval: 'hourly' | 'daily' | 'weekly' | null;
+  randomize_seed: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -261,12 +266,26 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
   };
 
-  // Get slides for a row (filtered by schedule) - using useCallback to avoid re-creation
+  // Get slides for a row (filtered by schedule + randomization) - using useCallback to avoid re-creation
   const getSlidesForRow = useCallback((rowId: string): Slide[] => {
     const allSlides = slidesCache[rowId] || [];
-    // Filter slides based on scheduling (time/day restrictions)
-    return filterVisibleSlides(allSlides);
-  }, [slidesCache]);
+
+    // First, filter slides based on scheduling (time/day restrictions)
+    const visibleSlides = filterVisibleSlides(allSlides);
+
+    // Then, apply randomization if enabled for this row
+    const row = slideRows.find(r => r.id === rowId);
+    if (row) {
+      return applyRandomization(
+        visibleSlides,
+        row.randomize_enabled,
+        row.randomize_count,
+        row.randomize_interval
+      );
+    }
+
+    return visibleSlides;
+  }, [slidesCache, slideRows]);
 
   // Handle unpublish icon click - delegate to parent (permanent unpublish)
   const handleUnpublishClick = (slideId: string, rowId: string) => {

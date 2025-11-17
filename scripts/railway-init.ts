@@ -20,6 +20,7 @@ import { initializeUsersTables } from './init-users-table'
 import { addUsersPasswordHash } from './add-users-password-hash'
 import { runUserOwnershipMigration } from './run-user-ownership-migration'
 import { makeTitleOptional } from './make-title-optional'
+import { runRandomizationMigration } from './run-randomization-migration'
 
 async function railwayInit() {
   try {
@@ -230,6 +231,20 @@ async function railwayInit() {
         console.error('❌ Make title optional migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without making title optional')
+      }
+    }
+
+    // Add slide randomization columns (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await runRandomizationMigration()
+      console.log('✅ Slide randomization columns added to slide_rows')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Slide randomization columns already exist, skipping')
+      } else {
+        console.error('❌ Slide randomization migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without slide randomization columns')
       }
     }
 
