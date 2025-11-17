@@ -1,13 +1,8 @@
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function AdminTopIconBar() {
   const { theme, toggleTheme } = useTheme();
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
-  };
 
   return (
     <header className="icon-container fixed top-0 left-0 right-0 flex justify-between items-center z-10" style={{padding: '0.2rem', backgroundColor: 'var(--bg-color)'}}>
@@ -30,13 +25,11 @@ export default function AdminTopIconBar() {
         <span className="material-symbols-outlined" title="Bug Report">bug_report</span>
       </div>
       <div className="flex items-center">
-        <span
-          className="material-symbols-outlined cursor-pointer hover:opacity-70"
-          onClick={handleLogout}
-          title="Logout"
-        >
-          logout
-        </span>
+        <Link href="/">
+          <span className="material-symbols-outlined" title="Go to Frontend">
+            logout
+          </span>
+        </Link>
         <span
           className="material-symbols-outlined cursor-pointer hover:opacity-70"
           onClick={toggleTheme}
