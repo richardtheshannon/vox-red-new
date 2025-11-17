@@ -66,10 +66,10 @@ History
 
 vox-red-new
 /
-56d36423
+96595cbd
 Failed
 
-Nov 16, 2025, 11:41 AM
+Nov 16, 2025, 4:02 PM
 app.lilde.com
 Get Help
 Details
@@ -79,14 +79,14 @@ HTTP Logs
 Search build logs
 
 You reached the start of the range
-Nov 16, 2025, 11:41 AM
+Nov 16, 2025, 4:02 PM
  
 [Region: us-west1]
 ==============
 Using Nixpacks
 ==============
 
-context: 3c62-z8gF
+context: mr8r-ROwH
 ╔════════ Nixpacks v1.38.0 ═══════╗
 ║ setup      │ nodejs_18, npm-9_x ║
 ║─────────────────────────────────║
@@ -103,7 +103,7 @@ load build definition from Dockerfile
 
 internal
 load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-700ms
+254ms
 
 internal
 load .dockerignore
@@ -115,37 +115,37 @@ load build context
 
 stage-0
 FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
-8ms
+25ms
 
 stage-0
-WORKDIR /app/
-12ms
+WORKDIR /app/ cached
+0ms
 
 stage-0
 COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
-9ms
+254ms
 
 stage-0
 RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
-33s
+52s
 61 store paths deleted, 559.40 MiB freed
 
 stage-0
 COPY . /app/.
-72ms
+213ms
 
 stage-0
 RUN npm ci
-10s
+15s
 Run `npm audit` for details.
 
 stage-0
 COPY . /app/.
-115ms
+299ms
 
 stage-0
 RUN npm run build
-16s
+23s
 npm warn config production Use `--omit=dev` instead.
 > nextjs-app@0.1.0 build
 > next build
@@ -155,7 +155,7 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
    ▲ Next.js 15.5.4
    Creating an optimized production build ...
- ✓ Compiled successfully in 9.0s
+ ✓ Compiled successfully in 12.5s
    Linting and checking validity of types ...
 ./src/app/admin/slides/[id]/page.tsx
 68:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
@@ -210,16 +210,16 @@ https://nextjs.org/telemetry
 201:6  Warning: React Hook useCallback has an unnecessary dependency: 'handleAudioEnded'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
 Failed to compile.
-./scripts/check-user-role.ts:35:18
-Type error: This comparison appears to be unintentional because the types '"user"' and '"ADMIN"' have no overlap.
+./src/app/api/users/route.ts:124:51
+Type error: Cannot find name 'body'.
 
-  33 |       if (user.role === 'admin') {
-  34 |         console.log(`  ✅ Role is correct (lowercase 'admin')`);
-> 35 |       } else if (user.role === 'ADMIN') {
-     |                  ^
-  36 |         console.log(`  ⚠️  Role is UPPERCASE - should be lowercase 'admin'`);
-  37 |         console.log(`  Fix with: UPDATE users SET role = 'admin' WHERE id = '${user.id}';`);
-  38 |       } else if (user.role === 'user') {
+  122 |     console.error('Error creating user:', error);
+  123 |     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+> 124 |     console.error('Request body:', JSON.stringify(body || {}, null, 2));
+      |                                                   ^
+  125 |     return NextResponse.json(
+  126 |       {
+  127 |         status: 'error',
 Next.js build worker exited with code: 1 and signal: null
 Dockerfile:24
 -------------------
@@ -232,7 +232,7 @@ Dockerfile:24
 ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
 Error: Docker build failed
 You reached the end of the range
-Nov 16, 2025, 11:43 AM
+Nov 16, 2025, 4:04 PM
 
 
 vox-red-new | Railway
