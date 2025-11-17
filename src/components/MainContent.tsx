@@ -589,14 +589,16 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         )}
 
         {/* Title */}
-        <h1
-          className="text-4xl font-bold mb-4"
-          style={{
-            color: textColor || '#000000'
-          }}
-        >
-          {slide.title}
-        </h1>
+        {slide.title && (
+          <h1
+            className="text-4xl font-bold mb-4"
+            style={{
+              color: textColor || '#000000'
+            }}
+          >
+            {slide.title}
+          </h1>
+        )}
 
         {/* Audio Player (if audio_url exists AND slide is active) */}
         {slide.audio_url && isActive && (

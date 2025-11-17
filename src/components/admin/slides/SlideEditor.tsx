@@ -84,11 +84,6 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
   });
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      setError('Title is required');
-      return;
-    }
-
     if (!editor) {
       setError('Editor not initialized');
       return;
@@ -101,7 +96,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
       setError(null);
 
       const slideData: Partial<Slide> = {
-        title: title.trim(),
+        title: title.trim() || undefined,
         subtitle: subtitle.trim() || undefined,
         body_content: bodyContent,
         audio_url: audioUrl || undefined,
@@ -136,7 +131,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
     return {
       id: slide?.id || 'preview',
       slide_row_id: row.id,
-      title,
+      title: title || undefined,
       subtitle: subtitle || undefined,
       body_content: editor?.getHTML() || '',
       audio_url: audioUrl || undefined,
@@ -227,7 +222,7 @@ export default function SlideEditor({ row, slide, isNewSlide, onSave, onCancel }
             {/* Title */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-color)' }}>
-                Title *
+                Title (Optional)
               </label>
               <input
                 type="text"

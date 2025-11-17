@@ -75,17 +75,6 @@ export async function POST(
       );
     }
 
-    // Validate required fields
-    if (!body.title) {
-      return NextResponse.json(
-        {
-          status: 'error',
-          message: 'Missing required field: title is required',
-        },
-        { status: 400 }
-      );
-    }
-
     // Validate layout_type if provided
     if (body.layout_type) {
       const validLayoutTypes = ['STANDARD', 'OVERFLOW', 'MINIMAL'];

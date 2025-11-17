@@ -5,7 +5,7 @@ import { PoolClient } from 'pg'
 export interface Slide {
   id: string
   slide_row_id: string
-  title: string
+  title?: string
   subtitle?: string
   body_content?: string
   audio_url?: string
@@ -30,7 +30,7 @@ export interface Slide {
 
 export interface CreateSlideData {
   slide_row_id: string
-  title: string
+  title?: string
   subtitle?: string
   body_content?: string
   audio_url?: string
@@ -91,7 +91,7 @@ export async function createSlide(data: CreateSlideData): Promise<Slide> {
 
   const slide = await queryOne<Slide>(sql, [
     data.slide_row_id,
-    data.title,
+    data.title || null,
     data.subtitle || null,
     data.body_content || null,
     data.audio_url || null,

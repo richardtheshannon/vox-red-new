@@ -19,6 +19,7 @@ import { addPlaylistDelay } from './add-playlist-delay'
 import { initializeUsersTables } from './init-users-table'
 import { addUsersPasswordHash } from './add-users-password-hash'
 import { runUserOwnershipMigration } from './run-user-ownership-migration'
+import { makeTitleOptional } from './make-title-optional'
 
 async function railwayInit() {
   try {
@@ -215,6 +216,20 @@ async function railwayInit() {
         console.error('❌ User ownership migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without user ownership column')
+      }
+    }
+
+    // Make slide title optional (safe to run multiple times)
+    try {
+      await makeTitleOptional()
+      console.log('✅ Slide title is now optional')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already')) {
+        console.log('ℹ️ Slide title already optional, skipping')
+      } else {
+        console.error('❌ Make title optional migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without making title optional')
       }
     }
 
