@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import AdminTopIconBar from '@/components/admin/AdminTopIconBar';
 import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
@@ -16,14 +15,12 @@ export default function AdminPage() {
   };
 
   return (
-    <ThemeProvider>
-      <div data-admin-page="true">
-        <AdminTopIconBar />
-        <AdminLeftIconBar />
-        <AdminRightIconBar isExpanded={sidebarExpanded} />
-        <AdminBottomIconBar onMenuClick={toggleSidebar} />
-        <AdminMainContent />
-      </div>
-    </ThemeProvider>
+    <div data-admin-page="true">
+      <AdminTopIconBar />
+      <AdminLeftIconBar />
+      <AdminRightIconBar isExpanded={sidebarExpanded} />
+      <AdminBottomIconBar onMenuClick={toggleSidebar} />
+      <AdminMainContent />
+    </div>
   );
 }

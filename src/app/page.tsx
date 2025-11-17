@@ -10,7 +10,7 @@ import BottomIconBar from '@/components/BottomIconBar';
 import MainContent from '@/components/MainContent';
 import YouTubeEmbed from '@/components/YouTubeEmbed';
 import { SwiperProvider } from '@/contexts/SwiperContext';
-import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { PlaylistProvider } from '@/contexts/PlaylistContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
 import LoginModal from '@/components/LoginModal';
@@ -218,10 +218,9 @@ export default function Home() {
   };
 
   return (
-    <ThemeProvider>
-      <PlaylistProvider>
-        <div
-          className="fixed inset-0 transition-all duration-500"
+    <PlaylistProvider>
+      <div
+        className="fixed inset-0 transition-all duration-500"
           style={activeSlideImageUrl ? {
             backgroundImage: `url(${activeSlideImageUrl})`,
             backgroundSize: 'cover',
@@ -312,11 +311,10 @@ export default function Home() {
           isProcessing={isUnpublishing}
         />
 
-          {/* Spa Audio Player */}
-          <SpaAudioPlayer isPlaying={isSpaPlaying} />
-        </div>
-      </PlaylistProvider>
-    </ThemeProvider>
+        {/* Spa Audio Player */}
+        <SpaAudioPlayer isPlaying={isSpaPlaying} />
+      </div>
+    </PlaylistProvider>
   );
 }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "lilde.com | spiritual growth",
@@ -43,7 +44,7 @@ export default function RootLayout({
         />
       </head>
       <body className="h-screen relative">
-        {children}
+        <Providers>{children}</Providers>
         <Script
           src="/essential-audio-player/essential_audio.js"
           strategy="beforeInteractive"

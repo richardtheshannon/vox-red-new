@@ -8,7 +8,6 @@ import AdminBottomIconBar from '@/components/admin/AdminBottomIconBar';
 import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export default function NewUserPage() {
   const router = useRouter();
@@ -91,8 +90,7 @@ export default function NewUserPage() {
   };
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {/* Header */}
         <AdminTopIconBar />
 
@@ -315,9 +313,8 @@ export default function NewUserPage() {
           </div>
         </div>
 
-        {/* Footer */}
-        <AdminBottomIconBar onMenuClick={toggleSidebar} />
-      </div>
-    </ThemeProvider>
+      {/* Footer */}
+      <AdminBottomIconBar onMenuClick={toggleSidebar} />
+    </div>
   );
 }

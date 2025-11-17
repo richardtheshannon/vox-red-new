@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { SessionProvider, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -17,18 +17,12 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Debug: Log the actual role value
-    console.log('[AdminAuthGuard] User role:', session.user.role, 'Type:', typeof session.user.role);
-
     // Case-insensitive role check to handle both 'admin' and 'ADMIN'
     if (session.user.role?.toLowerCase() !== 'admin') {
       // Authenticated but not admin - redirect to home
-      console.log('[AdminAuthGuard] Redirecting to home - role is not admin');
       router.push('/');
       return;
     }
-
-    console.log('[AdminAuthGuard] Access granted - user is admin');
   }, [session, status, router]);
 
   // Show loading state while checking authentication
@@ -54,9 +48,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <SessionProvider>
-      <AdminAuthGuard>{children}</AdminAuthGuard>
-    </SessionProvider>
-  );
+  return <AdminAuthGuard>{children}</AdminAuthGuard>;
 }

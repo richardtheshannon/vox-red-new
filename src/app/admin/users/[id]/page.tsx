@@ -8,7 +8,6 @@ import AdminBottomIconBar from '@/components/admin/AdminBottomIconBar';
 import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 
 interface User {
   id: string;
@@ -179,23 +178,20 @@ export default function EditUserPage() {
 
   if (loading) {
     return (
-      <ThemeProvider>
-        <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-          <AdminTopIconBar />
-          <div className="absolute inset-0" style={{ padding: '50px' }}>
-            <div className="h-full flex items-center justify-center">
-              <p style={{ color: 'var(--text-color)' }}>Loading user...</p>
-            </div>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+        <AdminTopIconBar />
+        <div className="absolute inset-0" style={{ padding: '50px' }}>
+          <div className="h-full flex items-center justify-center">
+            <p style={{ color: 'var(--text-color)' }}>Loading user...</p>
           </div>
-          <AdminBottomIconBar onMenuClick={toggleSidebar} />
         </div>
-      </ThemeProvider>
+        <AdminBottomIconBar onMenuClick={toggleSidebar} />
+      </div>
     );
   }
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {/* Header */}
         <AdminTopIconBar />
 
@@ -513,9 +509,8 @@ export default function EditUserPage() {
           </div>
         </div>
 
-        {/* Footer */}
-        <AdminBottomIconBar onMenuClick={toggleSidebar} />
-      </div>
-    </ThemeProvider>
+      {/* Footer */}
+      <AdminBottomIconBar onMenuClick={toggleSidebar} />
+    </div>
   );
 }

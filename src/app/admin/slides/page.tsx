@@ -8,7 +8,6 @@ import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
 import SlideRowList from '@/components/admin/slides/SlideRowList';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import { parseMarkdownCourse, getCourseTitle, truncateText, type ParsedSlide } from '@/lib/parseMarkdownCourse';
 
 interface SlideRow {
@@ -227,8 +226,7 @@ export default function AdminSlidesPage() {
   };
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {/* Header */}
         <AdminTopIconBar />
 
@@ -602,9 +600,8 @@ export default function AdminSlidesPage() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </ThemeProvider>
+        </div>
+      )}
+    </div>
   );
 }

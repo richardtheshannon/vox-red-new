@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { ThemeProvider } from '@/contexts/ThemeContext'
 
 export default function SetupPage() {
   const router = useRouter()
@@ -119,21 +118,18 @@ export default function SetupPage() {
 
   if (loading) {
     return (
-      <ThemeProvider>
-        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
-          <div className="text-center">
-            <p className="text-lg" style={{ color: 'var(--text-color)' }}>
-              Checking setup status...
-            </p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
+        <div className="text-center">
+          <p className="text-lg" style={{ color: 'var(--text-color)' }}>
+            Checking setup status...
+          </p>
         </div>
-      </ThemeProvider>
+      </div>
     )
   }
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
@@ -280,11 +276,10 @@ export default function SetupPage() {
           </div>
 
           {/* Footer Note */}
-          <p className="text-center text-xs mt-6" style={{ color: 'var(--secondary-text)' }}>
-            This setup page will only appear when no users exist in the system
-          </p>
-        </div>
+        <p className="text-center text-xs mt-6" style={{ color: 'var(--secondary-text)' }}>
+          This setup page will only appear when no users exist in the system
+        </p>
       </div>
-    </ThemeProvider>
+    </div>
   )
 }

@@ -8,7 +8,6 @@ import AdminBottomIconBar from '@/components/admin/AdminBottomIconBar';
 import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 
 interface User {
   id: string;
@@ -206,8 +205,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {/* Header */}
         <AdminTopIconBar />
 
@@ -336,9 +334,8 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Footer */}
-        <AdminBottomIconBar onMenuClick={toggleSidebar} />
-      </div>
-    </ThemeProvider>
+      {/* Footer */}
+      <AdminBottomIconBar onMenuClick={toggleSidebar} />
+    </div>
   );
 }

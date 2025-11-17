@@ -8,7 +8,6 @@ import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
 import SlideManager from '@/components/admin/slides/SlideManager';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import { Slide } from '@/lib/queries/slides';
 
 interface SlideRow {
@@ -120,8 +119,7 @@ export default function ManageSlidesPage() {
   };
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {/* Header */}
         <AdminTopIconBar />
 
@@ -213,9 +211,8 @@ export default function ManageSlidesPage() {
           </div>
         </div>
 
-        {/* Footer */}
-        <AdminBottomIconBar onMenuClick={toggleSidebar} />
-      </div>
-    </ThemeProvider>
+      {/* Footer */}
+      <AdminBottomIconBar onMenuClick={toggleSidebar} />
+    </div>
   );
 }

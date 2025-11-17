@@ -8,7 +8,6 @@ import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
 import AdminQuickActions from '@/components/admin/AdminQuickActions';
 import SlideRowForm, { SlideRowFormData } from '@/components/admin/slides/SlideRowForm';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -97,8 +96,7 @@ export default function EditSlideRowPage({ params }: PageProps) {
   };
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {/* Header */}
         <AdminTopIconBar />
 
@@ -191,9 +189,8 @@ export default function EditSlideRowPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Footer */}
-        <AdminBottomIconBar onMenuClick={toggleSidebar} />
-      </div>
-    </ThemeProvider>
+      {/* Footer */}
+      <AdminBottomIconBar onMenuClick={toggleSidebar} />
+    </div>
   );
 }

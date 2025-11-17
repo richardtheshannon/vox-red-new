@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import AdminTopIconBar from '@/components/admin/AdminTopIconBar';
 import AdminLeftIconBar from '@/components/admin/AdminLeftIconBar';
 import AdminRightIconBar from '@/components/admin/AdminRightIconBar';
@@ -16,8 +15,7 @@ export default function AdminMediaPage() {
   };
 
   return (
-    <ThemeProvider>
-      <div data-admin-page="true">
+    <div data-admin-page="true">
         <AdminTopIconBar />
         <AdminLeftIconBar />
         <AdminRightIconBar isExpanded={sidebarExpanded} />
@@ -54,9 +52,8 @@ export default function AdminMediaPage() {
               }}
               title="Media Management"
             />
-          </div>
-        </main>
-      </div>
-    </ThemeProvider>
+        </div>
+      </main>
+    </div>
   );
 }
