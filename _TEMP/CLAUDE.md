@@ -36,7 +36,7 @@ npm run db:validate      # Check pending migrations
 - **Background System**: Full-viewport images with theme overlay
 - **User-Specific Content**: Private rows visible only to assigned users
 - **Slide Counter**: Top bar displays current/total slides (e.g., "3/12")
-- **Randomization**: Time-based random slide selection per row
+- **Special Modes**: Quick Slides (atr icon), Simple Shifts (move_up icon)
 
 ### Admin (/admin)
 - **Protected**: Requires authentication + admin role
@@ -51,7 +51,7 @@ npm run db:validate      # Check pending migrations
 
 **users**: `id`, `name`, `email`, `password_hash`, `role` ('ADMIN'|'USER'|'MODERATOR')
 
-**slide_rows**: `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
+**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
 
 **slides**: `id`, `slide_row_id`, `title` (nullable), `subtitle`, `body_content` (nullable), `position`, `layout_type`, `audio_url`, `image_url`, `video_url`, `content_theme`, `title_bg_opacity`, `is_published`, `publish_time_start/end`, `publish_days` (JSON), `temp_unpublish_until`, `icon_set` (JSON)
 
@@ -62,9 +62,9 @@ npm run db:validate      # Check pending migrations
 ## Key Files
 
 ### Core
-- `src/app/page.tsx` - Main frontend, state management
-- `src/components/MainContent.tsx` - Slide rendering, randomization, filtering
-- `src/components/Providers.tsx` - SessionProvider + ThemeProvider
+- `src/app/page.tsx` - Main frontend, state management, mode toggles
+- `src/components/MainContent.tsx` - Slide rendering, filtering (Quick Slides, Simple Shifts)
+- `src/components/RightIconBar.tsx` - Mode toggle icons (atr, move_up)
 
 ### Authentication
 - `src/lib/auth.ts` - `requireAuth()`, `requireAdmin()`
@@ -72,17 +72,12 @@ npm run db:validate      # Check pending migrations
 
 ### Database
 - `src/lib/db.ts` - PostgreSQL connection
-- `src/lib/queries/slideRows.ts` - Row CRUD + user filtering + randomization fields
+- `src/lib/queries/slideRows.ts` - Row CRUD + user filtering + randomization
 - `src/lib/queries/slides.ts` - Slide CRUD + `getNextPosition()`
-- `src/lib/queries/users.ts` - User management
 
 ### Utilities
 - `src/lib/utils/scheduleFilter.ts` - Time/day-based slide filtering
 - `src/lib/utils/slideRandomizer.ts` - Seeded random slide selection
-
-### Admin Components
-- `src/components/admin/slides/SlideEditor.tsx` - Slide editor
-- `src/components/admin/slides/SlideRowForm.tsx` - Row editor + randomization controls
 
 ---
 
@@ -105,31 +100,50 @@ NEXTAUTH_URL="http://localhost:3000"       # Production: https://your-app.railwa
 
 ## Key Features
 
-### Slide Randomization (NEW - Jan 17, 2025)
-- **Admin Control**: Enable per-row randomization with count and interval
-- **Intervals**: Hourly, daily, or weekly re-randomization
-- **Deterministic**: Same slides within time window (uses seeded random)
-- **Integration**: Works seamlessly with schedule filtering
-- **Implementation**: `slideRandomizer.ts` - Fisher-Yates shuffle with time-based seed
+### Special Row Modes (Nov 2025)
+**Quick Slides** (row_type: 'QUICKSLIDE')
+- Icon: "atr" (top right sidebar)
+- Behavior: Shows ONLY Quick Slide rows when active
+- Use case: Temporary one-off slides for users
 
+**Simple Shifts** (row_type: 'SIMPLESHIFT')
+- Icon: "move_up" (top right, below atr)
+- Behavior: Shows ONLY Simple Shift rows when active
+- Use case: Daily shift/practice content
+
+**Normal Mode** (default)
+- Shows all rows EXCEPT Quick Slides and Simple Shifts
+- Standard content browsing
+
+### Row Filtering Logic (MainContent.tsx)
 ```typescript
-// In MainContent.tsx
-const slides = getSlidesForRow(rowId) // Applies schedule filter + randomization
-// Uses applyRandomization(slides, enabled, count, interval) internally
+if (isSimpleShiftMode) {
+  rows = slideRows.filter(row => row.row_type === 'SIMPLESHIFT')
+} else if (isQuickSlideMode) {
+  rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
+} else {
+  rows = slideRows.filter(row =>
+    row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT'
+  )
+}
 ```
+
+### Slide Randomization (Jan 2025)
+- **Admin Control**: Enable per-row with count and interval
+- **Intervals**: Hourly, daily, or weekly re-randomization
+- **Deterministic**: Same slides within time window (seeded random)
+- **Implementation**: `slideRandomizer.ts` - Fisher-Yates shuffle
 
 ### User-Specific Private Rows
 - **Public rows** (`user_id = null`): Visible to everyone
 - **Private rows** (`user_id = [UUID]`): Visible only to assigned user
 - **Admin view**: See ALL rows
-- **Implementation**: Server-side filtering in `getAllSlideRows()`
-- **Auto-Refresh**: MainContent monitors `sessionStatus` and auto-refetches rows on login/logout
+- **Auto-Refresh**: MainContent refetches on login/logout
 
 ### Dynamic Scheduling
 - **Time windows**: `publish_time_start/end` (supports overnight)
 - **Day restrictions**: `publish_days` [0=Sun, 6=Sat]
 - **Temporary unpublish**: `temp_unpublish_until`
-- **Filter**: `filterVisibleSlides()` in `scheduleFilter.ts`
 
 ### Authentication Patterns
 ```typescript
@@ -144,18 +158,11 @@ const { data: session } = useSession()
 {session && <PrivateContent />}
 ```
 
-### Theme System
-```typescript
-import { useTheme } from '@/contexts/ThemeContext'
-const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
-```
-**CSS Variables**: `--text-color`, `--bg-color`, `--card-bg`, `--border-color`, `--icon-color`
-
 ---
 
-## API Routes (Response Format)
+## API Routes
 
-`{ status: 'success'|'error', data?: {...}, message?: '...' }`
+Format: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 
 ### Authentication
 - `POST /api/auth/signin` - Login
@@ -164,15 +171,11 @@ const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
 
 ### Slide Rows
 - `GET/POST /api/slides/rows` - List/create (user-filtered)
-- `PATCH/DELETE /api/slides/rows/[id]` - Update/delete (includes randomization fields)
+- `PATCH/DELETE /api/slides/rows/[id]` - Update/delete
 
 ### Slides
 - `GET/POST /api/slides/rows/[id]/slides` - List/create
 - `PATCH/DELETE /api/slides/rows/[id]/slides/[slideId]` - Update/delete
-
-### Users (Admin)
-- `GET/POST /api/users` - List/create
-- `PATCH/DELETE /api/users/[id]` - Update/delete
 
 ---
 
@@ -183,10 +186,9 @@ const { theme, toggleTheme } = useTheme()  // 'light' | 'dark'
 - **Icons**: 24px, weight 100, use `var(--icon-color)`
 - **No ORM**: Direct PostgreSQL for performance
 - **Position Auto-Calc**: Server uses `getNextPosition()` - never send position on create
-- **Optional Fields**: `title`, `body_content`, `subtitle` - always use `|| ''` fallback
+- **Optional Fields**: `title`, `body_content`, `subtitle` - use `|| ''` fallback
 - **Roles**: Uppercase ('ADMIN', 'USER', 'MODERATOR')
-- **Passwords**: bcrypt hashed, min 8 chars
-- **Randomization**: Count must be >= 1, interval must be 'hourly'|'daily'|'weekly'
+- **Row Types**: 'ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT'
 
 ---
 
@@ -211,27 +213,37 @@ NEXTAUTH_SECRET=<strong-secret>
 - All migrations auto-run via `railway-init.ts`
 - Migrations use `IF NOT EXISTS` for safety
 - Registered in `validate-migrations.ts` for verification
-- Manual run: `railway run npm run db:seed:admin` (creates admin user)
+- Manual run: `railway run npm run railway:init`
 
 ---
 
 ## Recent Updates
 
+### Simple Shifts Toggle (November 17, 2025)
+**What**: Toggle to display only Simple Shift rows (similar to Quick Slides)
+**Icon**: "move_up" in right sidebar (below "atr")
+**Behavior**: Exclusive display mode - shows ONLY SIMPLESHIFT rows when active
+**Files Modified**:
+- `page.tsx` - Added isSimpleShiftMode state and toggle handler
+- `RightIconBar.tsx` - Added move_up icon
+- `MainContent.tsx` - Updated filtering logic for Simple Shift mode
+- `slideRows.ts` - Added SIMPLESHIFT to row_type union types
+**Database**: Added SIMPLESHIFT to row_type check constraint
+**Migration**: `scripts/add-simpleshift-type.ts`
+
 ### Session Auto-Refresh on Login (November 17, 2025)
-**What**: User-assigned rows appear immediately after login (no hard refresh needed)
-**Why**: Fix UX issue where users had to manually refresh to see private rows after logging in
-**How**: MainContent monitors `sessionStatus` from NextAuth, refetches rows when status changes
-**Files Modified**: `MainContent.tsx` (added `useSession` hook, sessionStatus dependency in fetch effect)
-**Impact**: Improved UX - seamless transition from public to personalized content upon authentication
+**What**: User-assigned rows appear immediately after login (no refresh needed)
+**How**: MainContent monitors `sessionStatus` from NextAuth, refetches on change
+**Files Modified**: `MainContent.tsx` (added sessionStatus dependency)
 
 ### Slide Randomization (January 17, 2025)
 **What**: Per-row randomization with time-based intervals (hourly/daily/weekly)
 **Files**: `slideRandomizer.ts`, `SlideRowForm.tsx`, `MainContent.tsx`
-**Database**: 4 new columns (`randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`)
+**Database**: 4 columns (`randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`)
 
 ### User-Specific Private Rows (January 17, 2025)
 **What**: Assign rows to specific users for personalized content
-**How**: `user_id` column on `slide_rows`, server-side filtering in `getAllSlideRows()`
+**How**: `user_id` column on `slide_rows`, server-side filtering
 
 ---
 
@@ -240,30 +252,30 @@ NEXTAUTH_SECRET=<strong-secret>
 | Issue | Solution |
 |-------|----------|
 | Sessions not persisting | Generate strong `NEXTAUTH_SECRET` with `openssl rand -base64 32` |
-| Private rows not appearing after login | Fixed (Nov 17, 2025) - MainContent now auto-refetches on session change |
+| Private rows not appearing after login | Fixed (Nov 17) - MainContent auto-refetches on session change |
 | Cannot access /setup | Users exist. Use `npm run db:seed:admin` instead |
 | Deployment failed (ESLint) | Run `npx eslint [file]` locally before pushing |
-| Randomization not working | Verify `randomize_enabled=true`, count >= 1, valid interval |
+| Simple Shifts not showing | Ensure row has `row_type = 'SIMPLESHIFT'` (not 'CUSTOM') |
+| Constraint violation on SIMPLESHIFT | Migration didn't run - check Railway logs or run `npm run railway:init` |
 
 ---
 
 ## Development Workflow
 
 ### Adding New Feature
-1. **Database**: Create migration in `scripts/migrations/`
-2. **Runner**: Create runner script like `run-[feature]-migration.ts`
-3. **Register**: Add to `railway-init.ts` and `validate-migrations.ts`
-4. **Types**: Update interfaces in `src/lib/queries/`
-5. **API**: Add validation in API routes
-6. **UI**: Update admin forms and frontend components
-7. **Validate**: Run `npm run db:validate` and `npx tsc --noEmit`
+1. **Database**: Create migration in `scripts/` (e.g., `add-feature.ts`)
+2. **Register**: Add to `railway-init.ts` and `validate-migrations.ts`
+3. **Types**: Update interfaces in `src/lib/queries/`
+4. **API**: Add validation in API routes
+5. **UI**: Update admin forms and frontend components
+6. **Validate**: Run `npm run db:validate` and `npx tsc --noEmit`
 
 ### Before Deployment
 ```bash
 npm run db:validate     # ✅ All migrations up to date
 npx tsc --noEmit        # ✅ 0 TypeScript errors
 npm run build           # ✅ Pass ESLint
-# Update this CLAUDE.md file if significant changes
+# Update this CLAUDE.md if significant changes
 git add . && git commit -m "Description" && git push
 ```
 
@@ -271,16 +283,29 @@ git add . && git commit -m "Description" && git push
 
 ## Code Patterns
 
-### Randomization Usage
+### Mode Toggle Pattern (Quick Slides / Simple Shifts)
 ```typescript
-// Admin Form (SlideRowForm.tsx)
-const [formData, setFormData] = useState({
-  randomize_enabled: false,
-  randomize_count: null,
-  randomize_interval: null,
-})
+// page.tsx - State
+const [isQuickSlideMode, setIsQuickSlideMode] = useState(false)
+const [isSimpleShiftMode, setIsSimpleShiftMode] = useState(false)
 
-// Frontend (MainContent.tsx)
+// page.tsx - Handler
+const toggleSimpleShiftMode = () => setIsSimpleShiftMode(prev => !prev)
+
+// MainContent.tsx - Filtering
+if (isSimpleShiftMode) {
+  rows = slideRows.filter(row => row.row_type === 'SIMPLESHIFT')
+} else if (isQuickSlideMode) {
+  rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
+} else {
+  rows = slideRows.filter(row =>
+    row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT'
+  )
+}
+```
+
+### Randomization
+```typescript
 import { applyRandomization } from '@/lib/utils/slideRandomizer'
 const visibleSlides = filterVisibleSlides(allSlides)
 const finalSlides = applyRandomization(
@@ -289,12 +314,6 @@ const finalSlides = applyRandomization(
   row.randomize_count,
   row.randomize_interval
 )
-```
-
-### Schedule Filtering
-```typescript
-import { filterVisibleSlides } from '@/lib/utils/scheduleFilter'
-const visibleSlides = filterVisibleSlides(allSlides) // Filters by time/day
 ```
 
 ### User Filtering
@@ -306,4 +325,4 @@ const rows = await getAllSlideRows(publishedOnly, userId, isAdmin)
 
 ---
 
-**Status**: Production Ready | **Lines**: 236/500 ✅ | **Last Updated**: November 17, 2025
+**Status**: Production Ready | **Lines**: 340/500 ✅ | **Last Updated**: November 17, 2025

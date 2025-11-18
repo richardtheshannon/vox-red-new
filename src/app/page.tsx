@@ -31,6 +31,7 @@ export default function Home() {
   // Track active row and slide
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
   const [activeSlideImageUrl, setActiveSlideImageUrl] = useState<string | null>(null);
+  const [prevSlideImageUrl, setPrevSlideImageUrl] = useState<string | null>(null);
   const [activeSlideVideoUrl, setActiveSlideVideoUrl] = useState<string | null>(null);
   const [videoDisplayMode, setVideoDisplayMode] = useState<'cover' | 'contained'>('cover');
 
@@ -128,6 +129,14 @@ export default function Home() {
   // Set active row ID when row changes
   const setActiveRow = (rowId: string) => {
     setActiveRowId(rowId);
+  };
+
+  // Wrapper for setActiveSlideImageUrl that handles fade transitions
+  const handleSetActiveSlideImageUrl = (newImageUrl: string | null) => {
+    // Store current image as previous (for fade-out)
+    setPrevSlideImageUrl(activeSlideImageUrl);
+    // Set new image (for fade-in)
+    setActiveSlideImageUrl(newImageUrl);
   };
 
   // Toggle video display mode
@@ -248,23 +257,41 @@ export default function Home() {
 
   return (
     <PlaylistProvider>
-      <div
-        className="fixed inset-0 transition-all duration-500"
-          style={activeSlideImageUrl ? {
-            backgroundImage: `url(${activeSlideImageUrl})`,
+      <div className="fixed inset-0">
+        {/* Previous background layer (fading out) */}
+        <div
+          className="fixed inset-0 transition-opacity duration-1000"
+          style={{
+            backgroundImage: prevSlideImageUrl ? `url(${prevSlideImageUrl})` : 'none',
+            backgroundColor: prevSlideImageUrl ? 'transparent' : 'var(--content-bg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          } : {
-            backgroundColor: 'var(--content-bg)'
+            backgroundRepeat: 'no-repeat',
+            opacity: activeSlideImageUrl === prevSlideImageUrl ? 1 : 0,
+            zIndex: 0
           }}
-        >
-          {/* Full viewport overlay (above background, below all content) */}
-          <OverlayLayer
-            activeSlideContentTheme={activeSlideContentTheme}
-            activeSlideOverlayOpacity={activeSlideOverlayOpacity}
-            activeSlideImageUrl={activeSlideImageUrl}
-          />
+        />
+
+        {/* Current background layer (fading in) */}
+        <div
+          className="fixed inset-0 transition-opacity duration-1000"
+          style={{
+            backgroundImage: activeSlideImageUrl ? `url(${activeSlideImageUrl})` : 'none',
+            backgroundColor: activeSlideImageUrl ? 'transparent' : 'var(--content-bg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 1,
+            zIndex: 0
+          }}
+        />
+
+        {/* Full viewport overlay (above background, below all content) */}
+        <OverlayLayer
+          activeSlideContentTheme={activeSlideContentTheme}
+          activeSlideOverlayOpacity={activeSlideOverlayOpacity}
+          activeSlideImageUrl={activeSlideImageUrl}
+        />
 
           {/* YouTube video layer (behind content, above background image and overlay) */}
           <YouTubeEmbed videoUrl={activeSlideVideoUrl} displayMode={videoDisplayMode} />
@@ -307,7 +334,7 @@ export default function Home() {
             setSwiperRef={setVerticalSwiperRef}
             handleSlideChange={handleSlideChange}
             setActiveRow={setActiveRow}
-            setActiveSlideImageUrl={setActiveSlideImageUrl}
+            setActiveSlideImageUrl={handleSetActiveSlideImageUrl}
             setActiveSlideVideoUrl={setActiveSlideVideoUrl}
             activeSlideVideoUrl={activeSlideVideoUrl}
             setActiveSlideOverlayOpacity={setActiveSlideOverlayOpacity}
