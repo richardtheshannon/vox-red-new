@@ -52,8 +52,6 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             >
               move_up
             </span>
-            <span className="material-symbols-outlined" title="Credit Card">credit_card</span>
-            <span className="material-symbols-outlined" title="Payment">payment</span>
           </>
         )}
       </div>
