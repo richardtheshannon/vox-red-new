@@ -22,6 +22,7 @@ import { runUserOwnershipMigration } from './run-user-ownership-migration'
 import { makeTitleOptional } from './make-title-optional'
 import { runRandomizationMigration } from './run-randomization-migration'
 import { addSimpleshiftType } from './add-simpleshift-type'
+import { addImgslidesType } from './add-imgslides-type'
 
 async function railwayInit() {
   try {
@@ -260,6 +261,20 @@ async function railwayInit() {
         console.error('❌ SIMPLESHIFT migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without SIMPLESHIFT row type')
+      }
+    }
+
+    // Add IMGSLIDES row type (safe to run multiple times)
+    try {
+      await addImgslidesType()
+      console.log('✅ IMGSLIDES row type added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ IMGSLIDES row type already exists, skipping')
+      } else {
+        console.error('❌ IMGSLIDES migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without IMGSLIDES row type')
       }
     }
 
