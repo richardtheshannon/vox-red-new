@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { Mousewheel } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import EssentialAudioPlayer from './EssentialAudioPlayer';
@@ -824,6 +825,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
             direction="vertical"
             spaceBetween={20}
             slidesPerView={1}
+            mousewheel={{ releaseOnEdges: true }}
+            modules={[Mousewheel]}
             className="h-full"
             onSwiper={(swiper) => {
               console.log('Desktop Vertical Swiper initialized:', swiper);
@@ -888,6 +891,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           direction="vertical"
           spaceBetween={20}
           slidesPerView={1}
+          mousewheel={{ releaseOnEdges: true }}
+          modules={[Mousewheel]}
           className="h-full"
           onSwiper={(swiper) => {
             if (window.innerWidth < 768) {
