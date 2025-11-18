@@ -57,6 +57,9 @@ export default function Home() {
   // Image Slide Mode state (toggle between all rows and Image Slide row only)
   const [isImageSlideMode, setIsImageSlideMode] = useState(false);
 
+  // Service Mode state (toggle between all rows and Service row only)
+  const [isServiceMode, setIsServiceMode] = useState(false);
+
   // Unpublish confirmation dialog state
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [slideToUnpublish, setSlideToUnpublish] = useState<{ slideId: string; rowId: string } | null>(null);
@@ -179,6 +182,11 @@ export default function Home() {
   // Toggle Image Slide Mode
   const toggleImageSlideMode = () => {
     setIsImageSlideMode(prev => !prev);
+  };
+
+  // Toggle Service Mode
+  const toggleServiceMode = () => {
+    setIsServiceMode(prev => !prev);
   };
 
   // Handle unpublish dialog open
@@ -334,6 +342,8 @@ export default function Home() {
             onSimpleShiftClick={toggleSimpleShiftMode}
             isImageSlideMode={isImageSlideMode}
             onImageSlideClick={toggleImageSlideMode}
+            isServiceMode={isServiceMode}
+            onServiceClick={toggleServiceMode}
             onGroupClick={handleGroupClick}
           />
           <BottomIconBar
@@ -352,6 +362,7 @@ export default function Home() {
             isQuickSlideMode={isQuickSlideMode}
             isSimpleShiftMode={isSimpleShiftMode}
             isImageSlideMode={isImageSlideMode}
+            isServiceMode={isServiceMode}
             onUnpublishDialogOpen={handleUnpublishDialogOpen}
             unpublishCallbackRef={mainContentUnpublishCallbackRef}
             updatePlaylistData={updatePlaylistData}
@@ -410,6 +421,7 @@ function MainContentWithRef({
   isQuickSlideMode,
   isSimpleShiftMode,
   isImageSlideMode,
+  isServiceMode,
   onUnpublishDialogOpen,
   unpublishCallbackRef,
   updatePlaylistData,
@@ -426,6 +438,7 @@ function MainContentWithRef({
   isQuickSlideMode: boolean;
   isSimpleShiftMode: boolean;
   isImageSlideMode: boolean;
+  isServiceMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
@@ -444,6 +457,7 @@ function MainContentWithRef({
       isQuickSlideMode={isQuickSlideMode}
       isSimpleShiftMode={isSimpleShiftMode}
       isImageSlideMode={isImageSlideMode}
+      isServiceMode={isServiceMode}
       onUnpublishDialogOpen={onUnpublishDialogOpen}
       unpublishCallbackRef={unpublishCallbackRef}
       updatePlaylistData={updatePlaylistData}

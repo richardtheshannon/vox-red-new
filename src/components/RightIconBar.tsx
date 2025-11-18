@@ -13,10 +13,12 @@ interface RightIconBarProps {
   onSimpleShiftClick?: () => void;
   isImageSlideMode?: boolean;
   onImageSlideClick?: () => void;
+  isServiceMode?: boolean;
+  onServiceClick?: () => void;
   onGroupClick?: () => void;
 }
 
-export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, isSimpleShiftMode = false, onSimpleShiftClick, isImageSlideMode = false, onImageSlideClick, onGroupClick }: RightIconBarProps) {
+export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, isSimpleShiftMode = false, onSimpleShiftClick, isImageSlideMode = false, onImageSlideClick, isServiceMode = false, onServiceClick, onGroupClick }: RightIconBarProps) {
   const { data: session } = useSession();
   return (
     <aside className={`icon-container fixed right-0 flex flex-col justify-between items-center ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem', top: '0', bottom: '0', paddingTop: '50px', paddingBottom: '50px', zIndex: 15}}>
@@ -65,6 +67,18 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
               }}
             >
               web_stories
+            </span>
+            <span
+              className="material-symbols-outlined"
+              title={isServiceMode ? 'Exit Service Mode' : 'Service Mode'}
+              onClick={onServiceClick}
+              style={{
+                cursor: 'pointer',
+                opacity: isServiceMode ? 1 : 0.6,
+                transition: 'opacity 0.3s ease'
+              }}
+            >
+              room_service
             </span>
           </>
         )}

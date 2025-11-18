@@ -23,6 +23,7 @@ import { makeTitleOptional } from './make-title-optional'
 import { runRandomizationMigration } from './run-randomization-migration'
 import { addSimpleshiftType } from './add-simpleshift-type'
 import { addImgslidesType } from './add-imgslides-type'
+import { addServiceType } from './add-service-type'
 
 async function railwayInit() {
   try {
@@ -275,6 +276,20 @@ async function railwayInit() {
         console.error('❌ IMGSLIDES migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without IMGSLIDES row type')
+      }
+    }
+
+    // Add SERVICE row type (safe to run multiple times)
+    try {
+      await addServiceType()
+      console.log('✅ SERVICE row type added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ SERVICE row type already exists, skipping')
+      } else {
+        console.error('❌ SERVICE migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without SERVICE row type')
       }
     }
 

@@ -2,7 +2,7 @@
 
 **Project**: Spiritual Content Platform with Slide-Based Navigation
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: November 17, 2025
+**Last Updated**: November 18, 2025
 
 ---
 
@@ -36,7 +36,7 @@ npm run db:validate      # Check pending migrations
 - **Background System**: Full-viewport images with theme overlay
 - **User-Specific Content**: Private rows visible only to assigned users
 - **Slide Counter**: Top bar displays current/total slides (e.g., "3/12")
-- **Special Modes**: Quick Slides (atr icon), Simple Shifts (move_up icon)
+- **Special Modes**: Quick Slides (atr), Simple Shifts (move_up), Image Slides (web_stories)
 
 ### Admin (/admin)
 - **Protected**: Requires authentication + admin role
@@ -51,7 +51,7 @@ npm run db:validate      # Check pending migrations
 
 **users**: `id`, `name`, `email`, `password_hash`, `role` ('ADMIN'|'USER'|'MODERATOR')
 
-**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
+**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'|'IMGSLIDES'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
 
 **slides**: `id`, `slide_row_id`, `title` (nullable), `subtitle`, `body_content` (nullable), `position`, `layout_type`, `audio_url`, `image_url`, `video_url`, `content_theme`, `title_bg_opacity`, `is_published`, `publish_time_start/end`, `publish_days` (JSON), `temp_unpublish_until`, `icon_set` (JSON)
 
@@ -63,8 +63,8 @@ npm run db:validate      # Check pending migrations
 
 ### Core
 - `src/app/page.tsx` - Main frontend, state management, mode toggles
-- `src/components/MainContent.tsx` - Slide rendering, filtering (Quick Slides, Simple Shifts)
-- `src/components/RightIconBar.tsx` - Mode toggle icons (atr, move_up)
+- `src/components/MainContent.tsx` - Slide rendering, mode filtering
+- `src/components/RightIconBar.tsx` - Mode toggle icons (atr, move_up, web_stories)
 
 ### Authentication
 - `src/lib/auth.ts` - `requireAuth()`, `requireAdmin()`
@@ -102,28 +102,45 @@ NEXTAUTH_URL="http://localhost:3000"       # Production: https://your-app.railwa
 
 ### Special Row Modes (Nov 2025)
 **Quick Slides** (row_type: 'QUICKSLIDE')
-- Icon: "atr" (top right sidebar)
+- Icon: "atr" (right sidebar, top section)
 - Behavior: Shows ONLY Quick Slide rows when active
 - Use case: Temporary one-off slides for users
 
 **Simple Shifts** (row_type: 'SIMPLESHIFT')
-- Icon: "move_up" (top right, below atr)
+- Icon: "move_up" (right sidebar, below atr)
 - Behavior: Shows ONLY Simple Shift rows when active
 - Use case: Daily shift/practice content
 
+**Image Slides** (row_type: 'IMGSLIDES')
+- Icon: "web_stories" (right sidebar, below move_up)
+- Behavior: Shows ONLY Image Slide rows when active
+- Use case: Image-focused content rows
+
+**Service** (row_type: 'SERVICE')
+- Icon: "room_service" (right sidebar, below web_stories)
+- Behavior: Shows ONLY Service rows when active
+- Use case: Service commitments and service-related content
+
 **Normal Mode** (default)
-- Shows all rows EXCEPT Quick Slides and Simple Shifts
+- Shows all rows EXCEPT Quick Slides, Simple Shifts, Image Slides, and Service
 - Standard content browsing
 
 ### Row Filtering Logic (MainContent.tsx)
 ```typescript
-if (isSimpleShiftMode) {
+if (isServiceMode) {
+  rows = slideRows.filter(row => row.row_type === 'SERVICE')
+} else if (isImageSlideMode) {
+  rows = slideRows.filter(row => row.row_type === 'IMGSLIDES')
+} else if (isSimpleShiftMode) {
   rows = slideRows.filter(row => row.row_type === 'SIMPLESHIFT')
 } else if (isQuickSlideMode) {
   rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
 } else {
   rows = slideRows.filter(row =>
-    row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT'
+    row.row_type !== 'QUICKSLIDE' &&
+    row.row_type !== 'SIMPLESHIFT' &&
+    row.row_type !== 'IMGSLIDES' &&
+    row.row_type !== 'SERVICE'
   )
 }
 ```
@@ -188,7 +205,7 @@ Format: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 - **Position Auto-Calc**: Server uses `getNextPosition()` - never send position on create
 - **Optional Fields**: `title`, `body_content`, `subtitle` - use `|| ''` fallback
 - **Roles**: Uppercase ('ADMIN', 'USER', 'MODERATOR')
-- **Row Types**: 'ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT'
+- **Row Types**: 'ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT', 'IMGSLIDES', 'SERVICE'
 
 ---
 
@@ -219,31 +236,48 @@ NEXTAUTH_SECRET=<strong-secret>
 
 ## Recent Updates
 
-### Simple Shifts Toggle (November 17, 2025)
-**What**: Toggle to display only Simple Shift rows (similar to Quick Slides)
-**Icon**: "move_up" in right sidebar (below "atr")
-**Behavior**: Exclusive display mode - shows ONLY SIMPLESHIFT rows when active
+### Service Mode Toggle (November 18, 2025)
+**What**: Toggle to display only Service rows (fourth special mode)
+**Icon**: "room_service" in right sidebar (below "web_stories")
+**Behavior**: Exclusive display mode - shows ONLY SERVICE rows when active
 **Files Modified**:
-- `page.tsx` - Added isSimpleShiftMode state and toggle handler
-- `RightIconBar.tsx` - Added move_up icon
-- `MainContent.tsx` - Updated filtering logic for Simple Shift mode
-- `slideRows.ts` - Added SIMPLESHIFT to row_type union types
-**Database**: Added SIMPLESHIFT to row_type check constraint
+- `page.tsx` - Added isServiceMode state and toggle handler
+- `RightIconBar.tsx` - Added room_service icon
+- `MainContent.tsx` - Updated filtering logic for Service mode (priority: Service > Image > Simple > Quick > Normal)
+- `slideRows.ts` - Added SERVICE to row_type union types
+**Database**: Added SERVICE to row_type check constraint
+**Migration**: `scripts/add-service-type.ts`
+**Post-Deploy**: Run `UPDATE slide_rows SET row_type = 'SERVICE' WHERE title = 'Service Commitments';` in Railway
+
+### Image Slides Toggle (November 18, 2025)
+**What**: Toggle to display only Image Slide rows (third special mode)
+**Icon**: "web_stories" in right sidebar (below "move_up")
+**Behavior**: Exclusive display mode - shows ONLY IMGSLIDES rows when active
+**Files Modified**:
+- `page.tsx` - Added isImageSlideMode state and toggle handler
+- `RightIconBar.tsx` - Added web_stories icon
+- `MainContent.tsx` - Updated filtering logic for Image Slide mode
+- `slideRows.ts` - Added IMGSLIDES to row_type union types
+**Database**: Added IMGSLIDES to row_type check constraint
+**Migration**: `scripts/add-imgslides-type.ts`
+**Post-Deploy**: Run `UPDATE slide_rows SET row_type = 'IMGSLIDES' WHERE title = 'Image slides';` in Railway
+
+### Simple Shifts Toggle (November 17, 2025)
+**What**: Toggle to display only Simple Shift rows
+**Icon**: "move_up" in right sidebar
 **Migration**: `scripts/add-simpleshift-type.ts`
 
-### Session Auto-Refresh on Login (November 17, 2025)
-**What**: User-assigned rows appear immediately after login (no refresh needed)
-**How**: MainContent monitors `sessionStatus` from NextAuth, refetches on change
-**Files Modified**: `MainContent.tsx` (added sessionStatus dependency)
+### Session Auto-Refresh (November 17, 2025)
+**What**: User-assigned rows appear immediately after login
+**How**: MainContent monitors sessionStatus from NextAuth
 
 ### Slide Randomization (January 17, 2025)
-**What**: Per-row randomization with time-based intervals (hourly/daily/weekly)
-**Files**: `slideRandomizer.ts`, `SlideRowForm.tsx`, `MainContent.tsx`
-**Database**: 4 columns (`randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`)
+**What**: Per-row randomization with time-based intervals
+**Database**: 4 columns for randomization control
 
 ### User-Specific Private Rows (January 17, 2025)
 **What**: Assign rows to specific users for personalized content
-**How**: `user_id` column on `slide_rows`, server-side filtering
+**How**: `user_id` column on `slide_rows`
 
 ---
 
@@ -252,11 +286,11 @@ NEXTAUTH_SECRET=<strong-secret>
 | Issue | Solution |
 |-------|----------|
 | Sessions not persisting | Generate strong `NEXTAUTH_SECRET` with `openssl rand -base64 32` |
-| Private rows not appearing after login | Fixed (Nov 17) - MainContent auto-refetches on session change |
+| Private rows not appearing | MainContent auto-refetches on session change (fixed Nov 17) |
 | Cannot access /setup | Users exist. Use `npm run db:seed:admin` instead |
 | Deployment failed (ESLint) | Run `npx eslint [file]` locally before pushing |
-| Simple Shifts not showing | Ensure row has `row_type = 'SIMPLESHIFT'` (not 'CUSTOM') |
-| Constraint violation on SIMPLESHIFT | Migration didn't run - check Railway logs or run `npm run railway:init` |
+| Mode rows not showing | Ensure row has correct `row_type` (QUICKSLIDE/SIMPLESHIFT/IMGSLIDES) |
+| Constraint violation | Migration didn't run - check Railway logs or `npm run railway:init` |
 
 ---
 
@@ -283,23 +317,32 @@ git add . && git commit -m "Description" && git push
 
 ## Code Patterns
 
-### Mode Toggle Pattern (Quick Slides / Simple Shifts)
+### Mode Toggle Pattern
 ```typescript
 // page.tsx - State
 const [isQuickSlideMode, setIsQuickSlideMode] = useState(false)
 const [isSimpleShiftMode, setIsSimpleShiftMode] = useState(false)
+const [isImageSlideMode, setIsImageSlideMode] = useState(false)
+const [isServiceMode, setIsServiceMode] = useState(false)
 
 // page.tsx - Handler
-const toggleSimpleShiftMode = () => setIsSimpleShiftMode(prev => !prev)
+const toggleServiceMode = () => setIsServiceMode(prev => !prev)
 
-// MainContent.tsx - Filtering
-if (isSimpleShiftMode) {
+// MainContent.tsx - Filtering (priority: Service > Image > Simple > Quick > Normal)
+if (isServiceMode) {
+  rows = slideRows.filter(row => row.row_type === 'SERVICE')
+} else if (isImageSlideMode) {
+  rows = slideRows.filter(row => row.row_type === 'IMGSLIDES')
+} else if (isSimpleShiftMode) {
   rows = slideRows.filter(row => row.row_type === 'SIMPLESHIFT')
 } else if (isQuickSlideMode) {
   rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
 } else {
   rows = slideRows.filter(row =>
-    row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT'
+    row.row_type !== 'QUICKSLIDE' &&
+    row.row_type !== 'SIMPLESHIFT' &&
+    row.row_type !== 'IMGSLIDES' &&
+    row.row_type !== 'SERVICE'
   )
 }
 ```
@@ -325,4 +368,4 @@ const rows = await getAllSlideRows(publishedOnly, userId, isAdmin)
 
 ---
 
-**Status**: Production Ready | **Lines**: 340/500 ✅ | **Last Updated**: November 17, 2025
+**Status**: Production Ready | **Lines**: 269/500 ✅ | **Last Updated**: November 18, 2025

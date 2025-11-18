@@ -26,6 +26,7 @@ interface MainContentProps {
   isQuickSlideMode: boolean;
   isSimpleShiftMode: boolean;
   isImageSlideMode: boolean;
+  isServiceMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
@@ -52,7 +53,7 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData, updateSlideCounter }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData, updateSlideCounter }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -95,13 +96,18 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
   };
 
-  // Filter rows based on Quick Slide mode, Simple Shift mode, and Image Slide mode
+  // Filter rows based on Quick Slide mode, Simple Shift mode, Image Slide mode, and Service mode
   const filteredSlideRows = useMemo(() => {
-    console.log('[MainContent] Filtering rows. Quick Slide Mode:', isQuickSlideMode, 'Simple Shift Mode:', isSimpleShiftMode, 'Image Slide Mode:', isImageSlideMode);
+    console.log('[MainContent] Filtering rows. Quick Slide Mode:', isQuickSlideMode, 'Simple Shift Mode:', isSimpleShiftMode, 'Image Slide Mode:', isImageSlideMode, 'Service Mode:', isServiceMode);
     console.log('[MainContent] Total slide rows:', slideRows.length);
 
     let rows: SlideRow[];
-    if (isImageSlideMode) {
+    if (isServiceMode) {
+      // Show only SERVICE rows
+      rows = slideRows.filter(row => row.row_type === 'SERVICE');
+      console.log('[MainContent] SERVICE rows found:', rows.length);
+      rows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
+    } else if (isImageSlideMode) {
       // Show only IMGSLIDES rows
       rows = slideRows.filter(row => row.row_type === 'IMGSLIDES');
       console.log('[MainContent] IMGSLIDES rows found:', rows.length);
@@ -117,9 +123,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       console.log('[MainContent] QUICKSLIDE rows found:', rows.length);
       rows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
     } else {
-      // Show all rows EXCEPT QUICKSLIDE, SIMPLESHIFT, and IMGSLIDES
-      rows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT' && row.row_type !== 'IMGSLIDES');
-      console.log('[MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, and IMGSLIDES):', rows.length);
+      // Show all rows EXCEPT QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, and SERVICE
+      rows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT' && row.row_type !== 'IMGSLIDES' && row.row_type !== 'SERVICE');
+      console.log('[MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, and SERVICE):', rows.length);
     }
 
     // Filter out rows that have zero visible slides (due to scheduling)
@@ -137,7 +143,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
     console.log('[MainContent] Rows with visible slides:', rowsWithVisibleSlides.length);
     return rowsWithVisibleSlides;
-  }, [slideRows, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, slidesCache]);
+  }, [slideRows, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, slidesCache]);
 
   // Memoize icon sets (already parsed by API, no need to parse again)
   const iconSetsCache = useMemo(() => {
@@ -233,9 +239,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
   }, [slidesCache, filteredSlideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl, updatePlaylistData, getHorizontalSwiper, updateSlideCounter]);
 
-  // Preload slides when Quick Slide mode, Simple Shift mode, or Image Slide mode changes
+  // Preload slides when Quick Slide mode, Simple Shift mode, Image Slide mode, or Service mode changes
   useEffect(() => {
-    console.log('[MainContent] Mode changed - Quick Slide:', isQuickSlideMode, 'Simple Shift:', isSimpleShiftMode, 'Image Slide:', isImageSlideMode);
+    console.log('[MainContent] Mode changed - Quick Slide:', isQuickSlideMode, 'Simple Shift:', isSimpleShiftMode, 'Image Slide:', isImageSlideMode, 'Service:', isServiceMode);
     console.log('[MainContent] Filtered slide rows:', filteredSlideRows.length);
 
     if (filteredSlideRows.length > 0) {
@@ -251,7 +257,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     } else {
       console.warn('[MainContent] No filtered slide rows available!');
     }
-  }, [isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, filteredSlideRows, slidesCache]);
+  }, [isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, filteredSlideRows, slidesCache]);
 
   // Load slides for a specific row
   const loadSlidesForRow = async (rowId: string) => {
