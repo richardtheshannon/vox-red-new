@@ -57,7 +57,8 @@
       "Bash(set DATABASE_URL=postgresql://postgres:lmtHqTYDkfXPVSSItdmvGGmvdFSnhLer@yamabiko.proxy.rlwy.net:59122/railway)",
       "Bash(npx eslint:*)",
       "Bash(pg_isready:*)",
-      "Bash(if exist .next rmdir /s /q .next)"
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(set DATABASE_URL)"
     ],
     "deny": [],
     "ask": []

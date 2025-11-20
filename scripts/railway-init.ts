@@ -24,6 +24,7 @@ import { runRandomizationMigration } from './run-randomization-migration'
 import { addSimpleshiftType } from './add-simpleshift-type'
 import { addImgslidesType } from './add-imgslides-type'
 import { addServiceType } from './add-service-type'
+import { addGoalsType } from './add-goals-type'
 
 async function railwayInit() {
   try {
@@ -290,6 +291,20 @@ async function railwayInit() {
         console.error('❌ SERVICE migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without SERVICE row type')
+      }
+    }
+
+    // Add GOALS row type (safe to run multiple times)
+    try {
+      await addGoalsType()
+      console.log('✅ GOALS row type added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ GOALS row type already exists, skipping')
+      } else {
+        console.error('❌ GOALS migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without GOALS row type')
       }
     }
 

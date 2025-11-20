@@ -61,7 +61,7 @@ const expectedConstraints: ConstraintCheck[] = [
   { table: 'slide_rows', constraint: 'slide_rows_playlist_delay_seconds_range', description: 'Playlist delay range: 0-45 seconds' },
   { table: 'slide_rows', constraint: 'check_randomize_count', description: 'Randomize count must be >= 1 if set' },
   { table: 'slide_rows', constraint: 'check_randomize_interval', description: 'Randomize interval must be hourly/daily/weekly' },
-  { table: 'slide_rows', constraint: 'slide_rows_row_type_check', description: 'Row type must include SIMPLESHIFT, IMGSLIDES, and SERVICE (Nov 2025)' },
+  { table: 'slide_rows', constraint: 'slide_rows_row_type_check', description: 'Row type must include SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS (Nov 2025)' },
 ]
 
 async function validateMigrations() {
