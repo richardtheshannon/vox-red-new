@@ -26,6 +26,7 @@ import { addImgslidesType } from './add-imgslides-type'
 import { addServiceType } from './add-service-type'
 import { addGoalsType } from './add-goals-type'
 import addRowBackgroundImage from './add-row-background-image'
+import addRowLayoutType from './add-row-layout-type'
 
 async function railwayInit() {
   try {
@@ -320,6 +321,20 @@ async function railwayInit() {
         console.error('❌ Row background image migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without row background image column')
+      }
+    }
+
+    // Add row layout type column (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addRowLayoutType()
+      console.log('✅ Row layout type column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Row layout type column already exists, skipping')
+      } else {
+        console.error('❌ Row layout type migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without row layout type column')
       }
     }
 

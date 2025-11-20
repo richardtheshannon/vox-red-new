@@ -29,6 +29,7 @@ export default function EditSlideRowPage({ params }: PageProps) {
     display_order: number;
     is_published: boolean;
     row_background_image_url?: string | null;
+    row_layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null;
   } | null>(null);
 
   useEffect(() => {

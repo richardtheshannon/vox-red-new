@@ -19,6 +19,7 @@ interface SlideRowFormProps {
     randomize_count?: number | null;
     randomize_interval?: 'hourly' | 'daily' | 'weekly' | null;
     row_background_image_url?: string | null;
+    row_layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null;
   };
   onSubmit: (data: SlideRowFormData) => Promise<void>;
   onCancel: () => void;
@@ -39,6 +40,7 @@ export interface SlideRowFormData {
   randomize_count: number | null;
   randomize_interval: 'hourly' | 'daily' | 'weekly' | null;
   row_background_image_url: string | null;
+  row_layout_type: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null;
 }
 
 interface User {
@@ -64,6 +66,7 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
     randomize_count: initialData?.randomize_count || null,
     randomize_interval: initialData?.randomize_interval || null,
     row_background_image_url: initialData?.row_background_image_url || null,
+    row_layout_type: initialData?.row_layout_type || null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -276,6 +279,31 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
         />
         <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
           When set, this image will replace all individual slide backgrounds in this row
+        </p>
+      </div>
+
+      {/* Row Layout Type */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+          Row Layout Type (overrides slide layouts)
+        </label>
+        <select
+          value={formData.row_layout_type || ''}
+          onChange={(e) => setFormData({ ...formData, row_layout_type: e.target.value as 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null || null })}
+          className="w-full px-4 py-2 rounded"
+          style={{
+            backgroundColor: 'var(--card-bg)',
+            color: 'var(--text-color)',
+            border: '1px solid var(--border-color)'
+          }}
+        >
+          <option value="">(None - use individual slide settings)</option>
+          <option value="STANDARD">Standard (Centered content)</option>
+          <option value="OVERFLOW">Overflow (Scrollable content)</option>
+          <option value="MINIMAL">Minimal (Title + audio only)</option>
+        </select>
+        <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+          When set, this layout will be used for all slides in this row instead of their individual settings
         </p>
       </div>
 

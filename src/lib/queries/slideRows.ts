@@ -20,6 +20,7 @@ export interface SlideRow {
   randomize_interval?: 'hourly' | 'daily' | 'weekly' | null
   randomize_seed?: number | null
   row_background_image_url?: string | null // Row-level background override
+  row_layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null // Row-level layout override
   created_at: Date
   updated_at: Date
 }
@@ -40,6 +41,7 @@ export interface CreateSlideRowData {
   randomize_interval?: 'hourly' | 'daily' | 'weekly' | null
   randomize_seed?: number | null
   row_background_image_url?: string | null
+  row_layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null
 }
 
 export interface UpdateSlideRowData {
@@ -57,6 +59,7 @@ export interface UpdateSlideRowData {
   randomize_interval?: 'hourly' | 'daily' | 'weekly' | null
   randomize_seed?: number | null
   row_background_image_url?: string | null
+  row_layout_type?: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null
 }
 
 // Get all slide rows
@@ -107,8 +110,8 @@ export async function getSlideRowById(id: string): Promise<SlideRow | null> {
 // Create new slide row
 export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow> {
   const sql = `
-    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by, user_id, randomize_enabled, randomize_count, randomize_interval, randomize_seed, row_background_image_url)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    INSERT INTO slide_rows (title, description, row_type, icon_set, theme_color, display_order, is_published, playlist_delay_seconds, created_by, user_id, randomize_enabled, randomize_count, randomize_interval, randomize_seed, row_background_image_url, row_layout_type)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     RETURNING *
   `
 
@@ -128,6 +131,7 @@ export async function createSlideRow(data: CreateSlideRowData): Promise<SlideRow
     data.randomize_interval || null,
     data.randomize_seed || null,
     data.row_background_image_url || null,
+    data.row_layout_type || null,
   ])
 
   if (!row) throw new Error('Failed to create slide row')
@@ -201,6 +205,10 @@ export async function updateSlideRow(id: string, data: UpdateSlideRowData): Prom
   if (data.row_background_image_url !== undefined) {
     fields.push(`row_background_image_url = $${paramCount++}`)
     values.push(data.row_background_image_url)
+  }
+  if (data.row_layout_type !== undefined) {
+    fields.push(`row_layout_type = $${paramCount++}`)
+    values.push(data.row_layout_type)
   }
 
   if (fields.length === 0) {

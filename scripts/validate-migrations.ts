@@ -34,6 +34,7 @@ const expectedColumns: ColumnCheck[] = [
   { table: 'slide_rows', column: 'randomize_interval', description: 'Slide randomization feature (Jan 2025)' },
   { table: 'slide_rows', column: 'randomize_seed', description: 'Slide randomization feature (Jan 2025)' },
   { table: 'slide_rows', column: 'row_background_image_url', description: 'Row-level background image override (Nov 2025)' },
+  { table: 'slide_rows', column: 'row_layout_type', description: 'Row-level layout type override (Nov 2025)' },
 
   { table: 'slides', column: 'id', description: 'Core table: slides' },
   { table: 'slides', column: 'title', description: 'Core table: slides' },
@@ -63,6 +64,7 @@ const expectedConstraints: ConstraintCheck[] = [
   { table: 'slide_rows', constraint: 'check_randomize_count', description: 'Randomize count must be >= 1 if set' },
   { table: 'slide_rows', constraint: 'check_randomize_interval', description: 'Randomize interval must be hourly/daily/weekly' },
   { table: 'slide_rows', constraint: 'slide_rows_row_type_check', description: 'Row type must include SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS (Nov 2025)' },
+  { table: 'slide_rows', constraint: 'slide_rows_row_layout_type_check', description: 'Row layout type must be STANDARD/OVERFLOW/MINIMAL or NULL (Nov 2025)' },
 ]
 
 async function validateMigrations() {

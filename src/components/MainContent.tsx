@@ -51,6 +51,7 @@ interface SlideRow {
   randomize_interval: 'hourly' | 'daily' | 'weekly' | null;
   randomize_seed: number | null;
   row_background_image_url: string | null;
+  row_layout_type: 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null;
   created_at: string;
   updated_at: string;
 }
@@ -522,7 +523,10 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     // Use per-slide icons if available, otherwise fallback to row icons
     const slideIcons = slide.icon_set ? parseIconSet(slide.icon_set) : rowIcons;
 
-    const containerClass = slide.layout_type === 'OVERFLOW'
+    // Check for row-level layout override first, then fall back to slide's layout_type
+    const effectiveLayoutType = row.row_layout_type || slide.layout_type;
+
+    const containerClass = effectiveLayoutType === 'OVERFLOW'
       ? (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-start items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-start')
       : (isMobile ? 'h-full overflow-y-auto p-4 flex flex-col justify-center items-start' : 'h-full overflow-y-auto p-4 flex flex-col justify-center');
 

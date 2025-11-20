@@ -130,6 +130,20 @@ export async function PATCH(
       }
     }
 
+    // Validate row_layout_type if provided
+    if (body.row_layout_type !== undefined && body.row_layout_type !== null) {
+      const validLayoutTypes = ['STANDARD', 'OVERFLOW', 'MINIMAL'];
+      if (!validLayoutTypes.includes(body.row_layout_type)) {
+        return NextResponse.json(
+          {
+            status: 'error',
+            message: `Invalid row_layout_type. Must be one of: ${validLayoutTypes.join(', ')}`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Remove fields that shouldn't be updated directly
     const { id, created_at, slide_count, ...updateData } = body;
 
