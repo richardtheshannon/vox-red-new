@@ -28,6 +28,7 @@ export default function EditSlideRowPage({ params }: PageProps) {
     theme_color: string;
     display_order: number;
     is_published: boolean;
+    row_background_image_url?: string | null;
   } | null>(null);
 
   useEffect(() => {

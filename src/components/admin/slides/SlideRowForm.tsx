@@ -18,6 +18,7 @@ interface SlideRowFormProps {
     randomize_enabled?: boolean;
     randomize_count?: number | null;
     randomize_interval?: 'hourly' | 'daily' | 'weekly' | null;
+    row_background_image_url?: string | null;
   };
   onSubmit: (data: SlideRowFormData) => Promise<void>;
   onCancel: () => void;
@@ -37,6 +38,7 @@ export interface SlideRowFormData {
   randomize_enabled: boolean;
   randomize_count: number | null;
   randomize_interval: 'hourly' | 'daily' | 'weekly' | null;
+  row_background_image_url: string | null;
 }
 
 interface User {
@@ -61,6 +63,7 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
     randomize_enabled: initialData?.randomize_enabled || false,
     randomize_count: initialData?.randomize_count || null,
     randomize_interval: initialData?.randomize_interval || null,
+    row_background_image_url: initialData?.row_background_image_url || null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -252,6 +255,28 @@ export default function SlideRowForm({ initialData, onSubmit, onCancel, isEdit =
             placeholder="#dc2626"
           />
         </div>
+      </div>
+
+      {/* Row Background Image */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-color)' }}>
+          Row Background Image (overrides slide images)
+        </label>
+        <input
+          type="text"
+          value={formData.row_background_image_url || ''}
+          onChange={(e) => setFormData({ ...formData, row_background_image_url: e.target.value || null })}
+          className="w-full px-4 py-2 rounded"
+          style={{
+            backgroundColor: 'var(--card-bg)',
+            color: 'var(--text-color)',
+            border: '1px solid var(--border-color)'
+          }}
+          placeholder="https://example.com/background.jpg"
+        />
+        <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+          When set, this image will replace all individual slide backgrounds in this row
+        </p>
       </div>
 
       {/* Display Order */}

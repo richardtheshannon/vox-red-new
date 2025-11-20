@@ -58,7 +58,8 @@
       "Bash(npx eslint:*)",
       "Bash(pg_isready:*)",
       "Bash(if exist .next rmdir /s /q .next)",
-      "Bash(set DATABASE_URL)"
+      "Bash(set DATABASE_URL)",
+      "Bash(tsx scripts/add-row-background-image.ts:*)"
     ],
     "deny": [],
     "ask": []

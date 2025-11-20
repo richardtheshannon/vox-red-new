@@ -25,6 +25,7 @@ import { addSimpleshiftType } from './add-simpleshift-type'
 import { addImgslidesType } from './add-imgslides-type'
 import { addServiceType } from './add-service-type'
 import { addGoalsType } from './add-goals-type'
+import addRowBackgroundImage from './add-row-background-image'
 
 async function railwayInit() {
   try {
@@ -305,6 +306,20 @@ async function railwayInit() {
         console.error('❌ GOALS migration failed:', error)
         // Don't throw - this is a non-critical enhancement
         console.log('⚠️ Continuing without GOALS row type')
+      }
+    }
+
+    // Add row background image column (safe to run multiple times - uses IF NOT EXISTS)
+    try {
+      await addRowBackgroundImage()
+      console.log('✅ Row background image column added')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) {
+        console.log('ℹ️ Row background image column already exists, skipping')
+      } else {
+        console.error('❌ Row background image migration failed:', error)
+        // Don't throw - this is a non-critical enhancement
+        console.log('⚠️ Continuing without row background image column')
       }
     }
 

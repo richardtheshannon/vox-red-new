@@ -33,6 +33,7 @@ const expectedColumns: ColumnCheck[] = [
   { table: 'slide_rows', column: 'randomize_count', description: 'Slide randomization feature (Jan 2025)' },
   { table: 'slide_rows', column: 'randomize_interval', description: 'Slide randomization feature (Jan 2025)' },
   { table: 'slide_rows', column: 'randomize_seed', description: 'Slide randomization feature (Jan 2025)' },
+  { table: 'slide_rows', column: 'row_background_image_url', description: 'Row-level background image override (Nov 2025)' },
 
   { table: 'slides', column: 'id', description: 'Core table: slides' },
   { table: 'slides', column: 'title', description: 'Core table: slides' },

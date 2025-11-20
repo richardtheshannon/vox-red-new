@@ -50,6 +50,7 @@ interface SlideRow {
   randomize_count: number | null;
   randomize_interval: 'hourly' | 'daily' | 'weekly' | null;
   randomize_seed: number | null;
+  row_background_image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -79,11 +80,15 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
   const { stopPlaylist } = usePlaylist();
 
   // Helper function to update slide data (image, video, AND overlay)
-  const updateActiveSlideData = (slide: Slide | null) => {
+  // Accepts optional row parameter to check for row-level background override
+  const updateActiveSlideData = (slide: Slide | null, row?: SlideRow | null) => {
     if (slide) {
+      // Check for row-level background override first, then fall back to slide image
+      const imageUrl = (row?.row_background_image_url) || slide.image_url || null;
+
       // Explicitly clear background if slide has no image_url (ensures slides without backgrounds show theme color)
       // Use separate checks to ensure null is set when image/video are missing
-      setActiveSlideImageUrl(slide.image_url || null);
+      setActiveSlideImageUrl(imageUrl);
       setActiveSlideVideoUrl(slide.video_url || null);
       setActiveSlideOverlayOpacity(Number(slide.title_bg_opacity) || 0);
       // Use slide's content_theme if defined, otherwise null (use global theme)
@@ -227,7 +232,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       const firstRow = filteredSlideRows[0];
       const slides = slidesCache[firstRow.id];
       if (slides && slides.length > 0) {
-        updateActiveSlideData(slides[0]);
+        updateActiveSlideData(slides[0], firstRow);
         initialBackgroundSetRef.current = true; // Mark as set
 
         // Update slide counter to first slide
@@ -390,7 +395,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 setActiveRow(firstRow.id);
                 const firstRowSlides = getSlidesForRow(firstRow.id);
                 if (firstRowSlides.length > 0) {
-                  updateActiveSlideData(firstRowSlides[0]);
+                  updateActiveSlideData(firstRowSlides[0], firstRow);
                 } else {
                   // Clear background if no slides in first row
                   updateActiveSlideData(null);
@@ -416,7 +421,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
             // Update background image/video/overlay with the target slide
             const targetSlide = updatedSlides[targetIndex];
-            updateActiveSlideData(targetSlide || null);
+            const currentRow = slideRows.find(r => r.id === rowId);
+            updateActiveSlideData(targetSlide || null, currentRow);
           }
         }, 100); // Small delay to ensure state updates
       } else {
@@ -471,7 +477,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               setActiveRow(firstRow.id);
               const firstRowSlides = getSlidesForRow(firstRow.id);
               if (firstRowSlides.length > 0) {
-                updateActiveSlideData(firstRowSlides[0]);
+                updateActiveSlideData(firstRowSlides[0], firstRow);
               } else {
                 // Clear background if no slides in first row
                 updateActiveSlideData(null);
@@ -497,7 +503,8 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
           // Update background image/video/overlay with the target slide
           const targetSlide = updatedSlides[targetIndex];
-          updateActiveSlideData(targetSlide || null);
+          const currentRow = slideRows.find(r => r.id === rowId);
+          updateActiveSlideData(targetSlide || null, currentRow);
         }
       }, 100); // Small delay to ensure state updates
     };
@@ -505,7 +512,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     return () => {
       unpublishCallbackRef.current = null;
     };
-  }, [unpublishCallbackRef, getHorizontalSwiper, getSlidesForRow, filteredSlideRows, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl]);
+  }, [unpublishCallbackRef, getHorizontalSwiper, getSlidesForRow, filteredSlideRows, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, slideRows]);
 
   // Render slide content
   const renderSlideContent = (slide: Slide, rowIcons: string[], row: SlideRow, isMobile: boolean = false, isActive: boolean = true, enableAudioRef: boolean = false) => {
@@ -781,7 +788,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
           // Use getSlidesForRow to get current slides (not stale closure) after unpublish
           const currentSlides = getSlidesForRow(row.id);
           const currentSlide = currentSlides[swiper.activeIndex];
-          updateActiveSlideData(currentSlide || null);
+          updateActiveSlideData(currentSlide || null, row);
           // Update slide counter with current slides count
           updateSlideCounter(swiper.activeIndex, currentSlides.length);
         }}
@@ -864,7 +871,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
                 // Update background image, video, and overlay for first slide of the new row
                 const rowSlides = getSlidesForRow(activeRow.id);
                 if (rowSlides.length > 0) {
-                  updateActiveSlideData(rowSlides[0]);
+                  updateActiveSlideData(rowSlides[0], activeRow);
                   // Update slide counter to first slide of new row
                   updateSlideCounter(0, rowSlides.length);
                 }
@@ -931,7 +938,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
               // Update background image, video, and overlay for first slide of the new row
               const rowSlides = getSlidesForRow(activeRow.id);
               if (rowSlides.length > 0) {
-                updateActiveSlideData(rowSlides[0]);
+                updateActiveSlideData(rowSlides[0], activeRow);
                 // Update slide counter to first slide of new row
                 updateSlideCounter(0, rowSlides.length);
               }
