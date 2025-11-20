@@ -2,7 +2,7 @@
 
 **Project**: Spiritual Content Platform with Slide-Based Navigation
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: November 18, 2025
+**Last Updated**: November 20, 2025
 
 ---
 
@@ -36,7 +36,7 @@ npm run db:validate      # Check pending migrations
 - **Background System**: Full-viewport images with theme overlay
 - **User-Specific Content**: Private rows visible only to assigned users
 - **Slide Counter**: Top bar displays current/total slides (e.g., "3/12")
-- **Special Modes**: Quick Slides (atr), Simple Shifts (move_up), Image Slides (web_stories)
+- **Special Modes**: 6 exclusive toggle modes (see below)
 
 ### Admin (/admin)
 - **Protected**: Requires authentication + admin role
@@ -51,7 +51,7 @@ npm run db:validate      # Check pending migrations
 
 **users**: `id`, `name`, `email`, `password_hash`, `role` ('ADMIN'|'USER'|'MODERATOR')
 
-**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'|'IMGSLIDES'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
+**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'|'IMGSLIDES'|'SERVICE'|'GOALS'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
 
 **slides**: `id`, `slide_row_id`, `title` (nullable), `subtitle`, `body_content` (nullable), `position`, `layout_type`, `audio_url`, `image_url`, `video_url`, `content_theme`, `title_bg_opacity`, `is_published`, `publish_time_start/end`, `publish_days` (JSON), `temp_unpublish_until`, `icon_set` (JSON)
 
@@ -64,7 +64,7 @@ npm run db:validate      # Check pending migrations
 ### Core
 - `src/app/page.tsx` - Main frontend, state management, mode toggles
 - `src/components/MainContent.tsx` - Slide rendering, mode filtering
-- `src/components/RightIconBar.tsx` - Mode toggle icons (atr, move_up, web_stories)
+- `src/components/RightIconBar.tsx` - Mode toggle icons
 
 ### Authentication
 - `src/lib/auth.ts` - `requireAuth()`, `requireAdmin()`
@@ -79,17 +79,24 @@ npm run db:validate      # Check pending migrations
 - `src/lib/utils/scheduleFilter.ts` - Time/day-based slide filtering
 - `src/lib/utils/slideRandomizer.ts` - Seeded random slide selection
 
+### Deployment
+- `scripts/railway-init.ts` - Auto-runs all migrations on Railway deploy
+- `scripts/validate-migrations.ts` - Pre-deployment validation
+
 ---
 
 ## Environment Variables
 
 ```env
-# Database
+# Database (Local)
 DB_HOST="localhost"
 DB_PORT="5432"
 DB_NAME="mp3_manager"
 DB_USER="postgres"
 DB_PASSWORD="your-password"
+
+# Database (Railway - auto-provided)
+DATABASE_URL="postgresql://..."
 
 # Authentication (CRITICAL)
 NEXTAUTH_SECRET="<strong-32-char-secret>"  # openssl rand -base64 32
@@ -98,36 +105,24 @@ NEXTAUTH_URL="http://localhost:3000"       # Production: https://your-app.railwa
 
 ---
 
-## Key Features
+## Special Row Modes (6 Exclusive Toggles)
 
-### Special Row Modes (Nov 2025)
-**Quick Slides** (row_type: 'QUICKSLIDE')
-- Icon: "atr" (right sidebar, top section)
-- Behavior: Shows ONLY Quick Slide rows when active
-- Use case: Temporary one-off slides for users
+All modes are **mutually exclusive** - only one can be active at a time. Each mode filters to show ONLY that row type.
 
-**Simple Shifts** (row_type: 'SIMPLESHIFT')
-- Icon: "move_up" (right sidebar, below atr)
-- Behavior: Shows ONLY Simple Shift rows when active
-- Use case: Daily shift/practice content
+| Mode | Icon | row_type | Icon Position | Use Case |
+|------|------|----------|---------------|----------|
+| **Quick Slides** | `atr` | 'QUICKSLIDE' | Right sidebar, top | Temporary one-off slides |
+| **Goals** | `things_to_do` | 'GOALS' | Right sidebar, under atr | Goal tracking & commitments |
+| **Simple Shifts** | `move_up` | 'SIMPLESHIFT' | Right sidebar, under things_to_do | Daily shift/practice content |
+| **Service** | `room_service` | 'SERVICE' | Right sidebar, under move_up | Service commitments |
+| **Image Slides** | `web_stories` | 'IMGSLIDES' | Right sidebar, bottom section | Image-focused content |
+| **Normal Mode** | (default) | All others | No icon | Shows all rows EXCEPT special modes |
 
-**Image Slides** (row_type: 'IMGSLIDES')
-- Icon: "web_stories" (right sidebar, below move_up)
-- Behavior: Shows ONLY Image Slide rows when active
-- Use case: Image-focused content rows
-
-**Service** (row_type: 'SERVICE')
-- Icon: "room_service" (right sidebar, below web_stories)
-- Behavior: Shows ONLY Service rows when active
-- Use case: Service commitments and service-related content
-
-**Normal Mode** (default)
-- Shows all rows EXCEPT Quick Slides, Simple Shifts, Image Slides, and Service
-- Standard content browsing
-
-### Row Filtering Logic (MainContent.tsx)
+### Row Filtering Priority (MainContent.tsx)
 ```typescript
-if (isServiceMode) {
+if (isGoalsMode) {
+  rows = slideRows.filter(row => row.row_type === 'GOALS')
+} else if (isServiceMode) {
   rows = slideRows.filter(row => row.row_type === 'SERVICE')
 } else if (isImageSlideMode) {
   rows = slideRows.filter(row => row.row_type === 'IMGSLIDES')
@@ -136,16 +131,22 @@ if (isServiceMode) {
 } else if (isQuickSlideMode) {
   rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
 } else {
+  // Normal mode: exclude ALL special types
   rows = slideRows.filter(row =>
     row.row_type !== 'QUICKSLIDE' &&
     row.row_type !== 'SIMPLESHIFT' &&
     row.row_type !== 'IMGSLIDES' &&
-    row.row_type !== 'SERVICE'
+    row.row_type !== 'SERVICE' &&
+    row.row_type !== 'GOALS'
   )
 }
 ```
 
-### Slide Randomization (Jan 2025)
+---
+
+## Core Features
+
+### Slide Randomization
 - **Admin Control**: Enable per-row with count and interval
 - **Intervals**: Hourly, daily, or weekly re-randomization
 - **Deterministic**: Same slides within time window (seeded random)
@@ -205,7 +206,7 @@ Format: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 - **Position Auto-Calc**: Server uses `getNextPosition()` - never send position on create
 - **Optional Fields**: `title`, `body_content`, `subtitle` - use `|| ''` fallback
 - **Roles**: Uppercase ('ADMIN', 'USER', 'MODERATOR')
-- **Row Types**: 'ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT', 'IMGSLIDES', 'SERVICE'
+- **Row Types**: 'ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT', 'IMGSLIDES', 'SERVICE', 'GOALS'
 
 ---
 
@@ -219,13 +220,6 @@ npm run build           # Must pass ESLint
 git push origin master  # Auto-deploys to Railway
 ```
 
-### Environment (Railway)
-```env
-DATABASE_URL=postgresql://...              # Auto-provided
-NEXTAUTH_URL=https://your-app.railway.app
-NEXTAUTH_SECRET=<strong-secret>
-```
-
 ### Migration System
 - All migrations auto-run via `railway-init.ts`
 - Migrations use `IF NOT EXISTS` for safety
@@ -234,50 +228,60 @@ NEXTAUTH_SECRET=<strong-secret>
 
 ---
 
+## Development Workflow
+
+### Adding New Special Row Mode (Pattern)
+1. **Migration**: Create `scripts/add-[name]-type.ts`
+2. **Register**: Add to `railway-init.ts` (import + execution block)
+3. **Update**: Add to `validate-migrations.ts` constraint description
+4. **Types**: Update `slideRows.ts` row_type union (3 places)
+5. **State**: Add `is[Name]Mode` state in `page.tsx`
+6. **Handler**: Add `toggle[Name]Mode` handler in `page.tsx`
+7. **Icon**: Add icon to `RightIconBar.tsx` (props + interface + JSX)
+8. **Filter**: Add filter logic to `MainContent.tsx` (props + interface + useMemo + useEffect)
+9. **Normal Mode**: Update normal mode filter to exclude new type
+10. **Validate**: Run `npm run db:validate` and `npx tsc --noEmit`
+
+### Before Deployment
+```bash
+npm run db:validate     # ✅ All migrations up to date
+npx tsc --noEmit        # ✅ 0 TypeScript errors
+npm run build           # ✅ Pass ESLint
+# Update CLAUDE.md if significant changes
+git add . && git commit -m "Description" && git push
+```
+
+---
+
 ## Recent Updates
 
-### Service Mode Toggle (November 18, 2025)
-**What**: Toggle to display only Service rows (fourth special mode)
-**Icon**: "room_service" in right sidebar (below "web_stories")
-**Behavior**: Exclusive display mode - shows ONLY SERVICE rows when active
+### Goals Mode Toggle (November 20, 2025)
+**What**: Toggle to display only Goals rows (sixth special mode)
+**Icon**: "things_to_do" in right sidebar (under "atr")
+**Behavior**: Exclusive display mode - shows ONLY GOALS rows when active
 **Files Modified**:
-- `page.tsx` - Added isServiceMode state and toggle handler
-- `RightIconBar.tsx` - Added room_service icon
-- `MainContent.tsx` - Updated filtering logic for Service mode (priority: Service > Image > Simple > Quick > Normal)
-- `slideRows.ts` - Added SERVICE to row_type union types
-**Database**: Added SERVICE to row_type check constraint
+- `page.tsx` - Added isGoalsMode state and toggle handler
+- `RightIconBar.tsx` - Added things_to_do icon (positioned between atr and move_up)
+- `MainContent.tsx` - Updated filtering logic (priority: Goals > Service > Image > Simple > Quick > Normal)
+- `slideRows.ts` - Added GOALS to row_type union types (3 places)
+**Database**: Added GOALS to row_type check constraint
+**Migration**: `scripts/add-goals-type.ts`
+**Railway**: Registered in `railway-init.ts` and `validate-migrations.ts`
+
+### Service Mode Toggle (November 18, 2025)
+**What**: Toggle to display only Service rows (fifth special mode)
+**Icon**: "room_service" in right sidebar
 **Migration**: `scripts/add-service-type.ts`
-**Post-Deploy**: Run `UPDATE slide_rows SET row_type = 'SERVICE' WHERE title = 'Service Commitments';` in Railway
 
 ### Image Slides Toggle (November 18, 2025)
-**What**: Toggle to display only Image Slide rows (third special mode)
-**Icon**: "web_stories" in right sidebar (below "move_up")
-**Behavior**: Exclusive display mode - shows ONLY IMGSLIDES rows when active
-**Files Modified**:
-- `page.tsx` - Added isImageSlideMode state and toggle handler
-- `RightIconBar.tsx` - Added web_stories icon
-- `MainContent.tsx` - Updated filtering logic for Image Slide mode
-- `slideRows.ts` - Added IMGSLIDES to row_type union types
-**Database**: Added IMGSLIDES to row_type check constraint
+**What**: Toggle to display only Image Slide rows (fourth special mode)
+**Icon**: "web_stories" in right sidebar
 **Migration**: `scripts/add-imgslides-type.ts`
-**Post-Deploy**: Run `UPDATE slide_rows SET row_type = 'IMGSLIDES' WHERE title = 'Image slides';` in Railway
 
 ### Simple Shifts Toggle (November 17, 2025)
-**What**: Toggle to display only Simple Shift rows
+**What**: Toggle to display only Simple Shift rows (third special mode)
 **Icon**: "move_up" in right sidebar
 **Migration**: `scripts/add-simpleshift-type.ts`
-
-### Session Auto-Refresh (November 17, 2025)
-**What**: User-assigned rows appear immediately after login
-**How**: MainContent monitors sessionStatus from NextAuth
-
-### Slide Randomization (January 17, 2025)
-**What**: Per-row randomization with time-based intervals
-**Database**: 4 columns for randomization control
-
-### User-Specific Private Rows (January 17, 2025)
-**What**: Assign rows to specific users for personalized content
-**How**: `user_id` column on `slide_rows`
 
 ---
 
@@ -286,77 +290,74 @@ NEXTAUTH_SECRET=<strong-secret>
 | Issue | Solution |
 |-------|----------|
 | Sessions not persisting | Generate strong `NEXTAUTH_SECRET` with `openssl rand -base64 32` |
-| Private rows not appearing | MainContent auto-refetches on session change (fixed Nov 17) |
+| Private rows not appearing | MainContent auto-refetches on session change |
 | Cannot access /setup | Users exist. Use `npm run db:seed:admin` instead |
 | Deployment failed (ESLint) | Run `npx eslint [file]` locally before pushing |
-| Mode rows not showing | Ensure row has correct `row_type` (QUICKSLIDE/SIMPLESHIFT/IMGSLIDES) |
-| Constraint violation | Migration didn't run - check Railway logs or `npm run railway:init` |
-
----
-
-## Development Workflow
-
-### Adding New Feature
-1. **Database**: Create migration in `scripts/` (e.g., `add-feature.ts`)
-2. **Register**: Add to `railway-init.ts` and `validate-migrations.ts`
-3. **Types**: Update interfaces in `src/lib/queries/`
-4. **API**: Add validation in API routes
-5. **UI**: Update admin forms and frontend components
-6. **Validate**: Run `npm run db:validate` and `npx tsc --noEmit`
-
-### Before Deployment
-```bash
-npm run db:validate     # ✅ All migrations up to date
-npx tsc --noEmit        # ✅ 0 TypeScript errors
-npm run build           # ✅ Pass ESLint
-# Update this CLAUDE.md if significant changes
-git add . && git commit -m "Description" && git push
-```
+| Mode rows not showing | Ensure row has correct `row_type` value |
+| Constraint violation on Railway | Migration didn't run - check Railway logs or manually run `railway run npm run railway:init` |
+| Local migration auth failed | Password issue - run SQL manually or wait for Railway deploy |
 
 ---
 
 ## Code Patterns
 
-### Mode Toggle Pattern
+### Mode Toggle Pattern (Full Example)
 ```typescript
-// page.tsx - State
-const [isQuickSlideMode, setIsQuickSlideMode] = useState(false)
-const [isSimpleShiftMode, setIsSimpleShiftMode] = useState(false)
-const [isImageSlideMode, setIsImageSlideMode] = useState(false)
-const [isServiceMode, setIsServiceMode] = useState(false)
+// 1. page.tsx - State (line ~64)
+const [isGoalsMode, setIsGoalsMode] = useState(false)
 
-// page.tsx - Handler
-const toggleServiceMode = () => setIsServiceMode(prev => !prev)
+// 2. page.tsx - Handler (line ~196)
+const toggleGoalsMode = () => setIsGoalsMode(prev => !prev)
 
-// MainContent.tsx - Filtering (priority: Service > Image > Simple > Quick > Normal)
-if (isServiceMode) {
-  rows = slideRows.filter(row => row.row_type === 'SERVICE')
-} else if (isImageSlideMode) {
-  rows = slideRows.filter(row => row.row_type === 'IMGSLIDES')
-} else if (isSimpleShiftMode) {
-  rows = slideRows.filter(row => row.row_type === 'SIMPLESHIFT')
-} else if (isQuickSlideMode) {
-  rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
-} else {
-  rows = slideRows.filter(row =>
-    row.row_type !== 'QUICKSLIDE' &&
-    row.row_type !== 'SIMPLESHIFT' &&
-    row.row_type !== 'IMGSLIDES' &&
-    row.row_type !== 'SERVICE'
-  )
+// 3. page.tsx - Pass to RightIconBar (line ~355)
+<RightIconBar
+  isGoalsMode={isGoalsMode}
+  onGoalsClick={toggleGoalsMode}
+  // ... other props
+/>
+
+// 4. page.tsx - Pass to MainContent (line ~376)
+<MainContentWithRef
+  isGoalsMode={isGoalsMode}
+  // ... other props
+/>
+
+// 5. RightIconBar.tsx - Interface (line ~18)
+interface RightIconBarProps {
+  isGoalsMode?: boolean
+  onGoalsClick?: () => void
+  // ... other props
 }
-```
 
-### Randomization
-```typescript
-import { applyRandomization } from '@/lib/utils/slideRandomizer'
-const visibleSlides = filterVisibleSlides(allSlides)
-const finalSlides = applyRandomization(
-  visibleSlides,
-  row.randomize_enabled,
-  row.randomize_count,
-  row.randomize_interval
-)
+// 6. RightIconBar.tsx - Icon JSX (line ~49)
+<span
+  className="material-symbols-outlined"
+  title={isGoalsMode ? 'Exit Goals Mode' : 'Goals Mode'}
+  onClick={onGoalsClick}
+  style={{
+    cursor: 'pointer',
+    opacity: isGoalsMode ? 1 : 0.6,
+    transition: 'opacity 0.3s ease'
+  }}
+>
+  things_to_do
+</span>
+
+// 7. MainContent.tsx - Interface (line ~30)
+interface MainContentProps {
+  isGoalsMode: boolean
+  // ... other props
+}
+
+// 8. MainContent.tsx - Filter Logic (line ~106)
+if (isGoalsMode) {
+  rows = slideRows.filter(row => row.row_type === 'GOALS')
+} else if (isServiceMode) {
+  // ... other modes
+} else {
+  // Normal mode - exclude GOALS
+  rows = slideRows.filter(row => row.row_type !== 'GOALS' && ...)
+}
 ```
 
 ### User Filtering
@@ -368,4 +369,4 @@ const rows = await getAllSlideRows(publishedOnly, userId, isAdmin)
 
 ---
 
-**Status**: Production Ready | **Lines**: 269/500 ✅ | **Last Updated**: November 18, 2025
+**Status**: Production Ready | **Lines**: 362/500 ✅ | **Last Updated**: November 20, 2025
