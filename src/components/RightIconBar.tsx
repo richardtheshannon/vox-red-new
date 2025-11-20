@@ -15,10 +15,12 @@ interface RightIconBarProps {
   onImageSlideClick?: () => void;
   isServiceMode?: boolean;
   onServiceClick?: () => void;
+  isGoalsMode?: boolean;
+  onGoalsClick?: () => void;
   onGroupClick?: () => void;
 }
 
-export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, isSimpleShiftMode = false, onSimpleShiftClick, isImageSlideMode = false, onImageSlideClick, isServiceMode = false, onServiceClick, onGroupClick }: RightIconBarProps) {
+export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, isSimpleShiftMode = false, onSimpleShiftClick, isImageSlideMode = false, onImageSlideClick, isServiceMode = false, onServiceClick, isGoalsMode = false, onGoalsClick, onGroupClick }: RightIconBarProps) {
   const { data: session } = useSession();
   return (
     <aside className={`icon-container fixed right-0 flex flex-col justify-between items-center ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem', top: '0', bottom: '0', paddingTop: '50px', paddingBottom: '50px', zIndex: 15}}>
@@ -46,6 +48,18 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             </span>
             <span
               className="material-symbols-outlined"
+              title={isGoalsMode ? 'Exit Goals Mode' : 'Goals Mode'}
+              onClick={onGoalsClick}
+              style={{
+                cursor: 'pointer',
+                opacity: isGoalsMode ? 1 : 0.6,
+                transition: 'opacity 0.3s ease'
+              }}
+            >
+              things_to_do
+            </span>
+            <span
+              className="material-symbols-outlined"
               title={isSimpleShiftMode ? 'Exit Simple Shift Mode' : 'Simple Shift Mode'}
               onClick={onSimpleShiftClick}
               style={{
@@ -55,18 +69,6 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
               }}
             >
               move_up
-            </span>
-            <span
-              className="material-symbols-outlined"
-              title={isImageSlideMode ? 'Exit Image Slide Mode' : 'Image Slide Mode'}
-              onClick={onImageSlideClick}
-              style={{
-                cursor: 'pointer',
-                opacity: isImageSlideMode ? 1 : 0.6,
-                transition: 'opacity 0.3s ease'
-              }}
-            >
-              web_stories
             </span>
             <span
               className="material-symbols-outlined"
@@ -89,6 +91,18 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             <span className="material-symbols-outlined" title="Tag">tag</span>
             <span className="material-symbols-outlined" title="Analytics">analytics</span>
             <span className="material-symbols-outlined" title="Photo Library">photo_library</span>
+            <span
+              className="material-symbols-outlined"
+              title={isImageSlideMode ? 'Exit Image Slide Mode' : 'Image Slide Mode'}
+              onClick={onImageSlideClick}
+              style={{
+                cursor: 'pointer',
+                opacity: isImageSlideMode ? 1 : 0.6,
+                transition: 'opacity 0.3s ease'
+              }}
+            >
+              web_stories
+            </span>
           </>
         )}
         {session && hasVideo && (

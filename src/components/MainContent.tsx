@@ -27,6 +27,7 @@ interface MainContentProps {
   isSimpleShiftMode: boolean;
   isImageSlideMode: boolean;
   isServiceMode: boolean;
+  isGoalsMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
@@ -53,7 +54,7 @@ interface SlideRow {
   updated_at: string;
 }
 
-export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData, updateSlideCounter }: MainContentProps) {
+export default function MainContent({ setSwiperRef, handleSlideChange, setActiveRow, setActiveSlideImageUrl, setActiveSlideVideoUrl, activeSlideVideoUrl, setActiveSlideOverlayOpacity, setActiveSlideContentTheme, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, isGoalsMode, onUnpublishDialogOpen, unpublishCallbackRef, updatePlaylistData, updateSlideCounter }: MainContentProps) {
   const [slideRows, setSlideRows] = useState<SlideRow[]>([]);
   const [slidesCache, setSlidesCache] = useState<Record<string, Slide[]>>({});
   const [loading, setLoading] = useState(true);
@@ -96,13 +97,18 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
   };
 
-  // Filter rows based on Quick Slide mode, Simple Shift mode, Image Slide mode, and Service mode
+  // Filter rows based on Quick Slide mode, Simple Shift mode, Image Slide mode, Service mode, and Goals mode
   const filteredSlideRows = useMemo(() => {
-    console.log('[MainContent] Filtering rows. Quick Slide Mode:', isQuickSlideMode, 'Simple Shift Mode:', isSimpleShiftMode, 'Image Slide Mode:', isImageSlideMode, 'Service Mode:', isServiceMode);
+    console.log('[MainContent] Filtering rows. Quick Slide Mode:', isQuickSlideMode, 'Simple Shift Mode:', isSimpleShiftMode, 'Image Slide Mode:', isImageSlideMode, 'Service Mode:', isServiceMode, 'Goals Mode:', isGoalsMode);
     console.log('[MainContent] Total slide rows:', slideRows.length);
 
     let rows: SlideRow[];
-    if (isServiceMode) {
+    if (isGoalsMode) {
+      // Show only GOALS rows
+      rows = slideRows.filter(row => row.row_type === 'GOALS');
+      console.log('[MainContent] GOALS rows found:', rows.length);
+      rows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
+    } else if (isServiceMode) {
       // Show only SERVICE rows
       rows = slideRows.filter(row => row.row_type === 'SERVICE');
       console.log('[MainContent] SERVICE rows found:', rows.length);
@@ -123,9 +129,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
       console.log('[MainContent] QUICKSLIDE rows found:', rows.length);
       rows.forEach(row => console.log('  - ', row.title, row.is_published ? '(published)' : '(unpublished)'));
     } else {
-      // Show all rows EXCEPT QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, and SERVICE
-      rows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT' && row.row_type !== 'IMGSLIDES' && row.row_type !== 'SERVICE');
-      console.log('[MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, and SERVICE):', rows.length);
+      // Show all rows EXCEPT QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS
+      rows = slideRows.filter(row => row.row_type !== 'QUICKSLIDE' && row.row_type !== 'SIMPLESHIFT' && row.row_type !== 'IMGSLIDES' && row.row_type !== 'SERVICE' && row.row_type !== 'GOALS');
+      console.log('[MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS):', rows.length);
     }
 
     // Filter out rows that have zero visible slides (due to scheduling)
@@ -143,7 +149,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
 
     console.log('[MainContent] Rows with visible slides:', rowsWithVisibleSlides.length);
     return rowsWithVisibleSlides;
-  }, [slideRows, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, slidesCache]);
+  }, [slideRows, isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, isGoalsMode, slidesCache]);
 
   // Memoize icon sets (already parsed by API, no need to parse again)
   const iconSetsCache = useMemo(() => {
@@ -239,9 +245,9 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     }
   }, [slidesCache, filteredSlideRows, setActiveSlideImageUrl, setActiveSlideVideoUrl, updatePlaylistData, getHorizontalSwiper, updateSlideCounter]);
 
-  // Preload slides when Quick Slide mode, Simple Shift mode, Image Slide mode, or Service mode changes
+  // Preload slides when Quick Slide mode, Simple Shift mode, Image Slide mode, Service mode, or Goals mode changes
   useEffect(() => {
-    console.log('[MainContent] Mode changed - Quick Slide:', isQuickSlideMode, 'Simple Shift:', isSimpleShiftMode, 'Image Slide:', isImageSlideMode, 'Service:', isServiceMode);
+    console.log('[MainContent] Mode changed - Quick Slide:', isQuickSlideMode, 'Simple Shift:', isSimpleShiftMode, 'Image Slide:', isImageSlideMode, 'Service:', isServiceMode, 'Goals:', isGoalsMode);
     console.log('[MainContent] Filtered slide rows:', filteredSlideRows.length);
 
     if (filteredSlideRows.length > 0) {
@@ -257,7 +263,7 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     } else {
       console.warn('[MainContent] No filtered slide rows available!');
     }
-  }, [isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, filteredSlideRows, slidesCache]);
+  }, [isQuickSlideMode, isSimpleShiftMode, isImageSlideMode, isServiceMode, isGoalsMode, filteredSlideRows, slidesCache]);
 
   // Load slides for a specific row
   const loadSlidesForRow = async (rowId: string) => {

@@ -60,6 +60,9 @@ export default function Home() {
   // Service Mode state (toggle between all rows and Service row only)
   const [isServiceMode, setIsServiceMode] = useState(false);
 
+  // Goals Mode state (toggle between all rows and Goals row only)
+  const [isGoalsMode, setIsGoalsMode] = useState(false);
+
   // Unpublish confirmation dialog state
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [slideToUnpublish, setSlideToUnpublish] = useState<{ slideId: string; rowId: string } | null>(null);
@@ -187,6 +190,11 @@ export default function Home() {
   // Toggle Service Mode
   const toggleServiceMode = () => {
     setIsServiceMode(prev => !prev);
+  };
+
+  // Toggle Goals Mode
+  const toggleGoalsMode = () => {
+    setIsGoalsMode(prev => !prev);
   };
 
   // Handle unpublish dialog open
@@ -344,6 +352,8 @@ export default function Home() {
             onImageSlideClick={toggleImageSlideMode}
             isServiceMode={isServiceMode}
             onServiceClick={toggleServiceMode}
+            isGoalsMode={isGoalsMode}
+            onGoalsClick={toggleGoalsMode}
             onGroupClick={handleGroupClick}
           />
           <BottomIconBar
@@ -363,6 +373,7 @@ export default function Home() {
             isSimpleShiftMode={isSimpleShiftMode}
             isImageSlideMode={isImageSlideMode}
             isServiceMode={isServiceMode}
+            isGoalsMode={isGoalsMode}
             onUnpublishDialogOpen={handleUnpublishDialogOpen}
             unpublishCallbackRef={mainContentUnpublishCallbackRef}
             updatePlaylistData={updatePlaylistData}
@@ -422,6 +433,7 @@ function MainContentWithRef({
   isSimpleShiftMode,
   isImageSlideMode,
   isServiceMode,
+  isGoalsMode,
   onUnpublishDialogOpen,
   unpublishCallbackRef,
   updatePlaylistData,
@@ -439,6 +451,7 @@ function MainContentWithRef({
   isSimpleShiftMode: boolean;
   isImageSlideMode: boolean;
   isServiceMode: boolean;
+  isGoalsMode: boolean;
   onUnpublishDialogOpen: (slideId: string, rowId: string) => void;
   unpublishCallbackRef: React.MutableRefObject<((slideId: string, rowId: string) => void) | null>;
   updatePlaylistData: (rowId: string, delaySeconds: number, slides: Slide[], swiper: SwiperType | null, hasAudio: boolean) => void;
@@ -458,6 +471,7 @@ function MainContentWithRef({
       isSimpleShiftMode={isSimpleShiftMode}
       isImageSlideMode={isImageSlideMode}
       isServiceMode={isServiceMode}
+      isGoalsMode={isGoalsMode}
       onUnpublishDialogOpen={onUnpublishDialogOpen}
       unpublishCallbackRef={unpublishCallbackRef}
       updatePlaylistData={updatePlaylistData}
