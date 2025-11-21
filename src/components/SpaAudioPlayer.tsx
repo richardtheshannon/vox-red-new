@@ -18,8 +18,21 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
   const [currentTrack, setCurrentTrack] = useState<SpaTrack | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Component mount logging
+  useEffect(() => {
+    const now = new Date();
+    console.log('[SpaAudioPlayer] Component mounted at:', now.toLocaleTimeString(), {
+      currentTime: `${now.getHours()}:${now.getMinutes()}`,
+      isPlaying,
+    });
+    return () => {
+      console.log('[SpaAudioPlayer] Component unmounting');
+    };
+  }, []);
+
   // Load active track on mount
   useEffect(() => {
+    console.log('[SpaAudioPlayer] Initial load - calling loadActiveTrack()');
     loadActiveTrack();
   }, []);
 
@@ -28,12 +41,17 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
   useEffect(() => {
     const RELOAD_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
+    console.log('[SpaAudioPlayer] Setting up periodic reload interval (5 minutes)');
     const intervalId = setInterval(() => {
+      console.log('[SpaAudioPlayer] Periodic reload triggered - calling loadActiveTrack()');
       loadActiveTrack();
     }, RELOAD_INTERVAL);
 
     // Cleanup interval on unmount
-    return () => clearInterval(intervalId);
+    return () => {
+      console.log('[SpaAudioPlayer] Clearing periodic reload interval');
+      clearInterval(intervalId);
+    };
   }, []);
 
   // Handle play/pause based on isPlaying prop and apply volume
@@ -56,34 +74,58 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
 
   const loadActiveTrack = async () => {
     try {
+      console.log('[SpaAudioPlayer] Fetching active spa track from /api/spa/tracks/active');
       const response = await fetch('/api/spa/tracks/active');
       const data = await response.json();
+
+      console.log('[SpaAudioPlayer] API response:', {
+        status: data.status,
+        hasData: !!data.data,
+        message: data.message,
+        trackId: data.data?.id,
+        trackTitle: data.data?.title,
+      });
 
       if (data.status === 'success' && data.data) {
         const track = data.data;
 
+        console.log('[SpaAudioPlayer] Track received:', {
+          id: track.id,
+          title: track.title,
+          publish_time_start: track.publish_time_start,
+          publish_time_end: track.publish_time_end,
+          publish_days: track.publish_days,
+        });
+
         // Apply client-side schedule filtering
-        if (isTrackVisibleNow(track)) {
+        const isVisible = isTrackVisibleNow(track);
+        console.log('[SpaAudioPlayer] Client-side visibility check:', isVisible);
+
+        if (isVisible) {
           // Only update if track actually changed (prevents audio restart on same track)
           setCurrentTrack(prevTrack => {
             if (prevTrack?.id === track.id) {
+              console.log('[SpaAudioPlayer] Same track, keeping existing');
               return prevTrack; // Same track, no update needed
             }
+            console.log('[SpaAudioPlayer] New track detected, updating state');
             return track; // New track, update state
           });
           setError(null);
         } else {
+          console.log('[SpaAudioPlayer] Track filtered out by time/day restrictions');
           setCurrentTrack(null);
           setError('No spa tracks available at this time');
           if (onLoadError) onLoadError();
         }
       } else {
+        console.log('[SpaAudioPlayer] No track data in response');
         setCurrentTrack(null);
         setError(data.message || 'No spa tracks available');
         if (onLoadError) onLoadError();
       }
     } catch (err) {
-      console.error('Error loading active spa track:', err);
+      console.error('[SpaAudioPlayer] Error loading active spa track:', err);
       setError('Failed to load spa track');
       if (onLoadError) onLoadError();
     }
@@ -98,16 +140,28 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
     const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
     const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight
 
+    console.log('[SpaAudioPlayer] Time-based filter check:', {
+      currentDay,
+      currentTime: `${Math.floor(currentTime / 60)}:${currentTime % 60}`,
+      trackPublishDays: track.publish_days,
+      trackTimeStart: track.publish_time_start,
+      trackTimeEnd: track.publish_time_end,
+    });
+
     // Check day-of-week restrictions
     if (track.publish_days) {
       try {
         const allowedDays: number[] = JSON.parse(track.publish_days);
 
         if (allowedDays.length > 0 && !allowedDays.includes(currentDay)) {
+          console.log('[SpaAudioPlayer] Track blocked by day restriction:', {
+            currentDay,
+            allowedDays,
+          });
           return false;
         }
       } catch (error) {
-        console.error('Error parsing publish_days:', error);
+        console.error('[SpaAudioPlayer] Error parsing publish_days:', error);
       }
     }
 
@@ -123,16 +177,23 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
       if (startMinutes > endMinutes) {
         // Overnight: visible if EITHER after start OR before end
         if (currentTime < startMinutes && currentTime >= endMinutes) {
+          console.log('[SpaAudioPlayer] Track blocked by overnight time restriction');
           return false;
         }
       } else {
         // Normal range: visible if between start and end
         if (currentTime < startMinutes || currentTime >= endMinutes) {
+          console.log('[SpaAudioPlayer] Track blocked by time restriction:', {
+            currentTime,
+            startMinutes,
+            endMinutes,
+          });
           return false;
         }
       }
     }
 
+    console.log('[SpaAudioPlayer] Track passed all time/day filters');
     return true;
   };
 
