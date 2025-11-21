@@ -10,8 +10,9 @@ interface SpaAudioPlayerProps {
 
 /**
  * SpaAudioPlayer component
- * Plays background ambient music based on active spa track
- * Handles scheduling, randomization, and audio playback
+ * Plays background ambient music based on scheduled spa tracks
+ * Server handles all schedule filtering (day/time restrictions)
+ * Automatically reloads every 5 minutes to respect schedule changes
  */
 export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -97,27 +98,17 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
           publish_days: track.publish_days,
         });
 
-        // Apply client-side schedule filtering
-        const isVisible = isTrackVisibleNow(track);
-        console.log('[SpaAudioPlayer] Client-side visibility check:', isVisible);
-
-        if (isVisible) {
-          // Only update if track actually changed (prevents audio restart on same track)
-          setCurrentTrack(prevTrack => {
-            if (prevTrack?.id === track.id) {
-              console.log('[SpaAudioPlayer] Same track, keeping existing');
-              return prevTrack; // Same track, no update needed
-            }
-            console.log('[SpaAudioPlayer] New track detected, updating state');
-            return track; // New track, update state
-          });
-          setError(null);
-        } else {
-          console.log('[SpaAudioPlayer] Track filtered out by time/day restrictions');
-          setCurrentTrack(null);
-          setError('No spa tracks available at this time');
-          if (onLoadError) onLoadError();
-        }
+        // Server has already filtered by schedule, trust it
+        // Only update if track actually changed (prevents audio restart on same track)
+        setCurrentTrack(prevTrack => {
+          if (prevTrack?.id === track.id) {
+            console.log('[SpaAudioPlayer] Same track, keeping existing');
+            return prevTrack; // Same track, no update needed
+          }
+          console.log('[SpaAudioPlayer] New track detected, updating state');
+          return track; // New track, update state
+        });
+        setError(null);
       } else {
         console.log('[SpaAudioPlayer] No track data in response');
         setCurrentTrack(null);
@@ -129,79 +120,6 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
       setError('Failed to load spa track');
       if (onLoadError) onLoadError();
     }
-  };
-
-  /**
-   * Client-side schedule filtering (same logic as slides)
-   * Checks if track should be visible based on time/day settings
-   */
-  const isTrackVisibleNow = (track: SpaTrack): boolean => {
-    const now = new Date();
-    const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
-    const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight
-
-    console.log('[SpaAudioPlayer] Time-based filter check:', {
-      currentDay,
-      currentTime: `${Math.floor(currentTime / 60)}:${currentTime % 60}`,
-      trackPublishDays: track.publish_days,
-      trackTimeStart: track.publish_time_start,
-      trackTimeEnd: track.publish_time_end,
-    });
-
-    // Check day-of-week restrictions
-    if (track.publish_days) {
-      try {
-        const allowedDays: number[] = JSON.parse(track.publish_days);
-
-        if (allowedDays.length > 0 && !allowedDays.includes(currentDay)) {
-          console.log('[SpaAudioPlayer] Track blocked by day restriction:', {
-            currentDay,
-            allowedDays,
-          });
-          return false;
-        }
-      } catch (error) {
-        console.error('[SpaAudioPlayer] Error parsing publish_days:', error);
-      }
-    }
-
-    // Check time-of-day restrictions
-    const hasTimeStart = track.publish_time_start !== null && track.publish_time_start !== undefined;
-    const hasTimeEnd = track.publish_time_end !== null && track.publish_time_end !== undefined;
-
-    if (hasTimeStart || hasTimeEnd) {
-      const startMinutes = hasTimeStart ? parseTimeToMinutes(track.publish_time_start!) : 0;
-      const endMinutes = hasTimeEnd ? parseTimeToMinutes(track.publish_time_end!) : 1439; // 23:59
-
-      // Handle overnight time ranges (e.g., 22:00 - 03:00)
-      if (startMinutes > endMinutes) {
-        // Overnight: visible if EITHER after start OR before end
-        if (currentTime < startMinutes && currentTime >= endMinutes) {
-          console.log('[SpaAudioPlayer] Track blocked by overnight time restriction');
-          return false;
-        }
-      } else {
-        // Normal range: visible if between start and end
-        if (currentTime < startMinutes || currentTime >= endMinutes) {
-          console.log('[SpaAudioPlayer] Track blocked by time restriction:', {
-            currentTime,
-            startMinutes,
-            endMinutes,
-          });
-          return false;
-        }
-      }
-    }
-
-    console.log('[SpaAudioPlayer] Track passed all time/day filters');
-    return true;
-  };
-
-  const parseTimeToMinutes = (timeStr: string): number => {
-    const parts = timeStr.split(':');
-    const hours = parseInt(parts[0], 10);
-    const minutes = parseInt(parts[1], 10);
-    return hours * 60 + minutes;
   };
 
   // Handle audio ended - loop the track

@@ -76,7 +76,7 @@ export async function GET() {
       })
     }
 
-    // Apply server-side schedule filtering BEFORE random selection
+    // Apply server-side schedule filtering
     const scheduledTracks = tracks.filter(track => isTrackVisibleNow(track))
 
     if (scheduledTracks.length === 0) {
@@ -87,18 +87,9 @@ export async function GET() {
       })
     }
 
-    // Check if we should use random selection
-    const randomTracks = scheduledTracks.filter(track => track.is_random)
-
-    let selectedTrack
-    if (randomTracks.length > 0) {
-      // Pick a random track from the random pool (already filtered by schedule)
-      const randomIndex = Math.floor(Math.random() * randomTracks.length)
-      selectedTrack = randomTracks[randomIndex]
-    } else {
-      // Use first track by display_order (tracks are already ordered by display_order)
-      selectedTrack = scheduledTracks[0]
-    }
+    // Return first scheduled track by display_order
+    // Tracks are already ordered by display_order, created_at from query
+    const selectedTrack = scheduledTracks[0]
 
     return NextResponse.json({
       status: 'success',
