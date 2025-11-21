@@ -36,13 +36,14 @@ npm run db:validate      # Check pending migrations
 - **Background System**: Full-viewport images with theme overlay
 - **User-Specific Content**: Private rows visible only to assigned users
 - **Slide Counter**: Top bar displays current/total slides (e.g., "3/12")
-- **Special Modes**: 6 exclusive toggle modes (see below)
+- **Special Modes**: 6 exclusive toggle modes (Quick Slides, Goals, Simple Shifts, Service, Image Slides, Normal)
 
 ### Admin (/admin)
 - **Protected**: Requires authentication + admin role
 - **Full CRUD**: Slides, slide rows, spa tracks, users
 - **Tiptap Editor**: Rich text editing for slide content
 - **User Assignment**: Assign rows to specific users (private rows)
+- **Row Overrides**: Set row-level background images and layout types that override individual slides
 - **Randomization Controls**: Enable, set count, select interval (hourly/daily/weekly)
 
 ---
@@ -51,9 +52,9 @@ npm run db:validate      # Check pending migrations
 
 **users**: `id`, `name`, `email`, `password_hash`, `role` ('ADMIN'|'USER'|'MODERATOR')
 
-**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'|'IMGSLIDES'|'SERVICE'|'GOALS'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`
+**slide_rows**: `id`, `title`, `description`, `row_type` ('ROUTINE'|'COURSE'|'TEACHING'|'CUSTOM'|'QUICKSLIDE'|'SIMPLESHIFT'|'IMGSLIDES'|'SERVICE'|'GOALS'), `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id` (nullable), `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`, `row_background_image_url`, `row_layout_type`
 
-**slides**: `id`, `slide_row_id`, `title` (nullable), `subtitle`, `body_content` (nullable), `position`, `layout_type`, `audio_url`, `image_url`, `video_url`, `content_theme`, `title_bg_opacity`, `is_published`, `publish_time_start/end`, `publish_days` (JSON), `temp_unpublish_until`, `icon_set` (JSON)
+**slides**: `id`, `slide_row_id`, `title` (nullable), `subtitle`, `body_content` (nullable), `position`, `layout_type` ('STANDARD'|'OVERFLOW'|'MINIMAL'), `audio_url`, `image_url`, `video_url`, `content_theme` ('light'|'dark'), `title_bg_opacity`, `is_published`, `publish_time_start/end`, `publish_days` (JSON), `temp_unpublish_until`, `icon_set` (JSON)
 
 **spa_tracks**: `id`, `title`, `audio_url`, `is_published`, `display_order`, `volume`, `publish_time_start/end`, `publish_days` (JSON)
 
@@ -63,7 +64,7 @@ npm run db:validate      # Check pending migrations
 
 ### Core
 - `src/app/page.tsx` - Main frontend, state management, mode toggles
-- `src/components/MainContent.tsx` - Slide rendering, mode filtering
+- `src/components/MainContent.tsx` - Slide rendering, mode filtering, row overrides
 - `src/components/RightIconBar.tsx` - Mode toggle icons
 
 ### Authentication
@@ -72,12 +73,15 @@ npm run db:validate      # Check pending migrations
 
 ### Database
 - `src/lib/db.ts` - PostgreSQL connection
-- `src/lib/queries/slideRows.ts` - Row CRUD + user filtering + randomization
+- `src/lib/queries/slideRows.ts` - Row CRUD + user filtering + randomization + overrides
 - `src/lib/queries/slides.ts` - Slide CRUD + `getNextPosition()`
 
 ### Utilities
 - `src/lib/utils/scheduleFilter.ts` - Time/day-based slide filtering
 - `src/lib/utils/slideRandomizer.ts` - Seeded random slide selection
+
+### Admin
+- `src/components/admin/slides/SlideRowForm.tsx` - Row edit form with override controls
 
 ### Deployment
 - `scripts/railway-init.ts` - Auto-runs all migrations on Railway deploy
@@ -112,39 +116,38 @@ All modes are **mutually exclusive** - only one can be active at a time. Each mo
 | Mode | Icon | row_type | Icon Position | Use Case |
 |------|------|----------|---------------|----------|
 | **Quick Slides** | `atr` | 'QUICKSLIDE' | Right sidebar, top | Temporary one-off slides |
-| **Goals** | `things_to_do` | 'GOALS' | Right sidebar, under atr | Goal tracking & commitments |
-| **Simple Shifts** | `move_up` | 'SIMPLESHIFT' | Right sidebar, under things_to_do | Daily shift/practice content |
-| **Service** | `room_service` | 'SERVICE' | Right sidebar, under move_up | Service commitments |
-| **Image Slides** | `web_stories` | 'IMGSLIDES' | Right sidebar, bottom section | Image-focused content |
+| **Goals** | `things_to_do` | 'GOALS' | Right sidebar, 2nd | Goal tracking & commitments |
+| **Simple Shifts** | `move_up` | 'SIMPLESHIFT' | Right sidebar, 3rd | Daily shift/practice content |
+| **Service** | `room_service` | 'SERVICE' | Right sidebar, 4th | Service commitments |
+| **Image Slides** | `web_stories` | 'IMGSLIDES' | Right sidebar, bottom | Image-focused content |
 | **Normal Mode** | (default) | All others | No icon | Shows all rows EXCEPT special modes |
 
-### Row Filtering Priority (MainContent.tsx)
-```typescript
-if (isGoalsMode) {
-  rows = slideRows.filter(row => row.row_type === 'GOALS')
-} else if (isServiceMode) {
-  rows = slideRows.filter(row => row.row_type === 'SERVICE')
-} else if (isImageSlideMode) {
-  rows = slideRows.filter(row => row.row_type === 'IMGSLIDES')
-} else if (isSimpleShiftMode) {
-  rows = slideRows.filter(row => row.row_type === 'SIMPLESHIFT')
-} else if (isQuickSlideMode) {
-  rows = slideRows.filter(row => row.row_type === 'QUICKSLIDE')
-} else {
-  // Normal mode: exclude ALL special types
-  rows = slideRows.filter(row =>
-    row.row_type !== 'QUICKSLIDE' &&
-    row.row_type !== 'SIMPLESHIFT' &&
-    row.row_type !== 'IMGSLIDES' &&
-    row.row_type !== 'SERVICE' &&
-    row.row_type !== 'GOALS'
-  )
-}
-```
+**Filter Priority**: Goals > Service > Image > Simple > Quick > Normal
 
 ---
 
 ## Core Features
+
+### Row-Level Overrides (NEW - Nov 2025)
+**Background Image Override** (`row_background_image_url`):
+- When set, overrides ALL individual slide `image_url` values in the row
+- Priority: `row.row_background_image_url` → `slide.image_url` → `null`
+- Set via Admin > Edit Row > "Row Background Image" field
+
+**Layout Type Override** (`row_layout_type`):
+- When set, overrides ALL individual slide `layout_type` values in the row
+- Options: 'STANDARD' (centered), 'OVERFLOW' (scrollable), 'MINIMAL' (title+audio only)
+- Priority: `row.row_layout_type` → `slide.layout_type` → `'STANDARD'`
+- Set via Admin > Edit Row > "Row Layout Type" dropdown
+
+**Implementation** (MainContent.tsx):
+```typescript
+// Background override
+const imageUrl = (row?.row_background_image_url) || slide.image_url || null
+
+// Layout override
+const effectiveLayoutType = row.row_layout_type || slide.layout_type
+```
 
 ### Slide Randomization
 - **Admin Control**: Enable per-row with count and interval
@@ -190,6 +193,7 @@ Format: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 ### Slide Rows
 - `GET/POST /api/slides/rows` - List/create (user-filtered)
 - `PATCH/DELETE /api/slides/rows/[id]` - Update/delete
+- Validation: `row_type`, `row_layout_type`, `playlist_delay_seconds`, randomization fields
 
 ### Slides
 - `GET/POST /api/slides/rows/[id]/slides` - List/create
@@ -207,6 +211,7 @@ Format: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 - **Optional Fields**: `title`, `body_content`, `subtitle` - use `|| ''` fallback
 - **Roles**: Uppercase ('ADMIN', 'USER', 'MODERATOR')
 - **Row Types**: 'ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT', 'IMGSLIDES', 'SERVICE', 'GOALS'
+- **Layout Types**: 'STANDARD', 'OVERFLOW', 'MINIMAL'
 
 ---
 
@@ -226,11 +231,16 @@ git push origin master  # Auto-deploys to Railway
 - Registered in `validate-migrations.ts` for verification
 - Manual run: `railway run npm run railway:init`
 
+**Recent Migrations**:
+- `add-goals-type.ts` - GOALS row_type
+- `add-row-background-image.ts` - row_background_image_url column
+- `add-row-layout-type.ts` - row_layout_type column with CHECK constraint
+
 ---
 
 ## Development Workflow
 
-### Adding New Special Row Mode (Pattern)
+### Adding New Special Row Mode
 1. **Migration**: Create `scripts/add-[name]-type.ts`
 2. **Register**: Add to `railway-init.ts` (import + execution block)
 3. **Update**: Add to `validate-migrations.ts` constraint description
@@ -241,6 +251,17 @@ git push origin master  # Auto-deploys to Railway
 8. **Filter**: Add filter logic to `MainContent.tsx` (props + interface + useMemo + useEffect)
 9. **Normal Mode**: Update normal mode filter to exclude new type
 10. **Validate**: Run `npm run db:validate` and `npx tsc --noEmit`
+
+### Adding Row-Level Override Field
+1. **Migration**: Create `scripts/add-row-[field].ts` with column + constraint
+2. **Register**: Add to `railway-init.ts` and `validate-migrations.ts`
+3. **Types**: Update `slideRows.ts` interfaces (SlideRow, CreateSlideRowData, UpdateSlideRowData)
+4. **SQL**: Update `createSlideRow()` INSERT and `updateSlideRow()` dynamic UPDATE
+5. **API**: Add validation in `/api/slides/rows/[id]/route.ts`
+6. **Admin UI**: Add field to `SlideRowForm.tsx` (interface + state + form section)
+7. **Edit Page**: Update interface in `/admin/slides/[id]/edit/page.tsx`
+8. **Frontend**: Update `MainContent.tsx` SlideRow interface + override logic
+9. **Validate**: Run `npx tsc --noEmit`
 
 ### Before Deployment
 ```bash
@@ -255,33 +276,26 @@ git add . && git commit -m "Description" && git push
 
 ## Recent Updates
 
+### Row-Level Overrides (November 20, 2025)
+**What**: Added row-level background image and layout type overrides
+**Features**:
+- `row_background_image_url` - Overrides all slide backgrounds in row
+- `row_layout_type` - Overrides all slide layouts in row (STANDARD/OVERFLOW/MINIMAL)
+**Files Modified**:
+- `scripts/add-row-background-image.ts` - Background image column migration
+- `scripts/add-row-layout-type.ts` - Layout type column migration with CHECK constraint
+- `slideRows.ts` - Updated interfaces and CRUD functions
+- `SlideRowForm.tsx` - Added text input (background) + dropdown (layout)
+- `MainContent.tsx` - Added override logic in `updateActiveSlideData()` and `renderSlideContent()`
+- `/api/slides/rows/[id]/route.ts` - Added validation for layout type
+**Database**: Added 2 columns with constraints
+**Migrations**: Registered in `railway-init.ts` and `validate-migrations.ts`
+
 ### Goals Mode Toggle (November 20, 2025)
 **What**: Toggle to display only Goals rows (sixth special mode)
-**Icon**: "things_to_do" in right sidebar (under "atr")
-**Behavior**: Exclusive display mode - shows ONLY GOALS rows when active
-**Files Modified**:
-- `page.tsx` - Added isGoalsMode state and toggle handler
-- `RightIconBar.tsx` - Added things_to_do icon (positioned between atr and move_up)
-- `MainContent.tsx` - Updated filtering logic (priority: Goals > Service > Image > Simple > Quick > Normal)
-- `slideRows.ts` - Added GOALS to row_type union types (3 places)
-**Database**: Added GOALS to row_type check constraint
+**Icon**: "things_to_do" in right sidebar (2nd position)
+**Files Modified**: `page.tsx`, `RightIconBar.tsx`, `MainContent.tsx`, `slideRows.ts`
 **Migration**: `scripts/add-goals-type.ts`
-**Railway**: Registered in `railway-init.ts` and `validate-migrations.ts`
-
-### Service Mode Toggle (November 18, 2025)
-**What**: Toggle to display only Service rows (fifth special mode)
-**Icon**: "room_service" in right sidebar
-**Migration**: `scripts/add-service-type.ts`
-
-### Image Slides Toggle (November 18, 2025)
-**What**: Toggle to display only Image Slide rows (fourth special mode)
-**Icon**: "web_stories" in right sidebar
-**Migration**: `scripts/add-imgslides-type.ts`
-
-### Simple Shifts Toggle (November 17, 2025)
-**What**: Toggle to display only Simple Shift rows (third special mode)
-**Icon**: "move_up" in right sidebar
-**Migration**: `scripts/add-simpleshift-type.ts`
 
 ---
 
@@ -294,79 +308,40 @@ git add . && git commit -m "Description" && git push
 | Cannot access /setup | Users exist. Use `npm run db:seed:admin` instead |
 | Deployment failed (ESLint) | Run `npx eslint [file]` locally before pushing |
 | Mode rows not showing | Ensure row has correct `row_type` value |
-| Constraint violation on Railway | Migration didn't run - check Railway logs or manually run `railway run npm run railway:init` |
-| Local migration auth failed | Password issue - run SQL manually or wait for Railway deploy |
+| Constraint violation | Migration didn't run - check Railway logs or run `railway run npm run railway:init` |
+| Row overrides not working | Check migration status with `npm run db:validate` |
 
 ---
 
 ## Code Patterns
 
-### Mode Toggle Pattern (Full Example)
+### Override Priority Pattern
 ```typescript
-// 1. page.tsx - State (line ~64)
-const [isGoalsMode, setIsGoalsMode] = useState(false)
+// Background image override (MainContent.tsx:87)
+const imageUrl = (row?.row_background_image_url) || slide.image_url || null
+setActiveSlideImageUrl(imageUrl)
 
-// 2. page.tsx - Handler (line ~196)
-const toggleGoalsMode = () => setIsGoalsMode(prev => !prev)
-
-// 3. page.tsx - Pass to RightIconBar (line ~355)
-<RightIconBar
-  isGoalsMode={isGoalsMode}
-  onGoalsClick={toggleGoalsMode}
-  // ... other props
-/>
-
-// 4. page.tsx - Pass to MainContent (line ~376)
-<MainContentWithRef
-  isGoalsMode={isGoalsMode}
-  // ... other props
-/>
-
-// 5. RightIconBar.tsx - Interface (line ~18)
-interface RightIconBarProps {
-  isGoalsMode?: boolean
-  onGoalsClick?: () => void
-  // ... other props
-}
-
-// 6. RightIconBar.tsx - Icon JSX (line ~49)
-<span
-  className="material-symbols-outlined"
-  title={isGoalsMode ? 'Exit Goals Mode' : 'Goals Mode'}
-  onClick={onGoalsClick}
-  style={{
-    cursor: 'pointer',
-    opacity: isGoalsMode ? 1 : 0.6,
-    transition: 'opacity 0.3s ease'
-  }}
->
-  things_to_do
-</span>
-
-// 7. MainContent.tsx - Interface (line ~30)
-interface MainContentProps {
-  isGoalsMode: boolean
-  // ... other props
-}
-
-// 8. MainContent.tsx - Filter Logic (line ~106)
-if (isGoalsMode) {
-  rows = slideRows.filter(row => row.row_type === 'GOALS')
-} else if (isServiceMode) {
-  // ... other modes
-} else {
-  // Normal mode - exclude GOALS
-  rows = slideRows.filter(row => row.row_type !== 'GOALS' && ...)
-}
+// Layout type override (MainContent.tsx:527)
+const effectiveLayoutType = row.row_layout_type || slide.layout_type
+const containerClass = effectiveLayoutType === 'OVERFLOW' ? '...' : '...'
 ```
 
 ### User Filtering
 ```typescript
-// Server-side
+// Server-side (slideRows.ts)
 const rows = await getAllSlideRows(publishedOnly, userId, isAdmin)
 // Returns public rows + user's private rows (or all if admin)
 ```
 
+### Dynamic SQL Updates
+```typescript
+// slideRows.ts:209 - Example of adding new field to update
+if (data.row_layout_type !== undefined) {
+  fields.push(`row_layout_type = $${paramCount++}`)
+  values.push(data.row_layout_type)
+}
+```
+
 ---
 
-**Status**: Production Ready | **Lines**: 362/500 ✅ | **Last Updated**: November 20, 2025
+**Status**: Production Ready | **Lines**: 372/500 ✅ | **Last Updated**: November 20, 2025

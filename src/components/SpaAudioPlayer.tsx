@@ -18,9 +18,22 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
   const [currentTrack, setCurrentTrack] = useState<SpaTrack | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Load active track
+  // Load active track on mount
   useEffect(() => {
     loadActiveTrack();
+  }, []);
+
+  // Periodic reload to respect time-based schedule changes
+  // Re-checks every 5 minutes to ensure tracks respect publish_time_start/end boundaries
+  useEffect(() => {
+    const RELOAD_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+    const intervalId = setInterval(() => {
+      loadActiveTrack();
+    }, RELOAD_INTERVAL);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   // Handle play/pause based on isPlaying prop and apply volume
@@ -51,7 +64,13 @@ export default function SpaAudioPlayer({ isPlaying, onLoadError }: SpaAudioPlaye
 
         // Apply client-side schedule filtering
         if (isTrackVisibleNow(track)) {
-          setCurrentTrack(track);
+          // Only update if track actually changed (prevents audio restart on same track)
+          setCurrentTrack(prevTrack => {
+            if (prevTrack?.id === track.id) {
+              return prevTrack; // Same track, no update needed
+            }
+            return track; // New track, update state
+          });
           setError(null);
         } else {
           setCurrentTrack(null);

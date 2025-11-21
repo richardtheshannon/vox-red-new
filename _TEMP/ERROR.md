@@ -1,197 +1,189 @@
-VOX-RED-NEW
-
-
-production
-Architecture
-Observability
-Logs
-Settings
-
-
-
-
-
-
-
-
-
-
-Activity
-
-
-vox-red-new
-Deployments
-Variables
-Metrics
-Settings
-app.lilde.com
-us-west2
-1 Replica
-
-
-
-
-History
-
-vox-red-new
-/
-bd7cc2c8
-Failed
-
-Nov 17, 2025, 9:50 AM
-app.lilde.com
-Get Help
-Details
-Build Logs
-Deploy Logs
-HTTP Logs
-Search build logs
-
-You reached the start of the range
-Nov 17, 2025, 9:50 AM
- 
-[Region: us-west1]
-==============
-Using Nixpacks
-==============
-
-context: k4p5-0g1c
-╔════════ Nixpacks v1.38.0 ═══════╗
-║ setup      │ nodejs_18, npm-9_x ║
-║─────────────────────────────────║
-║ install    │ npm ci             ║
-║─────────────────────────────────║
-║ build      │ npm run build      ║
-║─────────────────────────────────║
-║ start      │ npm run start      ║
-╚═════════════════════════════════╝
-
-internal
-load build definition from Dockerfile
-0ms
-
-internal
-load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1745885067
-218ms
-
-internal
-load .dockerignore
-0ms
-
-internal
-load build context
-0ms
-
-stage-0
-FROM ghcr.io/railwayapp/nixpacks:ubuntu-1745885067@sha256:d45c89d80e13d7ad0fd555b5130f22a866d9dd10e861f589932303ef2314c7de
-10ms
-
-stage-0
-RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d cached
-0ms
-
-stage-0
-COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix cached
-0ms
-
-stage-0
-WORKDIR /app/ cached
-0ms
-
-stage-0
-COPY . /app/.
-171ms
-
-stage-0
-RUN npm ci
-15s
-Run `npm audit` for details.
-
-stage-0
-COPY . /app/.
-212ms
-
-stage-0
-RUN npm run build
-22s
-npm warn config production Use `--omit=dev` instead.
-> nextjs-app@0.1.0 build
-> next build
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-   ▲ Next.js 15.5.4
-   Creating an optimized production build ...
- ✓ Compiled successfully in 13.6s
-   Linting and checking validity of types ...
-Failed to compile.
-./src/app/admin/slides/[id]/page.tsx
-67:6  Warning: React Hook useEffect has a missing dependency: 'fetchRowData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-./src/app/api/slides/import/route.ts
-3:10  Warning: 'createSlideRow' is defined but never used.  @typescript-eslint/no-unused-vars
-./src/app/api/slides/rows/[id]/route.ts
-85:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-85:17  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-85:29  Warning: 'slide_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/app/api/slides/rows/[id]/slides/[slideId]/route.ts
-139:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:17  Warning: 'slide_row_id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:31  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:43  Warning: 'view_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-139:55  Warning: 'completion_count' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/app/api/users/[id]/route.ts
-126:13  Warning: 'id' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-126:17  Warning: 'password' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-126:27  Warning: 'password_hash' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-126:42  Warning: 'created_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-126:54  Warning: 'updated_at' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/app/api/users/route.ts
-10:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
-./src/app/layout.tsx
-19:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-24:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-29:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-33:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-37:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
-41:9  Warning: Do not include stylesheets manually. See: https://nextjs.org/docs/messages/no-css-tags  @next/next/no-css-tags
-./src/components/EssentialAudioPlayer.tsx
-21:3  Warning: 'scratch' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-229:19  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
-./src/components/MainContent.tsx
-52:53  Warning: 'activeRowId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-64:11  Warning: 'stopPlaylist' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-173:6  Warning: React Hook useEffect has a missing dependency: 'loadSlidesForRow'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-199:6  Warning: React Hook useEffect has a missing dependency: 'updateActiveSlideData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-219:6  Warning: React Hook useEffect has a missing dependency: 'loadSlidesForRow'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-435:6  Warning: React Hook React.useEffect has a missing dependency: 'updateActiveSlideData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-438:133  Warning: 'enableAudioRef' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/components/SpaAudioPlayer.tsx
-24:6  Warning: React Hook useEffect has a missing dependency: 'loadActiveTrack'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-./src/components/admin/slides/SlideEditor.tsx
-3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
-47:10  Warning: 'showPreview' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-47:23  Warning: 'setShowPreview' is assigned a value but never used.  @typescript-eslint/no-unused-vars
-./src/components/admin/slides/SlideRowList.tsx
-248:32  Warning: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
-./src/contexts/PlaylistContext.tsx
-123:6  Warning: React Hook useCallback has a missing dependency: 'stopPlaylist'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
-201:6  Warning: React Hook useCallback has an unnecessary dependency: 'handleAudioEnded'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
-./src/lib/queries/slideRows.ts
-50:15  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
-info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
-Dockerfile:24
--------------------
-22 |     # build phase
-23 |     COPY . /app/.
-24 | >>> RUN --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-next/cache,target=/app/.next/cache --mount=type=cache,id=s/a011e499-729f-4d1f-ad0c-d0fbfcd643b2-node_modules/cache,target=/app/node_modules/.cache npm run build
-25 |
-26 |
--------------------
-ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm run build" did not complete successfully: exit code: 1
-Error: Docker build failed
-You reached the end of the range
-Nov 17, 2025, 9:51 AM
-
-
-VOX-RED-NEW | Railway
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 BottomIconBar context methods: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Filtering rows. Quick Slide Mode: false Simple Shift Mode: false Image Slide Mode: false Service Mode: false Goals Mode: false
+page-c0de1636a83a88a9.js:1 [MainContent] Total slide rows: 0
+page-c0de1636a83a88a9.js:1 [MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS): 0
+page-c0de1636a83a88a9.js:1 [MainContent] Rows with visible slides: 0
+page-c0de1636a83a88a9.js:1 [MainContent] Building icon cache from slideRows...
+page-c0de1636a83a88a9.js:1 [MainContent] Icon cache built: 0 rows
+page-c0de1636a83a88a9.js:1 [MainContent] Mode changed - Quick Slide: false Simple Shift: false Image Slide: false Service: false Goals: false
+page-c0de1636a83a88a9.js:1 [MainContent] Filtered slide rows: 0
+page-c0de1636a83a88a9.js:1 [MainContent] No filtered slide rows available!
+(anonymous) @ page-c0de1636a83a88a9.js:1
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 BottomIconBar context methods: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Fetching slide rows... (sessionStatus: authenticated )
+page-c0de1636a83a88a9.js:1 [MainContent] Fetched slide rows: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Total rows fetched: 11
+page-c0de1636a83a88a9.js:1   - The Presence Path (ROUTINE) - Published: true
+page-c0de1636a83a88a9.js:1   - Welcome to the Path (ROUTINE) - Published: true
+page-c0de1636a83a88a9.js:1   - Morning Meditation on Health (COURSE) - Published: true
+page-c0de1636a83a88a9.js:1   - Sacred Teachings Guided Journey (TEACHING) - Published: true
+page-c0de1636a83a88a9.js:1   - Anxiety Reduction/ (COURSE) - Published: true
+page-c0de1636a83a88a9.js:1   - The Stable Reset (COURSE) - Published: true
+page-c0de1636a83a88a9.js:1   - GOALS (GOALS) - Published: true
+page-c0de1636a83a88a9.js:1   - Service Commitments (SERVICE) - Published: true
+page-c0de1636a83a88a9.js:1   - Simple Shifts (SIMPLESHIFT) - Published: true
+page-c0de1636a83a88a9.js:1   - Image Slides (IMGSLIDES) - Published: true
+page-c0de1636a83a88a9.js:1   - Quick Slides (QUICKSLIDE) - Published: true
+page-c0de1636a83a88a9.js:1 [MainContent] Loading slides for row 7daa211b-7c14-4ec5-9f3d-fc32817dc67d...
+page-c0de1636a83a88a9.js:1 [MainContent] Filtering rows. Quick Slide Mode: false Simple Shift Mode: false Image Slide Mode: false Service Mode: false Goals Mode: false
+page-c0de1636a83a88a9.js:1 [MainContent] Total slide rows: 11
+page-c0de1636a83a88a9.js:1 [MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS): 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rows with visible slides: 6
+page-c0de1636a83a88a9.js:1 [MainContent] Building icon cache from slideRows...
+page-c0de1636a83a88a9.js:1   - The Presence Path: ["check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - Morning Meditation on Health: ["check_circle_unread","self_improvement","auto_awesome"]
+page-c0de1636a83a88a9.js:1   - Sacred Teachings Guided Journey: ["select_check_box","check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - Anxiety Reduction/: ["check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - The Stable Reset: ["select_check_box","check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - GOALS: ["check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - Service Commitments: ["check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - Simple Shifts: ["check_circle_unread"]
+page-c0de1636a83a88a9.js:1   - Quick Slides: ["select_check_box","check_circle_unread"]
+page-c0de1636a83a88a9.js:1 [MainContent] Icon cache built: 11 rows
+page-c0de1636a83a88a9.js:1 [MainContent] Mode changed - Quick Slide: false Simple Shift: false Image Slide: false Service: false Goals: false
+page-c0de1636a83a88a9.js:1 [MainContent] Filtered slide rows: 6
+page-c0de1636a83a88a9.js:1 [MainContent] First filtered row: The Presence Path 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Slides cached for this row: false
+page-c0de1636a83a88a9.js:1 [MainContent] Loading slides for row: 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Loading slides for row 7daa211b-7c14-4ec5-9f3d-fc32817dc67d...
+page-c0de1636a83a88a9.js:1 [MainContent] Slides response for row 7daa211b-7c14-4ec5-9f3d-fc32817dc67d: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Found 14 slides for row 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Loading slides for row 92a4cae8-01f0-4653-bc88-f0dae40df4b3...
+page-c0de1636a83a88a9.js:1 [MainContent] Filtering rows. Quick Slide Mode: false Simple Shift Mode: false Image Slide Mode: false Service Mode: false Goals Mode: false
+page-c0de1636a83a88a9.js:1 [MainContent] Total slide rows: 11
+page-c0de1636a83a88a9.js:1 [MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS): 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rows with visible slides: 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 Desktop Vertical Swiper initialized: I
+page-c0de1636a83a88a9.js:1 [MainContent] Mode changed - Quick Slide: false Simple Shift: false Image Slide: false Service: false Goals: false
+page-c0de1636a83a88a9.js:1 [MainContent] Filtered slide rows: 6
+page-c0de1636a83a88a9.js:1 [MainContent] First filtered row: The Presence Path 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Slides cached for this row: true
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: false isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 BottomIconBar context methods: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [AudioPlayer] useEffect running: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] useEffect running: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/_MP3s/@_SFX/550252__department64__bellring_12.wav
+page-c0de1636a83a88a9.js:1 [AudioPlayer] Rendering HTML5 audio player - URL: https://media.lilde.com/media/_MP3s/@_SFX/550252__department64__bellring_12.wav
+page-c0de1636a83a88a9.js:1 [AudioPlayer] useEffect running: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] useEffect running: Object
+page-c0de1636a83a88a9.js:1 [AudioPlayer] ⚠️ Not calling onAudioRefChange: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Slides response for row 7daa211b-7c14-4ec5-9f3d-fc32817dc67d: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Found 14 slides for row 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Filtering rows. Quick Slide Mode: false Simple Shift Mode: false Image Slide Mode: false Service Mode: false Goals Mode: false
+page-c0de1636a83a88a9.js:1 [MainContent] Total slide rows: 11
+page-c0de1636a83a88a9.js:1 [MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS): 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rows with visible slides: 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Mode changed - Quick Slide: false Simple Shift: false Image Slide: false Service: false Goals: false
+page-c0de1636a83a88a9.js:1 [MainContent] Filtered slide rows: 6
+page-c0de1636a83a88a9.js:1 [MainContent] First filtered row: The Presence Path 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Slides cached for this row: true
+page-c0de1636a83a88a9.js:1 [MainContent] Slides response for row 92a4cae8-01f0-4653-bc88-f0dae40df4b3: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Found 9 slides for row 92a4cae8-01f0-4653-bc88-f0dae40df4b3
+page-c0de1636a83a88a9.js:1 [MainContent] Filtering rows. Quick Slide Mode: false Simple Shift Mode: false Image Slide Mode: false Service Mode: false Goals Mode: false
+page-c0de1636a83a88a9.js:1 [MainContent] Total slide rows: 11
+page-c0de1636a83a88a9.js:1 [MainContent] Normal rows (excluding QUICKSLIDE, SIMPLESHIFT, IMGSLIDES, SERVICE, and GOALS): 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rows with visible slides: 6
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Mode changed - Quick Slide: false Simple Shift: false Image Slide: false Service: false Goals: false
+page-c0de1636a83a88a9.js:1 [MainContent] Filtered slide rows: 6
+page-c0de1636a83a88a9.js:1 [MainContent] First filtered row: The Presence Path 7daa211b-7c14-4ec5-9f3d-fc32817dc67d
+page-c0de1636a83a88a9.js:1 [MainContent] Slides cached for this row: true
+page-c0de1636a83a88a9.js:1 [MainContent] Initial playlist data update - hasAudio: true visibleSlides: 8 horizontalSwiper: true
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: true isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 BottomIconBar context methods: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [AudioPlayer] Audio loaded successfully: https://media.lilde.com/media/_MP3s/@_SFX/550252__department64__bellring_12.wav
+page-c0de1636a83a88a9.js:1 [AudioPlayer] Audio loaded successfully: https://media.lilde.com/media/_MP3s/@_SFX/550252__department64__bellring_12.wav
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: true isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 BottomIconBar context methods: Object
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: Array(0) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: Array(3) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: Array(1) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: Array(2) enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [TopIconBar] hasAudioSlides: true isPlaylistActive: false
+page-c0de1636a83a88a9.js:1 BottomIconBar context methods: {slidePrev: ƒ, slideNext: ƒ, scrollUp: ƒ, scrollDown: ƒ}
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: ['check_circle_unread'] enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: [] enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: (3) ['check_circle_unread', 'self_improvement', 'auto_awesome'] enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: (2) ['select_check_box', 'check_circle_unread'] enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: ['check_circle_unread'] enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: (2) ['select_check_box', 'check_circle_unread'] enableAudioRef: true
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Presence Path (7daa211b-7c14-4ec5-9f3d-fc32817dc67d) with icons: ['check_circle_unread'] enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Welcome to the Path (92a4cae8-01f0-4653-bc88-f0dae40df4b3) with icons: [] enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Morning Meditation on Health (247e37b7-d365-42db-81f8-585ce49ba4a9) with icons: (3) ['check_circle_unread', 'self_improvement', 'auto_awesome'] enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Sacred Teachings Guided Journey (69121c77-2707-4393-8736-02f1859f54c7) with icons: (2) ['select_check_box', 'check_circle_unread'] enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row Anxiety Reduction/ (3c4f6faa-4524-46f3-8440-21ed9c535b11) with icons: ['check_circle_unread'] enableAudioRef: false
+page-c0de1636a83a88a9.js:1 [MainContent] Rendering row The Stable Reset (ff68e952-b7ee-4034-af62-07c9d79660f1) with icons: (2) ['select_check_box', 'check_circle_unread'] enableAudioRef: false
