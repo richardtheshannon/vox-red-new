@@ -5,10 +5,11 @@ import { useSession } from 'next-auth/react';
 
 interface BottomIconBarProps {
   hasBackgroundImage?: boolean;
-  onQuickSlideClick?: () => void;
+  onRefreshClick?: () => void;
+  isOfflineReady?: boolean;
 }
 
-export default function BottomIconBar({ hasBackgroundImage = false, onQuickSlideClick }: BottomIconBarProps) {
+export default function BottomIconBar({ hasBackgroundImage = false, onRefreshClick, isOfflineReady = false }: BottomIconBarProps) {
   const { data: session } = useSession();
   const { slidePrev, slideNext, scrollUp, scrollDown } = useSwiperContext();
   console.log('BottomIconBar context methods:', { slidePrev, slideNext, scrollUp, scrollDown });
@@ -17,16 +18,34 @@ export default function BottomIconBar({ hasBackgroundImage = false, onQuickSlide
     <footer className={`icon-container fixed bottom-0 left-0 right-0 flex justify-between items-center z-20 ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem'}}>
       <div className="flex items-center">
         {session && (
-          <>
-            <span className="material-symbols-outlined" title="Refresh">refresh</span>
+          <div style={{ position: 'relative', display: 'inline-flex' }}>
             <span
-              className="material-symbols-outlined cursor-pointer hover:opacity-70"
-              title="Create Quick Slide"
-              onClick={onQuickSlideClick}
+              className="material-symbols-outlined cursor-pointer hover:text-blue-600 transition-colors"
+              title={isOfflineReady ? "Update offline content" : "Download for offline use"}
+              onClick={onRefreshClick}
+              style={{
+                color: isOfflineReady ? '#22c55e' : undefined
+              }}
             >
-              comment
+              refresh
             </span>
-          </>
+            {isOfflineReady && (
+              <span
+                className="material-symbols-rounded"
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  right: '-2px',
+                  fontSize: '12px',
+                  color: '#22c55e',
+                  fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 12"
+                }}
+                title="Offline ready"
+              >
+                check_circle
+              </span>
+            )}
+          </div>
         )}
         <span
           className="material-symbols-outlined cursor-pointer hover:text-blue-600 transition-colors"

@@ -13,6 +13,7 @@ import { Slide } from '@/lib/queries/slides';
 import { filterVisibleSlides } from '@/lib/utils/scheduleFilter';
 import { applyRandomization } from '@/lib/utils/slideRandomizer';
 import { useSession } from 'next-auth/react';
+import { getCachedSlideRows, getCachedSlidesForRow, isOnline } from '@/lib/offlineManager';
 
 interface MainContentProps {
   setSwiperRef: (swiper: SwiperType | null) => void;
@@ -182,7 +183,73 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
     const fetchSlideRows = async () => {
       try {
         setLoading(true);
-        console.log('[MainContent] Fetching slide rows... (sessionStatus:', sessionStatus, ')');
+        console.log('[MainContent] Fetching slide rows... (sessionStatus:', sessionStatus, 'online:', isOnline(), ')');
+
+        // Check if offline - use cached data
+        if (!isOnline()) {
+          console.log('[MainContent] Offline mode - loading from cache');
+          const cachedRows = getCachedSlideRows();
+
+          if (cachedRows.length > 0) {
+            console.log('[MainContent] Loaded', cachedRows.length, 'rows from cache');
+            // Convert cached rows to SlideRow format
+            const rows: SlideRow[] = cachedRows.map(row => ({
+              id: row.id,
+              title: row.title,
+              description: null,
+              row_type: row.row_type,
+              is_published: true,
+              display_order: 0,
+              slide_count: row.slides.length,
+              icon_set: [],
+              theme_color: null,
+              playlist_delay_seconds: row.playlist_delay_seconds,
+              randomize_enabled: row.randomize_enabled,
+              randomize_count: row.randomize_count,
+              randomize_interval: row.randomize_interval,
+              randomize_seed: null,
+              row_background_image_url: row.row_background_image_url,
+              row_layout_type: row.row_layout_type as 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null,
+              created_at: '',
+              updated_at: ''
+            }));
+
+            setSlideRows(rows);
+
+            // Pre-populate slides cache from offline data
+            const newSlidesCache: Record<string, Slide[]> = {};
+            cachedRows.forEach(row => {
+              newSlidesCache[row.id] = row.slides.map(slide => ({
+                ...slide,
+                subtitle: slide.subtitle || undefined,
+                body_content: slide.body_content || undefined,
+                audio_url: slide.audio_url || undefined,
+                video_url: slide.video_url || undefined,
+                layout_type: (slide.layout_type as 'STANDARD' | 'OVERFLOW' | 'MINIMAL') || 'STANDARD',
+                title_bg_opacity: slide.title_bg_opacity ? Number(slide.title_bg_opacity) : undefined,
+                body_bg_opacity: undefined,
+                publish_days: slide.publish_days ? JSON.stringify(slide.publish_days) : null,
+                slide_row_id: row.id,
+                position: 0,
+                is_published: true,
+                view_count: 0,
+                completion_count: 0,
+                created_at: new Date(),
+                updated_at: new Date()
+              }));
+            });
+            setSlidesCache(newSlidesCache);
+
+            setLoading(false);
+            return;
+          } else {
+            setError('No offline content available. Please connect to download content.');
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Online - fetch from API
         const response = await fetch('/api/slides/rows?published=true', {
           // Enable caching for better performance
           next: { revalidate: 60 } // Revalidate every 60 seconds
@@ -213,7 +280,59 @@ export default function MainContent({ setSwiperRef, handleSlideChange, setActive
         }
       } catch (err) {
         console.error('Error fetching slide rows:', err);
-        setError('Error loading content');
+
+        // Try to load from cache if online fetch fails
+        const cachedRows = getCachedSlideRows();
+        if (cachedRows.length > 0) {
+          console.log('[MainContent] Fetch failed, falling back to cache with', cachedRows.length, 'rows');
+          const rows: SlideRow[] = cachedRows.map(row => ({
+            id: row.id,
+            title: row.title,
+            description: null,
+            row_type: row.row_type,
+            is_published: true,
+            display_order: 0,
+            slide_count: row.slides.length,
+            icon_set: [],
+            theme_color: null,
+            playlist_delay_seconds: row.playlist_delay_seconds,
+            randomize_enabled: row.randomize_enabled,
+            randomize_count: row.randomize_count,
+            randomize_interval: row.randomize_interval,
+            randomize_seed: null,
+            row_background_image_url: row.row_background_image_url,
+            row_layout_type: row.row_layout_type as 'STANDARD' | 'OVERFLOW' | 'MINIMAL' | null,
+            created_at: '',
+            updated_at: ''
+          }));
+
+          setSlideRows(rows);
+
+          const newSlidesCache: Record<string, Slide[]> = {};
+          cachedRows.forEach(row => {
+            newSlidesCache[row.id] = row.slides.map(slide => ({
+              ...slide,
+              subtitle: slide.subtitle || undefined,
+              body_content: slide.body_content || undefined,
+              audio_url: slide.audio_url || undefined,
+              video_url: slide.video_url || undefined,
+              layout_type: (slide.layout_type as 'STANDARD' | 'OVERFLOW' | 'MINIMAL') || 'STANDARD',
+              title_bg_opacity: slide.title_bg_opacity ? Number(slide.title_bg_opacity) : undefined,
+              body_bg_opacity: undefined,
+              publish_days: slide.publish_days ? JSON.stringify(slide.publish_days) : null,
+              slide_row_id: row.id,
+              position: 0,
+              is_published: true,
+              view_count: 0,
+              completion_count: 0,
+              created_at: new Date(),
+              updated_at: new Date()
+            }));
+          });
+          setSlidesCache(newSlidesCache);
+        } else {
+          setError('Error loading content');
+        }
       } finally {
         setLoading(false);
       }

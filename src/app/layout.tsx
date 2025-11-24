@@ -6,6 +6,7 @@ import Providers from "@/components/Providers";
 export const metadata: Metadata = {
   title: "lilde.com | spiritual growth",
   description: "Spiritual content platform with slide-based navigation",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -58,6 +59,22 @@ export default function RootLayout({
                 document.body.style.display = 'none';
                 document.body.offsetHeight; // Trigger reflow
                 document.body.style.display = '';
+              });
+            }
+          `}
+        </Script>
+        <Script id="service-worker-registration" strategy="afterInteractive">
+          {`
+            // Register service worker for offline support
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                  .then((registration) => {
+                    console.log('[PWA] Service Worker registered:', registration);
+                  })
+                  .catch((error) => {
+                    console.error('[PWA] Service Worker registration failed:', error);
+                  });
               });
             }
           `}

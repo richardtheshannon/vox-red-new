@@ -15,8 +15,6 @@ Ask me any questions you may have, strictly one question at a time before we get
 
 # git add .&& git commit -m "general quick commit" && git push origin master
 
-
-Failed to create user
 Deployment failed. Please read ERROR.md in the _TEMP directory.
 
 cd "c:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app" && cmd /c "del \\\\?\\%CD%\\nul"
@@ -24,7 +22,8 @@ cd "c:\Users\icos\00_DEPLOY\vox-red\_ new-ui\nextjs-app" && cmd /c "del \\\\?\\%
 FIRST: Update CLAUDE.md in the _TEMP directory, with any relevant application update overviews.
 SECOND: Revise and update CLAUDE.md in the _TEMP directory to only contain essential application information for continued development. This should be a concise, specific, outline of the application. Lets keep it under 500 lines. 
 -------------------------------------------
-
+<break time="3.0s" />
+-------------------------------------------
 taskkill /IM node.exe /F
 del \\?\C:\Users\icos\00_DEPLOY\vox-red\XXX_vox-red\NUL
 C:\Users\icos\00_DEPLOY\vox-red\XXX_vox-red

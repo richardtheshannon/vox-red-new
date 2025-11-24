@@ -47,7 +47,7 @@ export interface CreateSlideRowData {
 export interface UpdateSlideRowData {
   title?: string
   description?: string
-  row_type?: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE' | 'SIMPLESHIFT' | 'IMGSLIDES'
+  row_type?: 'ROUTINE' | 'COURSE' | 'TEACHING' | 'CUSTOM' | 'QUICKSLIDE' | 'SIMPLESHIFT' | 'IMGSLIDES' | 'SERVICE' | 'GOALS'
   icon_set?: string[]
   theme_color?: string
   display_order?: number

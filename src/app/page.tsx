@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import type { Slide } from '@/lib/queries/slides';
 import TopIconBar from '@/components/TopIconBar';
@@ -13,11 +13,16 @@ import { SwiperProvider } from '@/contexts/SwiperContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { PlaylistProvider } from '@/contexts/PlaylistContext';
 import QuickSlideModal from '@/components/QuickSlideModal';
+import GoalSlideModal from '@/components/GoalSlideModal';
+import SimpleShiftModal from '@/components/SimpleShiftModal';
+import ServiceSlideModal from '@/components/ServiceSlideModal';
 import LoginModal from '@/components/LoginModal';
 import LogoutModal from '@/components/LogoutModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import SpaAudioPlayer from '@/components/SpaAudioPlayer';
+import OfflineProgressModal from '@/components/OfflineProgress';
 import { useSession } from 'next-auth/react';
+import { downloadContentForOffline, getOfflineStatus, type OfflineProgress } from '@/lib/offlineManager';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -41,6 +46,15 @@ export default function Home() {
 
   // Quick Slide Modal state
   const [isQuickSlideModalOpen, setIsQuickSlideModalOpen] = useState(false);
+
+  // Goal Slide Modal state
+  const [isGoalSlideModalOpen, setIsGoalSlideModalOpen] = useState(false);
+
+  // Simple Shift Slide Modal state
+  const [isSimpleShiftSlideModalOpen, setIsSimpleShiftSlideModalOpen] = useState(false);
+
+  // Service Slide Modal state
+  const [isServiceSlideModalOpen, setIsServiceSlideModalOpen] = useState(false);
 
   // Login Modal state
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -83,6 +97,16 @@ export default function Home() {
   // Slide counter state
   const [currentSlideIndex, setCurrentSlideIndex] = useState(1);
   const [totalSlides, setTotalSlides] = useState(0);
+
+  // Offline state
+  const [offlineProgress, setOfflineProgress] = useState<OfflineProgress>({
+    status: 'idle',
+    progress: 0,
+    message: '',
+    totalAssets: 0,
+    cachedAssets: 0
+  });
+  const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   // Navigation functions for footer arrows
   // Left/Right arrows navigate horizontal slides only
@@ -160,6 +184,36 @@ export default function Home() {
 
   const handleQuickSlideSuccess = () => {
     // Reload the page to show the new quick slide
+    window.location.reload();
+  };
+
+  // Handle Goal Slide Modal
+  const handleGoalSlideClick = () => {
+    setIsGoalSlideModalOpen(true);
+  };
+
+  const handleGoalSlideSuccess = () => {
+    // Reload the page to show the new goal
+    window.location.reload();
+  };
+
+  // Handle Simple Shift Slide Modal
+  const handleSimpleShiftSlideClick = () => {
+    setIsSimpleShiftSlideModalOpen(true);
+  };
+
+  const handleSimpleShiftSlideSuccess = () => {
+    // Reload the page to show the new simple shift slide
+    window.location.reload();
+  };
+
+  // Handle Service Slide Modal
+  const handleServiceSlideClick = () => {
+    setIsServiceSlideModalOpen(true);
+  };
+
+  const handleServiceSlideSuccess = () => {
+    // Reload the page to show the new service slide
     window.location.reload();
   };
 
@@ -279,6 +333,42 @@ export default function Home() {
     return playlistDataRef.current;
   };
 
+  // Check offline status on mount
+  useEffect(() => {
+    const status = getOfflineStatus();
+    setIsOfflineReady(status.isOfflineReady);
+  }, []);
+
+  // Handle offline download
+  const handleOfflineDownload = async () => {
+    if (!session) {
+      console.warn('User must be logged in to download for offline use');
+      return;
+    }
+
+    try {
+      await downloadContentForOffline((progress) => {
+        setOfflineProgress(progress);
+        if (progress.status === 'complete') {
+          setIsOfflineReady(true);
+        }
+      });
+    } catch (err) {
+      console.error('Failed to download content for offline:', err);
+    }
+  };
+
+  // Close offline progress modal
+  const handleCloseOfflineProgress = () => {
+    setOfflineProgress({
+      status: 'idle',
+      progress: 0,
+      message: '',
+      totalAssets: 0,
+      cachedAssets: 0
+    });
+  };
+
   return (
     <PlaylistProvider>
       <div className="fixed inset-0">
@@ -346,19 +436,24 @@ export default function Home() {
             hasBackgroundImage={!!activeSlideImageUrl}
             isQuickSlideMode={isQuickSlideMode}
             onAtrClick={toggleQuickSlideMode}
+            onQuickSlideClick={handleQuickSlideClick}
             isSimpleShiftMode={isSimpleShiftMode}
             onSimpleShiftClick={toggleSimpleShiftMode}
+            onSimpleShiftSlideClick={handleSimpleShiftSlideClick}
             isImageSlideMode={isImageSlideMode}
             onImageSlideClick={toggleImageSlideMode}
             isServiceMode={isServiceMode}
             onServiceClick={toggleServiceMode}
+            onServiceSlideClick={handleServiceSlideClick}
             isGoalsMode={isGoalsMode}
             onGoalsClick={toggleGoalsMode}
+            onGoalSlideClick={handleGoalSlideClick}
             onGroupClick={handleGroupClick}
           />
           <BottomIconBar
             hasBackgroundImage={!!activeSlideImageUrl}
-            onQuickSlideClick={handleQuickSlideClick}
+            onRefreshClick={handleOfflineDownload}
+            isOfflineReady={isOfflineReady}
           />
           <MainContentWithRef
             setSwiperRef={setVerticalSwiperRef}
@@ -388,6 +483,27 @@ export default function Home() {
           onSuccess={handleQuickSlideSuccess}
         />
 
+        {/* Goal Slide Modal */}
+        <GoalSlideModal
+          isOpen={isGoalSlideModalOpen}
+          onClose={() => setIsGoalSlideModalOpen(false)}
+          onSuccess={handleGoalSlideSuccess}
+        />
+
+        {/* Simple Shift Slide Modal */}
+        <SimpleShiftModal
+          isOpen={isSimpleShiftSlideModalOpen}
+          onClose={() => setIsSimpleShiftSlideModalOpen(false)}
+          onSuccess={handleSimpleShiftSlideSuccess}
+        />
+
+        {/* Service Slide Modal */}
+        <ServiceSlideModal
+          isOpen={isServiceSlideModalOpen}
+          onClose={() => setIsServiceSlideModalOpen(false)}
+          onSuccess={handleServiceSlideSuccess}
+        />
+
         {/* Login Modal */}
         <LoginModal
           isOpen={isLoginModalOpen}
@@ -414,6 +530,12 @@ export default function Home() {
 
         {/* Spa Audio Player */}
         <SpaAudioPlayer isPlaying={isSpaPlaying} />
+
+        {/* Offline Progress Modal */}
+        <OfflineProgressModal
+          progress={offlineProgress}
+          onClose={handleCloseOfflineProgress}
+        />
       </div>
     </PlaylistProvider>
   );

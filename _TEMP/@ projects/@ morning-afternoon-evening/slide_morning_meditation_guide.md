@@ -1,7 +1,7 @@
 # Morning Meditation: The Path of the Grateful Heart
 *A Guided Journey of Gratitude, Acceptance, and Reverence*
 
-<break time="3.0s" />`
+<break time="3.0s" />
 
 Welcome, dear one. Sit comfortably, as the ancient ones did when the morning star first appeared above the mountains. Let your spine be like the pine tree – tall, yet flexible. Let your breath flow like the river that knows its way.
 

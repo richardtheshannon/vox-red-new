@@ -55,7 +55,7 @@ export async function PATCH(
 
     // Validate row_type if provided
     if (body.row_type) {
-      const validRowTypes = ['ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE'];
+      const validRowTypes = ['ROUTINE', 'COURSE', 'TEACHING', 'CUSTOM', 'QUICKSLIDE', 'SIMPLESHIFT', 'IMGSLIDES', 'SERVICE', 'GOALS'];
       if (!validRowTypes.includes(body.row_type)) {
         return NextResponse.json(
           {

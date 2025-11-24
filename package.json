@@ -19,6 +19,8 @@
     "db:fix:schema": "tsx scripts/fix-users-schema.ts",
     "db:check": "tsx scripts/check-db-constraints.ts",
     "db:migrate:user-ownership": "tsx scripts/run-user-ownership-migration.ts",
+    "db:download-prod": "tsx scripts/download-production-db.ts",
+    "db:download-prod-simple": "tsx scripts/download-production-db-simple.ts",
     "railway:init": "tsx scripts/railway-init.ts"
   },
   "dependencies": {

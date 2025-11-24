@@ -9,18 +9,22 @@ interface RightIconBarProps {
   hasBackgroundImage?: boolean;
   isQuickSlideMode?: boolean;
   onAtrClick?: () => void;
+  onQuickSlideClick?: () => void;
   isSimpleShiftMode?: boolean;
   onSimpleShiftClick?: () => void;
+  onSimpleShiftSlideClick?: () => void;
   isImageSlideMode?: boolean;
   onImageSlideClick?: () => void;
   isServiceMode?: boolean;
   onServiceClick?: () => void;
+  onServiceSlideClick?: () => void;
   isGoalsMode?: boolean;
   onGoalsClick?: () => void;
+  onGoalSlideClick?: () => void;
   onGroupClick?: () => void;
 }
 
-export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, isSimpleShiftMode = false, onSimpleShiftClick, isImageSlideMode = false, onImageSlideClick, isServiceMode = false, onServiceClick, isGoalsMode = false, onGoalsClick, onGroupClick }: RightIconBarProps) {
+export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMode = 'cover', hasBackgroundImage = false, isQuickSlideMode = false, onAtrClick, onQuickSlideClick, isSimpleShiftMode = false, onSimpleShiftClick, onSimpleShiftSlideClick, isImageSlideMode = false, onImageSlideClick, isServiceMode = false, onServiceClick, onServiceSlideClick, isGoalsMode = false, onGoalsClick, onGoalSlideClick, onGroupClick }: RightIconBarProps) {
   const { data: session } = useSession();
   return (
     <aside className={`icon-container fixed right-0 flex flex-col justify-between items-center ${hasBackgroundImage ? 'no-gradient' : ''}`} style={{padding: '0.2rem', top: '0', bottom: '0', paddingTop: '50px', paddingBottom: '50px', zIndex: 15}}>
@@ -46,6 +50,15 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             >
               atr
             </span>
+            {isQuickSlideMode && (
+              <span
+                className="material-symbols-outlined cursor-pointer hover:opacity-70"
+                title="Create Quick Slide"
+                onClick={onQuickSlideClick}
+              >
+                comment
+              </span>
+            )}
             <span
               className="material-symbols-outlined"
               title={isGoalsMode ? 'Exit Goals Mode' : 'Goals Mode'}
@@ -58,6 +71,15 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             >
               things_to_do
             </span>
+            {isGoalsMode && (
+              <span
+                className="material-symbols-outlined cursor-pointer hover:opacity-70"
+                title="Create Goal"
+                onClick={onGoalSlideClick}
+              >
+                comment
+              </span>
+            )}
             <span
               className="material-symbols-outlined"
               title={isSimpleShiftMode ? 'Exit Simple Shift Mode' : 'Simple Shift Mode'}
@@ -70,6 +92,15 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             >
               move_up
             </span>
+            {isSimpleShiftMode && (
+              <span
+                className="material-symbols-outlined cursor-pointer hover:opacity-70"
+                title="Create Simple Shift Slide"
+                onClick={onSimpleShiftSlideClick}
+              >
+                comment
+              </span>
+            )}
             <span
               className="material-symbols-outlined"
               title={isServiceMode ? 'Exit Service Mode' : 'Service Mode'}
@@ -82,6 +113,15 @@ export default function RightIconBar({ hasVideo = false, onVideoToggle, videoMod
             >
               room_service
             </span>
+            {isServiceMode && (
+              <span
+                className="material-symbols-outlined cursor-pointer hover:opacity-70"
+                title="Create Service Slide"
+                onClick={onServiceSlideClick}
+              >
+                comment
+              </span>
+            )}
           </>
         )}
       </div>
