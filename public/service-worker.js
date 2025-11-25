@@ -1,5 +1,5 @@
 // Service Worker for Offline PWA Support
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const APP_CACHE = `app-shell-${CACHE_VERSION}`;
 const CONTENT_CACHE = `content-${CACHE_VERSION}`;
 const MEDIA_CACHE = `media-${CACHE_VERSION}`;
@@ -7,7 +7,6 @@ const MEDIA_CACHE = `media-${CACHE_VERSION}`;
 // App shell resources (critical for offline operation)
 const APP_SHELL_URLS = [
   '/',
-  '/offline',
   '/globals.css'
 ];
 
@@ -104,10 +103,18 @@ self.addEventListener('fetch', (event) => {
 
         return response;
       }).catch(() => {
-        // If network fails and no cache, return offline page
-        return caches.match('/offline').then((offlineResponse) => {
-          return offlineResponse || new Response('Offline', { status: 503 });
-        });
+        // If network fails and no cache, serve the root page (which handles offline mode)
+        // This allows the React app to load and detect offline state
+        if (url.pathname === '/') {
+          return caches.match('/').then((rootResponse) => {
+            return rootResponse || new Response('Offline - please connect to the internet', {
+              status: 503,
+              headers: { 'Content-Type': 'text/html' }
+            });
+          });
+        }
+        // For other resources, return a basic offline response
+        return new Response('Offline', { status: 503 });
       });
     })
   );

@@ -45,3 +45,6 @@ next-env.d.ts
 # Windows reserved filename
 nul
 .gitignore.tmp
+
+# Temporary project files
+_TEMP/
