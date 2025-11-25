@@ -210,6 +210,16 @@ export function clearOfflineCache(): void {
   localStorage.removeItem(OFFLINE_DATA_KEY);
   localStorage.removeItem(OFFLINE_STATUS_KEY);
 
+  // Also clear offline auth data
+  if (typeof window !== 'undefined') {
+    // Import dynamically to avoid circular dependencies
+    import('./offlineAuth').then(({ clearOfflineAuthData }) => {
+      clearOfflineAuthData();
+    }).catch((err) => {
+      console.error('Failed to clear offline auth data:', err);
+    });
+  }
+
   // Also clear service worker caches
   if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({

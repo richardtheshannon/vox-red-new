@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
+import { verifyOfflineCredentials, storeOfflineAuthData } from '@/lib/offlineAuth';
+import { isOnline } from '@/lib/offlineManager';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -11,6 +13,7 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { update } = useSession();
 
   // Form fields
   const [email, setEmail] = useState('');
@@ -41,9 +44,40 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setSubmitting(true);
 
     try {
-      // Attempt login with NextAuth
+      const normalizedEmail = email.trim().toLowerCase();
+      const online = isOnline();
+
+      // OFFLINE MODE: Verify against cached credentials
+      if (!online) {
+        console.log('[LoginModal] Offline mode - verifying cached credentials');
+        const offlineSession = await verifyOfflineCredentials(normalizedEmail, password);
+
+        if (offlineSession) {
+          // Successfully authenticated offline
+          console.log('[LoginModal] Offline authentication successful');
+
+          // Update NextAuth session with offline data
+          await update(offlineSession);
+
+          setEmail('');
+          setPassword('');
+          setError(null);
+          setSubmitting(false);
+          onClose();
+
+          // Reload to refresh content with user-specific data
+          window.location.reload();
+        } else {
+          setError('Invalid email or password (offline mode)');
+          setSubmitting(false);
+        }
+        return;
+      }
+
+      // ONLINE MODE: Authenticate with NextAuth
+      console.log('[LoginModal] Online mode - authenticating with server');
       const result = await signIn('credentials', {
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         password,
         redirect: false,
       });
@@ -55,12 +89,30 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       if (result?.ok) {
+        console.log('[LoginModal] Online authentication successful');
+
+        // Store credentials for offline use (after successful online login)
+        // Note: We don't have the user data yet, so we'll cache it via a callback
+        // The password will be stored securely in the offlineAuth system
+        try {
+          // Store password temporarily for caching after session is established
+          sessionStorage.setItem('pending-offline-cache', JSON.stringify({
+            email: normalizedEmail,
+            password: password
+          }));
+        } catch (err) {
+          console.warn('[LoginModal] Failed to queue offline cache:', err);
+        }
+
         // Successful login - close modal and stay on frontend
         setEmail('');
         setPassword('');
         setError(null);
         setSubmitting(false);
         onClose();
+
+        // Reload to refresh content and trigger cache storage
+        window.location.reload();
       } else {
         setError('Login failed. Please try again.');
         setSubmitting(false);

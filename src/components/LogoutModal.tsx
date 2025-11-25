@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
+import { clearOfflineAuthData } from '@/lib/offlineAuth';
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -14,6 +15,10 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
   const handleLogout = async () => {
     setSubmitting(true);
     try {
+      // Clear offline auth data before signing out
+      clearOfflineAuthData();
+      console.log('[LogoutModal] Cleared offline auth data');
+
       await signOut({ callbackUrl: '/' });
     } catch (err) {
       console.error('Error during logout:', err);
