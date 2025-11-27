@@ -2,7 +2,7 @@
 
 **Project**: Spiritual Content Platform with Slide-Based Navigation (PWA)
 **Platform**: Windows | **Branch**: master | **Status**: Production Ready
-**Last Updated**: November 24, 2025
+**Last Updated**: November 25, 2025
 
 ---
 
@@ -24,9 +24,9 @@ npm run db:download-prod-simple  # Download production DB for local testing
 
 - **Framework**: Next.js 15.5.4, React 19.1.0, TypeScript
 - **Database**: PostgreSQL (direct `pg` client, no ORM)
-- **Authentication**: NextAuth.js 4.24.13 (JWT, 30-day sessions)
+- **Authentication**: NextAuth.js 4.24.13 (JWT, 30-day sessions) + Offline Auth (PBKDF2)
 - **UI**: Swiper.js 12.0.2, Tiptap editor, Tailwind CSS, Material Symbols
-- **PWA**: Service Worker v2, Cache API, Web App Manifest (offline support)
+- **PWA**: Service Worker v2, Cache API, Web App Manifest, Offline Login
 - **Deployment**: Railway (auto-deploy on push to master)
 
 ---
@@ -37,10 +37,9 @@ npm run db:download-prod-simple  # Download production DB for local testing
 - **50px Icon Border**: Fixed header/footer/sidebars (z-20), square UI everywhere
 - **Dual Swiper Navigation**: Vertical (rows) + Horizontal (slides)
 - **Background System**: Full-viewport images with theme overlay
-- **6 Special Modes**: Quick Slides, Goals, Simple Shifts, Service, Image Slides, Normal (mutually exclusive)
-- **Quick-Add Feature**: Comment icon appears contextually in special modes
+- **6 Special Modes**: Quick Slides, Goals, Simple Shifts, Service, Image Slides, Normal
 - **User-Specific Content**: Private rows visible only to assigned users
-- **Offline PWA**: Logged-in users download content for offline use (refresh icon)
+- **Offline PWA**: Content + authentication work completely offline
 
 ### Admin (/admin)
 - **Protected**: Authentication + admin role required
@@ -54,50 +53,131 @@ npm run db:download-prod-simple  # Download production DB for local testing
 
 **users**: `id`, `name`, `email`, `password_hash`, `role` (ADMIN|USER|MODERATOR)
 
-**slide_rows**: `id`, `title`, `description`, `row_type`, `is_published`, `display_order`, `icon_set` (JSON), `theme_color`, `playlist_delay_seconds`, `user_id`, `randomize_enabled`, `randomize_count`, `randomize_interval`, `randomize_seed`, `row_background_image_url`, `row_layout_type`
+**slide_rows**: `id`, `title`, `row_type`, `is_published`, `display_order`, `playlist_delay_seconds`, `user_id`, `randomize_enabled`, `randomize_count`, `randomize_interval`, `row_background_image_url`, `row_layout_type`
 - **row_type**: ROUTINE | COURSE | TEACHING | CUSTOM | QUICKSLIDE | SIMPLESHIFT | IMGSLIDES | SERVICE | GOALS
 
-**slides**: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type` (STANDARD|OVERFLOW|MINIMAL), `audio_url`, `image_url`, `video_url`, `content_theme` (light|dark), `title_bg_opacity`, `body_bg_opacity`, `is_published`, `publish_time_start`, `publish_time_end`, `publish_days` (JSON [0-6]), `temp_unpublish_until`, `icon_set` (JSON), `view_count`, `completion_count`
+**slides**: `id`, `slide_row_id`, `title`, `subtitle`, `body_content`, `position`, `layout_type` (STANDARD|OVERFLOW|MINIMAL), `audio_url`, `image_url`, `video_url`, `content_theme`, `is_published`, `publish_time_start`, `publish_time_end`, `publish_days` (JSON), `temp_unpublish_until`
 
-**spa_tracks**: `id`, `title`, `audio_url`, `is_published`, `display_order`, `volume`, `publish_time_start`, `publish_time_end`, `publish_days` (JSON [0-6])
+**spa_tracks**: `id`, `title`, `audio_url`, `is_published`, `display_order`, `volume`, `publish_time_start`, `publish_time_end`, `publish_days`
 
 ---
 
 ## Key Files
+
+**Authentication**:
+- `lib/authOptions.ts` - NextAuth configuration (JWT sessions)
+- `lib/offlineAuth.ts` - Offline credential caching (PBKDF2, Web Crypto API)
+- `components/LoginModal.tsx` - Dual-mode login (online/offline)
+- `components/LogoutModal.tsx` - Clears offline auth cache
+- `components/Providers.tsx` - Auto-caches credentials after online login
 
 **Frontend**:
 - `page.tsx` - State management, mode handling
 - `MainContent.tsx` - Rendering, filtering, offline cache fallback
 - `RightIconBar.tsx` - Mode icons, quick-add triggers
 - `BottomIconBar.tsx` - Refresh/offline download icon
-- `[Name]Modal.tsx` - Quick-add modals (Quick/Goal/SimpleShift/Service)
-- `OfflineProgress.tsx` - Download progress UI
 
 **Backend**:
 - `lib/db.ts` - Database connection
-- `lib/auth.ts` + `lib/authOptions.ts` - Authentication
 - `lib/queries/slideRows.ts` - Row CRUD operations
 - `lib/queries/slides.ts` - Slide CRUD, type definitions
-- `lib/utils/scheduleFilter.ts` - Time-based filtering
-- `lib/utils/slideRandomizer.ts` - Deterministic randomization
-- `lib/offlineManager.ts` - Offline cache management (localStorage + Cache API)
+- `lib/offlineManager.ts` - Offline content cache (localStorage + Cache API)
 
 **PWA**:
-- `public/manifest.json` - PWA manifest
 - `public/service-worker.js` - Service worker v2 (caching, offline fallback)
+- `public/manifest.json` - PWA manifest
 
 **API Routes**:
 - `/api/slides/rows` - Row CRUD
 - `/api/slides/rows/[id]/slides` - Slide CRUD
-- `/api/slides/{quick-slide,goal-slide,simple-shift-slide,service-slide}` - Quick-add endpoints
+- `/api/slides/{quick-slide,goal-slide,simple-shift-slide,service-slide}` - Quick-add
 
-**Admin**:
-- `components/admin/slides/SlideRowForm.tsx` - Row form with overrides
+---
 
-**Deployment**:
-- `scripts/railway-init.ts` - Auto-run migrations on deploy
-- `scripts/validate-migrations.ts` - Validate schema before push
-- `scripts/download-production-db-simple.ts` - Download prod DB for testing
+## Special Row Modes
+
+All modes are **mutually exclusive** - only one active at a time.
+
+| Mode | Icon | row_type | Quick-Add | Use Case |
+|------|------|----------|-----------|----------|
+| Quick Slides | `atr` | 'QUICKSLIDE' | ✅ | Temporary one-off slides |
+| Goals | `things_to_do` | 'GOALS' | ✅ | Goal tracking |
+| Simple Shifts | `move_up` | 'SIMPLESHIFT' | ✅ | Daily practices |
+| Service | `room_service` | 'SERVICE' | ✅ | Service commitments |
+| Image Slides | `web_stories` | 'IMGSLIDES' | ❌ | Image content |
+| Normal | (default) | All others | ❌ | Default view |
+
+---
+
+## Core Features
+
+### Offline Authentication (NEW - Nov 25, 2025)
+- **Online Login**: Credentials cached using PBKDF2 (100k iterations) + random salt
+- **Offline Login**: Verify against cached hash, create synthetic NextAuth session
+- **Storage**: localStorage (`offline-auth-data`) with user session data
+- **Security**: No plain passwords stored, only salted hashes
+- **Expiration**: 30-day TTL (matches NextAuth session duration)
+- **Auto-Clear**: Removed on logout or expiration
+- **Flow**:
+  1. Online login → NextAuth verifies → cache credentials
+  2. Offline login → verify cached hash → restore session
+  3. Access private content offline with full authentication
+
+### Offline PWA (Content Caching)
+- Click refresh icon → downloads all visible content → green badge when ready
+- **Storage**: localStorage (metadata) + Cache API (images/audio)
+- **Caching**: Slide text, images, audio, scheduling metadata (videos excluded)
+- **Service Worker**: Serves cached `/` page when network fails
+- **Scheduling**: Time-based visibility rules work offline
+
+### Row-Level Overrides
+- `row_background_image_url` - Override slide images for entire row
+- `row_layout_type` - Override slide layouts for entire row
+- **Priority**: Row → Slide → Default
+
+### Dynamic Scheduling
+- `publish_time_start/end` - Time ranges (supports overnight: 22:00-02:00)
+- `publish_days` - JSON array [0-6] (Sunday=0)
+- `temp_unpublish_until` - Temporary unpublish with auto-restore
+
+### User-Specific Rows
+- Public (`user_id = null`) - Visible to all users
+- Private (`user_id = UUID`) - Visible to owner + admins only
+- Auto-refresh on login/logout
+
+---
+
+## Development Rules
+
+- **50px Border**: Fixed border at z-20 on all pages
+- **Square UI**: No rounded corners anywhere
+- **Icons**: 24px size, weight 100, use `var(--icon-color)`
+- **No ORM**: Direct PostgreSQL queries for performance
+- **Auto Position**: Server calculates using `getNextPosition()` - never send on create
+- **Case Sensitive**: Roles/types are UPPERCASE strings
+- **Layout Types**: 'STANDARD' (centered), 'OVERFLOW' (scrollable), 'MINIMAL' (title+audio only)
+
+---
+
+## Railway Deployment
+
+**Pre-Deploy Checklist**:
+```bash
+npm run db:validate    # Verify no pending migrations
+npx tsc --noEmit       # TypeScript validation
+npm run build          # Test production build (skip if dev server running)
+git push origin master # Deploy
+```
+
+**Migrations**:
+- Auto-run via `railway-init.ts` on deployment
+- Use `IF NOT EXISTS` for all schema changes
+- Register in `validate-migrations.ts` for validation
+
+**Git Ignore**:
+- `_TEMP/` directory excluded
+- `.env*` files excluded
+- Media files NOT deployed (URLs in database)
 
 ---
 
@@ -121,99 +201,32 @@ NEXTAUTH_URL="http://localhost:3000"
 
 ---
 
-## Special Row Modes
+## Common Workflows
 
-All modes are **mutually exclusive** - only one active at a time.
+### Testing Offline Authentication
+1. **Online Login**: Login at http://localhost:3000/ → credentials cached
+2. **Verify Cache**: DevTools → Application → localStorage → `offline-auth-data`
+3. **Go Offline**: DevTools → Network → Offline
+4. **Logout**: Click logout → cache cleared
+5. **Login Offline**: Should fail (no cached credentials)
+6. **Go Online**: Login again → cache refreshed
+7. **Go Offline Again**: Login should work with cached credentials
+8. **Access Private Content**: User-specific rows should be visible offline
 
-| Mode | Icon | row_type | Position | Quick-Add | Use Case |
-|------|------|----------|----------|-----------|----------|
-| Quick Slides | `atr` | 'QUICKSLIDE' | Right 1st | ✅ | Temporary one-off slides |
-| Goals | `things_to_do` | 'GOALS' | Right 2nd | ✅ | Goal tracking |
-| Simple Shifts | `move_up` | 'SIMPLESHIFT' | Right 3rd | ✅ | Daily practices |
-| Service | `room_service` | 'SERVICE' | Right 4th | ✅ | Service commitments |
-| Image Slides | `web_stories` | 'IMGSLIDES' | Right bottom | ❌ | Image content |
-| Normal | (default) | All others | N/A | ❌ | Default view |
+### Adding Quick-Add to New Mode
+1. Create `[Name]Modal.tsx` (clone existing modal)
+2. Create `/api/slides/[name]-slide/route.ts` (clone existing API)
+3. Update `page.tsx`: Import modal, add state, handlers, props
+4. Update `RightIconBar.tsx`: Add contextual icon with click handler
+5. Test: Mode icon → comment icon → modal → submit → slide created
 
----
-
-## Core Features
-
-### Offline PWA (Logged-In Users Only)
-- Click refresh icon (bottom-left) → downloads all visible content → green badge when ready
-- **Storage**: localStorage (slide metadata) + Cache API (images/audio via service worker)
-- **Caching**: Slide text, images, audio, scheduling metadata (videos excluded - too large)
-- **Offline Logic**: Service worker serves cached `/` page → React app loads → MainContent detects offline → loads from localStorage
-- **Scheduling**: Time-based visibility rules work offline using cached schedule data
-- **Updates**: Subsequent clicks update cache with latest content
-
-### Service Worker v2 (Fixed Offline Mode)
-- **Cache Strategy**: Network-first with cache fallback
-- **Offline Handling**: Serves cached root page when network fails (allows React app to load)
-- **No Offline Page**: Removed non-existent `/offline` route (was causing browser offline page)
-- **Cache Storage**: App shell, content (JSON), media (images/audio) in separate caches
-- **Version**: v2 (bumped to force client updates after offline fix)
-
-### Quick-Add Pattern
-- Click mode icon → comment icon appears → modal opens → submit
-- API finds/creates row for mode → creates slide with auto-position → reload
-- **Files**: `[Name]Modal.tsx`, `/api/slides/[name]-slide/route.ts`, state in `page.tsx`, prop to `RightIconBar.tsx`
-
-### Row-Level Overrides
-- `row_background_image_url` - Override slide images for entire row
-- `row_layout_type` - Override slide layouts for entire row
-- **Priority**: Row → Slide → Default
-
-### Slide Randomization
-- Per-row enable/disable with `randomize_enabled`
-- Count limit with `randomize_count` (null = all slides)
-- Intervals: hourly, daily, weekly
-- Deterministic: Same seed = same slides per interval
-
-### User-Specific Rows
-- Public (`user_id = null`) - Visible to all users
-- Private (`user_id = UUID`) - Visible to owner + admins only
-- Auto-refresh on login/logout
-
-### Dynamic Scheduling
-- `publish_time_start/end` - Time ranges (supports overnight: 22:00-02:00)
-- `publish_days` - JSON array [0-6] (Sunday=0)
-- `temp_unpublish_until` - Temporary unpublish with auto-restore
-
----
-
-## Development Rules
-
-- **50px Border**: Fixed border at z-20 on all pages
-- **Square UI**: No rounded corners anywhere
-- **Icons**: 24px size, weight 100, use `var(--icon-color)`
-- **No ORM**: Direct PostgreSQL queries for performance
-- **Auto Position**: Server calculates using `getNextPosition()` - never send on create
-- **Optional Fields**: `title`, `body_content`, `subtitle` - use `|| ''` fallback
-- **Case Sensitive**: Roles/types are UPPERCASE strings
-- **Layout Types**: 'STANDARD' (centered), 'OVERFLOW' (scrollable), 'MINIMAL' (title+audio only)
-- **Type Safety**: Offline cache mapping requires explicit type conversions (see MainContent.tsx lines 222-239)
-
----
-
-## Railway Deployment
-
-**Pre-Deploy Checklist**:
-```bash
-npm run db:validate    # Verify no pending migrations
-npx tsc --noEmit       # TypeScript validation
-npm run build          # Test production build
-git push origin master # Deploy
-```
-
-**Migrations**:
-- Auto-run via `railway-init.ts` on deployment
-- Use `IF NOT EXISTS` for all schema changes
-- Register in `validate-migrations.ts` for validation
-
-**Git Ignore**:
-- `_TEMP/` directory excluded (contains MP3s and project files)
-- `.env*` files excluded
-- Media files NOT deployed (referenced via URLs in database)
+### Testing with Production Data
+1. Get PUBLIC_URL from Railway dashboard
+2. Run `npm run db:download-prod-simple` and provide URL
+3. Update `.env`: `DB_NAME="mp3_manager_backup"`
+4. Restart dev server
+5. Test locally with production data
+6. Revert `.env`: `DB_NAME="mp3_manager"`
 
 ---
 
@@ -222,7 +235,7 @@ git push origin master # Deploy
 All routes return: `{ status: 'success'|'error', data?: {...}, message?: '...' }`
 
 **Auth**:
-- `POST /api/auth/signin` - User login
+- `POST /api/auth/signin` - User login (online only, triggers offline cache)
 - `GET /api/auth/session` - Get current session
 - `POST /api/setup` - Create first admin (one-time only)
 
@@ -246,53 +259,24 @@ All routes return: `{ status: 'success'|'error', data?: {...}, message?: '...' }
 
 ---
 
-## Common Workflows
-
-### Adding Quick-Add to New Mode
-1. Create `[Name]Modal.tsx` (clone existing modal)
-2. Create `/api/slides/[name]-slide/route.ts` (clone existing API)
-3. Update `page.tsx`: Import modal, add state `is[Name]ModalOpen`, handlers, props
-4. Update `RightIconBar.tsx`: Add prop, contextual icon `{is[Name]Mode && <span>comment</span>}`
-5. Test: Mode icon → comment icon → modal → submit → slide created
-
-### Adding New Special Row Mode
-1. Create migration adding new row_type to enum
-2. Register migration in `validate-migrations.ts`
-3. Update `slideRows.ts` row_type union type
-4. Update `page.tsx`: Add mode state, handler, pass to RightIconBar
-5. Update `RightIconBar.tsx`: Add icon with click handler
-6. Update `MainContent.tsx`: Add filter logic, update Normal mode exclusion
-7. Validate: `npm run db:validate && npx tsc --noEmit`
-
-### Testing with Production Data
-1. Get PUBLIC_URL from Railway dashboard
-2. Run `npm run db:download-prod-simple` and provide URL
-3. Update `.env`: `DB_NAME="mp3_manager_backup"`
-4. Restart dev server
-5. Test locally with production data
-6. Revert `.env`: `DB_NAME="mp3_manager"`
-
-### Fixing Offline Mode Issues
-1. Check service worker registration in browser console
-2. Verify localStorage has data: `localStorage.getItem('offline-slide-data')`
-3. Check Cache API: DevTools → Application → Cache Storage
-4. Unregister old service worker: DevTools → Application → Service Workers → Unregister
-5. Hard refresh: Ctrl+Shift+R or Cmd+Shift+R
-
----
-
 ## Recent Updates
 
-**Nov 24, 2025 (Latest)**:
-- **Offline PWA Fix** - Service worker v2: Removed non-existent `/offline` page, now serves cached `/` when offline, allows React app to load and detect offline state
-- **TypeScript Fixes** - Fixed offline cache type mismatches in MainContent.tsx: Added `view_count`, `completion_count`, proper type conversions for `subtitle`, `layout_type`, `publish_days`, date objects
-- **Repository Cleanup** - Added `_TEMP/` to `.gitignore` to prevent MP3 files from being committed
+**Nov 25, 2025 (Latest)**:
+- ✅ **Offline Authentication** - PBKDF2-based credential caching (100k iterations)
+  - Added `lib/offlineAuth.ts` - Secure credential hashing with Web Crypto API
+  - Updated `LoginModal.tsx` - Dual-mode login (online/offline detection)
+  - Updated `Providers.tsx` - Auto-cache credentials after online login
+  - Updated `LogoutModal.tsx` - Clear auth cache on logout
+  - 30-day expiration matching NextAuth session duration
+  - Users can now login and access private content completely offline
 
 **Nov 24, 2025**:
-- **Offline PWA Support** - Service worker, manifest.json, offlineManager.ts, OfflineProgress modal, cache fallback in MainContent, refresh icon handler in BottomIconBar (logged-in users only)
-- **Service Quick-Add** - ServiceSlideModal, /api/slides/service-slide, page.tsx, RightIconBar
+- **Offline PWA Fix** - Service worker v2: Serves cached `/` when offline
+- **TypeScript Fixes** - Fixed offline cache type mismatches in MainContent.tsx
+- **Repository Cleanup** - Added `_TEMP/` to `.gitignore`
+- **Offline PWA Support** - Service worker, manifest.json, offlineManager.ts
+- **Service Quick-Add** - ServiceSlideModal, /api/slides/service-slide
 - **Simple Shift Quick-Add** - SimpleShiftModal, contextual comment icons
-- **Production DB Download** - `npm run db:download-prod-simple` script
 
 **Nov 20, 2025**:
 - **Row-Level Overrides** - `row_background_image_url`, `row_layout_type` columns
@@ -305,88 +289,78 @@ All routes return: `{ status: 'success'|'error', data?: {...}, message?: '...' }
 | Issue | Solution |
 |-------|----------|
 | Sessions not persisting | Generate strong `NEXTAUTH_SECRET`: `openssl rand -base64 32` |
-| Private rows missing | Check `user_id` - MainContent auto-refetches on session change |
-| Cannot access /setup | Users exist. Use `npm run db:seed:admin` instead |
-| Mode rows not showing | Verify correct `row_type` value (UPPERCASE) in database |
-| Row overrides not working | Run `npm run db:validate` to check migrations |
+| Cannot login offline | Must login online first to cache credentials. Check localStorage for `offline-auth-data` |
+| Offline login fails | Verify credentials cached. Check DevTools console for `[OfflineAuth]` logs |
+| Cached credentials expired | 30-day limit. Login online again to refresh cache |
+| Private rows missing offline | User must download content while logged in (refresh icon) |
+| Service worker not updating | Unregister old SW in DevTools → Service Workers → Unregister. Hard refresh |
 | Database download fails | Use PUBLIC_URL from Railway, not PRIVATE_URL |
-| Offline content not loading | User must be logged in. Click refresh icon to download. Check browser console for SW errors. |
-| Service worker not updating | Unregister old SW in DevTools → Application → Service Workers → Unregister. Hard refresh. |
-| Browser shows offline page | Service worker v2 fixes this. Clear cache, unregister SW, hard refresh. |
-| TypeScript errors in MainContent | Offline cache needs explicit type conversions. See lines 222-239 for pattern. |
+| TypeScript errors | Run `npx tsc --noEmit` to check. See MainContent.tsx:222-239 for offline cache type pattern |
 
 ---
 
 ## Code Patterns
 
-**Offline Cache Check** (MainContent.tsx:189-249):
+### Offline Authentication Flow (offlineAuth.ts)
+```typescript
+// Store credentials after online login
+await storeOfflineAuthData(userId, name, email, role, password);
+// PBKDF2 hash with 100k iterations + random salt stored in localStorage
+
+// Verify offline login
+const session = await verifyOfflineCredentials(email, password);
+// Returns synthetic NextAuth session if hash matches
+
+// Clear on logout
+clearOfflineAuthData();
+```
+
+### Offline Content Loading (MainContent.tsx)
 ```typescript
 if (!isOnline()) {
   const cachedRows = getCachedSlideRows();
   if (cachedRows.length > 0) {
-    // Convert cached rows to SlideRow format with proper types
-    const rows: SlideRow[] = cachedRows.map(row => ({...}));
+    // Convert cached rows to SlideRow format
     setSlideRows(rows);
-
-    // Pre-populate slides cache with type conversions
-    const newSlidesCache: Record<string, Slide[]> = {};
-    cachedRows.forEach(row => {
-      newSlidesCache[row.id] = row.slides.map(slide => ({
-        ...slide,
-        subtitle: slide.subtitle || undefined,
-        layout_type: (slide.layout_type as 'STANDARD' | 'OVERFLOW' | 'MINIMAL') || 'STANDARD',
-        publish_days: slide.publish_days ? JSON.stringify(slide.publish_days) : null,
-        view_count: 0,
-        completion_count: 0,
-        created_at: new Date(),
-        updated_at: new Date()
-      }));
-    });
     setSlidesCache(newSlidesCache);
   }
 }
 ```
 
-**Offline Download** (page.tsx):
+### Dual-Mode Login (LoginModal.tsx)
 ```typescript
-await downloadContentForOffline((progress) => {
-  setOfflineProgress(progress); // Update UI with progress
-});
-```
+const online = isOnline();
 
-**Service Worker Offline Handling** (service-worker.js:105-118):
-```javascript
-.catch(() => {
-  // Serve cached root page when network fails
-  if (url.pathname === '/') {
-    return caches.match('/').then((rootResponse) => {
-      return rootResponse || new Response('Offline', { status: 503 });
-    });
+if (!online) {
+  // Offline: Verify against cached credentials
+  const offlineSession = await verifyOfflineCredentials(email, password);
+  if (offlineSession) {
+    await update(offlineSession); // Update NextAuth session
+    window.location.reload();
   }
-  return new Response('Offline', { status: 503 });
-});
+} else {
+  // Online: Standard NextAuth flow
+  const result = await signIn('credentials', { email, password });
+  if (result?.ok) {
+    // Queue credential caching via sessionStorage
+    sessionStorage.setItem('pending-offline-cache', JSON.stringify({ email, password }));
+    window.location.reload();
+  }
+}
 ```
 
-**Contextual Icon Display** (RightIconBar.tsx):
+### Auto-Cache After Login (Providers.tsx)
 ```typescript
-{isServiceMode && <span onClick={onServiceSlideClick}>comment</span>}
-```
-
-**Quick-Add API Pattern**:
-```typescript
-const rows = await getSlideRowsByType('SERVICE', false);
-let row = rows[0] || await createSlideRow({ row_type: 'SERVICE', ... });
-const position = await getNextPosition(row.id);
-const slide = await createSlide({ slide_row_id: row.id, position, ... });
-return { status: 'success', data: { slide } };
-```
-
-**Row Override Logic** (MainContent.tsx):
-```typescript
-const effectiveImageUrl = row.row_background_image_url || slide.image_url;
-const effectiveLayout = row.row_layout_type || slide.layout_type || 'STANDARD';
+useEffect(() => {
+  const pendingCache = sessionStorage.getItem('pending-offline-cache');
+  if (pendingCache && session?.user) {
+    const { email, password } = JSON.parse(pendingCache);
+    await storeOfflineAuthData(session.user.id, session.user.name, email, session.user.role, password);
+    sessionStorage.removeItem('pending-offline-cache');
+  }
+}, [session]);
 ```
 
 ---
 
-**Status**: Production Ready + PWA (Offline Fixed) | **Last Updated**: November 24, 2025 | **Lines**: 398
+**Status**: Production Ready + Offline Auth | **Last Updated**: November 25, 2025 | **Lines**: 370

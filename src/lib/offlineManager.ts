@@ -129,16 +129,90 @@ export async function downloadContentForOffline(
       // Cache media files
       updateProgress('downloading', `Caching media for ${row.title}...`);
 
-      for (const url of mediaUrls) {
+      // Separate audio and image URLs for different caching strategies
+      const imageUrls: string[] = [];
+      const audioUrls: string[] = [];
+
+      mediaUrls.forEach(url => {
+        if (url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg') || url.includes('audio')) {
+          audioUrls.push(url);
+        } else {
+          imageUrls.push(url);
+        }
+      });
+
+      // Cache images via fetch (passive caching)
+      for (const url of imageUrls) {
         try {
-          // Pre-cache media by fetching it
           const response = await fetch(url);
           if (response.ok) {
             cachedAssets++;
             updateProgress('downloading', `Cached ${cachedAssets}/${totalAssets} assets...`);
           }
         } catch (err) {
-          console.warn(`Failed to cache media: ${url}`, err);
+          console.warn(`Failed to cache image: ${url}`, err);
+        }
+      }
+
+      // Cache audio files via Service Worker postMessage (explicit caching)
+      if (audioUrls.length > 0 && navigator.serviceWorker.controller) {
+        try {
+          console.log(`[OfflineManager] Requesting SW to cache ${audioUrls.length} audio files for ${row.title}`);
+
+          // Send URLs to service worker for explicit caching
+          navigator.serviceWorker.controller.postMessage({
+            type: 'CACHE_URLS',
+            urls: audioUrls,
+            cacheName: 'media-v3'
+          });
+
+          // Wait for cache completion message
+          await new Promise<void>((resolve) => {
+            const handleMessage = (event: MessageEvent) => {
+              if (event.data.type === 'CACHE_COMPLETE') {
+                cachedAssets += audioUrls.length;
+                updateProgress('downloading', `Cached ${cachedAssets}/${totalAssets} assets...`);
+                navigator.serviceWorker.removeEventListener('message', handleMessage);
+                resolve();
+              }
+            };
+            navigator.serviceWorker.addEventListener('message', handleMessage);
+
+            // Timeout after 30 seconds
+            setTimeout(() => {
+              navigator.serviceWorker.removeEventListener('message', handleMessage);
+              console.warn('[OfflineManager] Audio caching timeout');
+              resolve();
+            }, 30000);
+          });
+        } catch (err) {
+          console.warn(`Failed to cache audio files via SW:`, err);
+          // Fallback: try direct fetch
+          for (const url of audioUrls) {
+            try {
+              const response = await fetch(url);
+              if (response.ok) {
+                cachedAssets++;
+                updateProgress('downloading', `Cached ${cachedAssets}/${totalAssets} assets...`);
+              }
+            } catch (fetchErr) {
+              console.warn(`Failed to cache audio: ${url}`, fetchErr);
+            }
+          }
+        }
+      } else if (audioUrls.length > 0) {
+        console.warn('[OfflineManager] Service worker not available, using fallback audio caching');
+        // Fallback if SW not available
+        for (const url of audioUrls) {
+          try {
+            const response = await fetch(url);
+            if (response.ok) {
+              cachedAssets++;
+              updateProgress('downloading', `Cached ${cachedAssets}/${totalAssets} assets...`);
+            }
+          } catch (err) {
+            console.warn(`Failed to cache audio: ${url}`, err);
+          }
         }
       }
     }
